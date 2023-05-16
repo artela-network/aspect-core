@@ -5,9 +5,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	rpctypes "github.com/evmos/ethermint/rpc/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -44,23 +41,10 @@ func NewEthBlock() *Block {
 	}
 }
 
-// FillTendermintHeader fill a tendermint header to ethBlock
-func (block *Block) FillTendermintHeader(header tmtypes.Header) {
-	block.Header.Number = uint64(header.Height)
-	block.Header.ParentHash = common.BytesToHash(header.LastBlockID.Hash.Bytes()).String()
-	block.Header.StateRoot = common.BytesToHash(header.AppHash).String()
-	block.Header.Timestamp = uint64(header.Time.Unix())
-	block.DataHash = header.DataHash.Bytes()
-	block.Hash = common.BytesToHash(header.Hash()).String()
-}
-
-// FillProtoHeader fill a proto header to ethBlock
-func (block *EthBlock) FillProtoHeader(header tmproto.Header) {
-	block.Header.Number = uint64(header.Height)
-	block.Header.ParentHash = common.BytesToHash(header.LastBlockId.Hash).String()
-	block.Header.StateRoot = common.BytesToHash(header.AppHash).String()
-	block.Header.Timestamp = uint64(header.Time.Unix())
-	block.DataHash = header.DataHash
+func (block *Block) FillHeader(header *EthHeader, dataHash []byte, hash string) {
+	block.Header = header
+	block.DataHash = dataHash
+	block.Hash = hash
 }
 
 func (block *Block) FillSize(size uint64) {
@@ -75,33 +59,11 @@ func (block *Block) FillGasUsed(gasUsed uint64) {
 	block.Header.GasUsed = gasUsed
 }
 
-func (block *Block) FillTransactions(trans []*rpctypes.RPCTransaction) {
-	block.Transactions = make([]*AspTransaction, len(trans))
+func (block *Block) FillTransactions(trans []*AspTransaction) {
 	if len(trans) > 0 {
 		block.Header.TxHash = common.BytesToHash(block.DataHash).String()
 	}
-
-	for i, tran := range trans {
-		block.Transactions[i] = &AspTransaction{
-			ChainId:     tran.ChainID.String(),
-			Nonce:       uint64(tran.Nonce),
-			GasTipCap:   tran.GasTipCap.String(),
-			GasFeeCap:   tran.GasFeeCap.String(),
-			GasLimit:    0,
-			GasPrice:    tran.GasPrice.ToInt().Uint64(),
-			To:          tran.To.String(),
-			Value:       tran.Value.ToInt().Uint64(),
-			Input:       tran.Input,
-			BlockHash:   tran.BlockHash.Bytes(),
-			BlockNumber: tran.BlockNumber.ToInt().Uint64(),
-			From:        tran.From.String(),
-			Hash:        tran.Hash.Bytes(),
-			Type:        uint64(tran.Type),
-			V:           tran.V.ToInt().Bytes(),
-			R:           tran.R.ToInt().Bytes(),
-			S:           tran.S.ToInt().Bytes(),
-		}
-	}
+	block.Transactions = trans
 }
 
 func (block *Block) FillBloom(bloom ethtypes.Bloom) {
