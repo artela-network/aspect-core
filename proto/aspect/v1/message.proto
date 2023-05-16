@@ -4,18 +4,11 @@ package aspect.v1;
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
-message BlockOutput {
-  message Result {
-    bool success = 1;
-    string error = 2;
-  }
-  Result res = 1;
-  AspBlock block = 2;
-}
+
 
 message AspectInput  {
-  uint64 blockHeight = 1;
-  AspTransition tx = 2;
+  int64 blockHeight = 1;
+  AspTransaction tx = 2;
   map<string, string> context = 3;
 }
 
@@ -34,7 +27,7 @@ message AspAccessTuple {
   repeated string storage_keys = 2 ;
 }
 
-message AspTransition {
+message AspTransaction {
   // chain_id of the destination EVM chain
   string chain_id = 1 ;
   // nonce corresponds to the account nonce (transaction sequence).
@@ -59,13 +52,13 @@ message AspTransition {
 
   bytes  blockHash = 11;
 
-  uint64  blockNumber = 12;
+  int64  blockNumber = 12;
 
   string  from = 13;
 
   bytes  hash = 14;
 
-  uint64 transactionIndex = 15;
+  int64 transactionIndex = 15;
 
   uint64 type = 16;
   // v defines the signature value
@@ -77,37 +70,47 @@ message AspTransition {
 }
 
 
-// EthBlock for querying ethereum block from aspect
-message AspBlock  {
-  AspHeader    header = 1;
-  repeated AspHeader    uncles = 2;
-  repeated AspTransition transactions = 3;
-  string  hash = 4;
-  uint64  size = 5;
-  bytes  dataHash = 6;
-}
-
-message  AspHeader{
-  string parentHash=1;
-  string uncleHash=2;
-  string miner=3;
-  string stateRoot=4;
-  string txHash=5;
-  string receiptHash=6;
-  uint64 difficulty=7;
-  uint64 number=8;
-  uint64 gasLimit=9;
-  uint64 gasUsed=10;
-  uint64 timestamp=11;
-  bytes extraData=12;
-  bytes mixHash=13;
-  uint64 nonce=14;
-  uint64 baseFeePerGas=15;
-}
-
 message AspectCode{
   string aspectId=1;
   uint64 version=2;
   uint32 priority=3;
   bytes code=4;
+}
+
+message BlockOutput {
+  message Result {
+    bool success = 1;
+    string error = 2;
+  }
+
+  Result res = 1;
+  EthBlock block = 2;
+}
+
+// EthBlock for querying ethereum block from aspect
+message EthBlock {
+  EthHeader header = 1;
+  repeated EthHeader uncles = 2;
+  repeated AspTransaction transactions = 3;
+  string hash = 4;
+  uint64 size = 5;
+  bytes dataHash = 6;
+}
+
+message EthHeader {
+  string parentHash = 1;
+  string uncleHash = 2;
+  string miner = 3;
+  string stateRoot = 4;
+  string txHash = 5;
+  string receiptHash = 6;
+  uint64 difficulty = 7;
+  uint64 number = 8;
+  uint64 gasLimit = 9;
+  uint64 gasUsed = 10;
+  uint64 timestamp = 11;
+  bytes extraData = 12;
+  bytes mixHash = 13;
+  uint64 nonce = 14;
+  uint64 baseFeePerGas = 15;
 }

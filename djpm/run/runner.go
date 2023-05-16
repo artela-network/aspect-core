@@ -1,6 +1,6 @@
 package run
 
-import "github.com/artela-network/artela-sdk/types"
+import "github.com/artela-network/artelasdk/types"
 
 func RunAspect(code []byte, method string, input *types.AspectInput) (types.AspectOutput, error) {
 

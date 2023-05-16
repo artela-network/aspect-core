@@ -1,14 +1,33 @@
 package djpm
 
 import (
-	"github.com/artela-network/artela-sdk/djpm/run"
-	"github.com/artela-network/artela-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
+	"math/big"
+	"strconv"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/artela-network/artelasdk/djpm/run"
+	"github.com/artela-network/artelasdk/types"
 )
 
+var globalAspect *Aspect
+
 type Aspect struct {
-	EndPoint types.AspectEndPoint
+	GetBondAspects func(*ethtypes.Transaction) ([]types.AspectCode, error)
+}
+
+func NewAspect(fun func(*ethtypes.Transaction) ([]types.AspectCode, error)) *Aspect {
+	globalAspect = &Aspect{GetBondAspects: fun}
+	return globalAspect
+}
+
+func AspectInstance() *Aspect {
+	if globalAspect == nil {
+		panic("aspcect instance not init,please exec NewAspect() first ")
+	}
+	return globalAspect
 }
 
 func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkTxAspect) *types.ResponseAspect {
@@ -20,12 +39,12 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 	for _, msg := range req.Tx.GetMsgs() {
 		ok := req.IsEthTx(msg)
 		if !ok {
-			//ignore cosmos tx
+			// ignore cosmos tx
 			continue
 		}
 		ethTx := req.ConvertEthTx(msg)
 		txAspect := types.RequestEthTxAspect{
-			Tx:          &ethTx,
+			Tx:          ethTx,
 			Context:     req.Context,
 			BlockHeight: req.BlockHeight,
 			BlockHash:   req.BlockHash,
@@ -49,7 +68,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		// ignore contract deployment transaction & aspect op txs
 		return nil
 	}
-	boundAspects, err := aspect.EndPoint.GetBondAspects(req.Tx)
+	boundAspects, err := aspect.GetBondAspects(req.Tx)
 	// load aspects
 	if err != nil {
 		return nil
@@ -58,7 +77,8 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		return nil
 	}
 
-	transaction, newErr := types.NewAspTransaction(req.Tx, req.BlockHash, req.BlockHeight, req.TxIndex, req.BaseFee, req.ChainId)
+	chain, _ := strconv.ParseInt(req.ChainId, 10, 64)
+	transaction, newErr := types.NewTx(req.Tx, common.HexToHash(req.BlockHash), req.BlockHeight, req.TxIndex, big.NewInt(req.BaseFee), big.NewInt(chain))
 	if newErr != nil {
 		return nil
 	}
@@ -113,7 +133,6 @@ func (aspect Aspect) PreTxExecute(req *types.RequestSdkTxAspect) *types.Response
 }
 func (aspect Aspect) PreContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
 	return aspect.execAspectByEthTx(types.PRE_CONTRACT_CALL_METHOD, req)
-
 
 }
 func (aspect Aspect) PostContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {

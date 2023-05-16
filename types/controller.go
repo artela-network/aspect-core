@@ -2,10 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
-
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"math/big"
 )
 
 const (
@@ -15,11 +12,11 @@ const (
 type RequestEthTxAspect struct {
 	Tx          *ethtypes.Transaction
 	Context     map[string]string
-	BlockHeight uint64
-	BlockHash   common.Hash
-	TxIndex     uint64
-	BaseFee     *big.Int
-	ChainId     *big.Int
+	BlockHeight int64
+	BlockHash   string
+	TxIndex     int64
+	BaseFee     int64
+	ChainId     string
 }
 
 // ResponseAspect txhash->aspectId-> AspectOutPut
@@ -56,28 +53,23 @@ func (c ResponseAspect) Merge(out *ResponseAspect) {
 type RequestSdkTxAspect struct {
 	Tx           sdk.Tx
 	IsEthTx      func(tx sdk.Msg) bool
-	ConvertEthTx func(tx sdk.Msg) ethtypes.Transaction
+	ConvertEthTx func(tx sdk.Msg) *ethtypes.Transaction
 	Context      map[string]string
-	BlockHeight  uint64
-	BlockHash    common.Hash
-	TxIndex      uint64
-	BaseFee      *big.Int
-	ChainId      *big.Int
+	BlockHeight  int64
+	BlockHash    string
+	TxIndex      int64
+	BaseFee      int64
+	ChainId      string
 }
 
 type RequestBlockAspect struct {
-	BlockHeight uint64
-	BaseFee     *big.Int
-	ChainId     *big.Int
+	BlockHeight int64
+	ChainId     string
 	Context     map[string]string
 }
 
 type ResponseBlockAspect struct {
 	Result AspectOutput
-}
-
-type AspectEndPoint interface {
-	GetBondAspects(tx *ethtypes.Transaction) ([]AspectCode, error)
 }
 
 type SdkTxEndPoint interface {

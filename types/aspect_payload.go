@@ -2,10 +2,11 @@ package types
 
 import (
 	"encoding/json"
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"math/big"
 )
 
 func (input *AspectInput) ToJSON() (string, error) {
@@ -36,10 +37,10 @@ func (output *AspectOutput) FromJSON(data string) error {
 
 // NewTransactionFromData returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).
-func NewAspTransaction(
-	tx *ethtypes.Transaction, blockHash common.Hash, blockNumber, index uint64, baseFee *big.Int,
+func NewTx(
+	tx *ethtypes.Transaction, blockHash common.Hash, blockNumber, index int64, baseFee *big.Int,
 	chainID *big.Int,
-) (*AspTransition, error) {
+) (*AspTransaction, error) {
 	// Determine the signer. For replay-protected transactions, use the most permissive
 	// signer, because we assume that signers are backwards-compatible with old
 	// transactions. For non-protected transactions, the homestead signer signer is used
@@ -53,7 +54,7 @@ func NewAspTransaction(
 	from, _ := ethtypes.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
 
-	result := &AspTransition{
+	result := &AspTransaction{
 		ChainId:          tx.ChainId().String(),
 		Nonce:            tx.Nonce(),
 		GasTipCap:        tx.GasTipCap().String(),
