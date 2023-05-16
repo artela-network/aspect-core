@@ -1,0 +1,135 @@
+package djpm
+
+import (
+	"github.com/artela-network/artela-sdk/djpm/run"
+	"github.com/artela-network/artela-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
+	"strings"
+)
+
+type Aspect struct {
+	EndPoint types.AspectEndPoint
+}
+
+func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkTxAspect) *types.ResponseAspect {
+
+	if req.Tx == nil || len(req.Tx.GetMsgs()) == 0 {
+		return nil
+	}
+	var result types.ResponseAspect
+	for _, msg := range req.Tx.GetMsgs() {
+		ok := req.IsEthTx(msg)
+		if !ok {
+			//ignore cosmos tx
+			continue
+		}
+		ethTx := req.ConvertEthTx(msg)
+		txAspect := types.RequestEthTxAspect{
+			Tx:          &ethTx,
+			Context:     req.Context,
+			BlockHeight: req.BlockHeight,
+			BlockHash:   req.BlockHash,
+			TxIndex:     req.TxIndex,
+			BaseFee:     req.BaseFee,
+			ChainId:     req.ChainId,
+		}
+		out := aspect.execAspectByEthTx(methodName, &txAspect)
+		result.Merge(out)
+	}
+	return &result
+
+}
+
+func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthTxAspect) *types.ResponseAspect {
+	if req.Tx == nil {
+		return nil
+	}
+	to := req.Tx.To()
+	if to == nil || strings.EqualFold(types.ARTELA_ADDR, to.Hex()) {
+		// ignore contract deployment transaction & aspect op txs
+		return nil
+	}
+	boundAspects, err := aspect.EndPoint.GetBondAspects(req.Tx)
+	// load aspects
+	if err != nil {
+		return nil
+	}
+	if boundAspects == nil || len(boundAspects) == 0 {
+		return nil
+	}
+
+	transaction, newErr := types.NewAspTransaction(req.Tx, req.BlockHash, req.BlockHeight, req.TxIndex, req.BaseFee, req.ChainId)
+	if newErr != nil {
+		return nil
+	}
+	aspectInput := types.AspectInput{
+		BlockHeight: req.BlockHeight,
+		Tx:          transaction,
+		Context:     req.Context,
+	}
+	var response types.ResponseAspect
+	txHash := common.BytesToHash(transaction.Hash).String()
+	// run aspects on received transaction
+	for _, aspect := range boundAspects {
+		code := aspect.Code
+		res, err := run.RunAspect(code, methodName, &aspectInput)
+		if err != nil {
+			res = types.AspectOutput{
+				Success: false,
+				Message: err.Error(),
+				Context: nil,
+			}
+		}
+		id := aspect.AspectId
+
+		response.With(txHash, id, res)
+	}
+	return &response
+}
+func (aspect Aspect) OnTxReceive(req *types.RequestSdkTxAspect) *types.ResponseAspect {
+	return aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req)
+}
+
+func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
+	return nil
+
+}
+func (aspect Aspect) OnTxVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
+
+	return aspect.execAspectByEthTx(types.ON_TX_VERIFY_METHOD, req)
+
+}
+
+func (aspect Aspect) OnAccountVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthTx(types.ON_ACCOUNT_VERIFY_METHOD, req)
+}
+func (aspect Aspect) OnGasPayment(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	return nil
+
+}
+func (aspect Aspect) PreTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
+	return aspect.execAspectBySdkTx(types.PRE_TX_EXECUTE_METHOD, req)
+
+}
+func (aspect Aspect) PreContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthTx(types.PRE_CONTRACT_CALL_METHOD, req)
+
+
+}
+func (aspect Aspect) PostContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthTx(types.POST_CONTRACT_CALL_METHOD, req)
+
+}
+func (aspect Aspect) PostTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
+	return aspect.execAspectBySdkTx(types.POST_TX_EXECUTE_METHOD, req)
+
+}
+func (aspect Aspect) OnTxCommit(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthTx(types.ON_TX_COMMIT_METHOD, req)
+
+}
+
+func (aspect Aspect) OnBlockFinalize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
+	return nil
+
+}

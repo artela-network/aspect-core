@@ -1,0 +1,113 @@
+syntax = "proto3";
+package aspect.v1;
+
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+message BlockOutput {
+  message Result {
+    bool success = 1;
+    string error = 2;
+  }
+  Result res = 1;
+  AspBlock block = 2;
+}
+
+message AspectInput  {
+  uint64 blockHeight = 1;
+  AspTransition tx = 2;
+  map<string, string> context = 3;
+}
+
+message AspectOutput  {
+  bool  success = 1;
+  string  message=2;
+  map<string, string> context = 3;
+}
+
+// AccessTuple is the element type of an access list.
+message AspAccessTuple {
+
+  // address is a hex formatted ethereum address
+  string address = 1;
+  // storage_keys are hex formatted hashes of the storage keys
+  repeated string storage_keys = 2 ;
+}
+
+message AspTransition {
+  // chain_id of the destination EVM chain
+  string chain_id = 1 ;
+  // nonce corresponds to the account nonce (transaction sequence).
+  uint64 nonce = 2;
+  // gas_tip_cap defines the max value for the gas tip
+  string gas_tip_cap = 3 ;
+  // gas_fee_cap defines the max value for the gas fee
+  string gas_fee_cap = 4;
+  // gas defines the gas limit defined for the transaction.
+  uint64 gas_limit = 5;
+
+  uint64 gas_price=6;
+
+  // to is the hex formatted address of the recipient
+  string to = 7;
+  // value defines the the transaction amount.
+  uint64 value = 8 ;
+  // data is the data payload bytes of the transaction.
+  bytes input = 9;
+  // accesses is an array of access tuples
+  repeated AspAccessTuple accessList = 10;
+
+  bytes  blockHash = 11;
+
+  uint64  blockNumber = 12;
+
+  string  from = 13;
+
+  bytes  hash = 14;
+
+  uint64 transactionIndex = 15;
+
+  uint64 type = 16;
+  // v defines the signature value
+  bytes v = 17;
+  // r defines the signature value
+  bytes r = 18;
+  // s define the signature value
+  bytes s = 19;
+}
+
+
+// EthBlock for querying ethereum block from aspect
+message AspBlock  {
+  AspHeader    header = 1;
+  repeated AspHeader    uncles = 2;
+  repeated AspTransition transactions = 3;
+  string  hash = 4;
+  uint64  size = 5;
+  bytes  dataHash = 6;
+}
+
+message  AspHeader{
+  string parentHash=1;
+  string uncleHash=2;
+  string miner=3;
+  string stateRoot=4;
+  string txHash=5;
+  string receiptHash=6;
+  uint64 difficulty=7;
+  uint64 number=8;
+  uint64 gasLimit=9;
+  uint64 gasUsed=10;
+  uint64 timestamp=11;
+  bytes extraData=12;
+  bytes mixHash=13;
+  uint64 nonce=14;
+  uint64 baseFeePerGas=15;
+}
+
+message AspectCode{
+  string aspectId=1;
+  uint64 version=2;
+  uint32 priority=3;
+  bytes code=4;
+}
