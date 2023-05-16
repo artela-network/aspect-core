@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -15,11 +16,20 @@ import (
 var globalAspect *Aspect
 
 type Aspect struct {
-	GetBondAspects func(*ethtypes.Transaction) ([]types.AspectCode, error)
+	GetBondAspects func(int64, *ethtypes.Transaction) ([]types.AspectCode, error)
+	IsEthTx        func(tx sdk.Msg) bool
+	ConvertEthTx   func(tx sdk.Msg) *ethtypes.Transaction
 }
 
-func NewAspect(fun func(*ethtypes.Transaction) ([]types.AspectCode, error)) *Aspect {
-	globalAspect = &Aspect{GetBondAspects: fun}
+func NewAspect(
+	getFunc func(int64, *ethtypes.Transaction) ([]types.AspectCode, error),
+	checkTxFunc func(tx sdk.Msg) bool,
+	convertTxFunc func(tx sdk.Msg) *ethtypes.Transaction) *Aspect {
+	globalAspect = &Aspect{
+		GetBondAspects: getFunc,
+		IsEthTx:        checkTxFunc,
+		ConvertEthTx:   convertTxFunc,
+	}
 	return globalAspect
 }
 
@@ -37,12 +47,12 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 	}
 	var result types.ResponseAspect
 	for _, msg := range req.Tx.GetMsgs() {
-		ok := req.IsEthTx(msg)
+		ok := aspect.IsEthTx(msg)
 		if !ok {
 			// ignore cosmos tx
 			continue
 		}
-		ethTx := req.ConvertEthTx(msg)
+		ethTx := aspect.ConvertEthTx(msg)
 		txAspect := types.RequestEthTxAspect{
 			Tx:          ethTx,
 			Context:     req.Context,
@@ -68,7 +78,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		// ignore contract deployment transaction & aspect op txs
 		return nil
 	}
-	boundAspects, err := aspect.GetBondAspects(req.Tx)
+	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, req.Tx)
 	// load aspects
 	if err != nil {
 		return nil

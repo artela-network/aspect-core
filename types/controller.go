@@ -51,15 +51,14 @@ func (c ResponseAspect) Merge(out *ResponseAspect) {
 }
 
 type RequestSdkTxAspect struct {
-	Tx           sdk.Tx
-	IsEthTx      func(tx sdk.Msg) bool
-	ConvertEthTx func(tx sdk.Msg) *ethtypes.Transaction
-	Context      map[string]string
-	BlockHeight  int64
-	BlockHash    string
-	TxIndex      int64
-	BaseFee      int64
-	ChainId      string
+	Tx sdk.Tx
+
+	Context     map[string]string
+	BlockHeight int64
+	BlockHash   string
+	TxIndex     int64
+	BaseFee     int64
+	ChainId     string
 }
 
 type RequestBlockAspect struct {
