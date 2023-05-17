@@ -21,19 +21,19 @@ type RequestEthTxAspect struct {
 
 // ResponseAspect txhash->aspectId-> AspectOutPut
 type ResponseAspect struct {
-	ResultMap map[string]map[string]AspectOutput
+	ResultMap map[string]map[string]*AspectOutput
 }
 
-func (c ResponseAspect) With(txHash string, aspectId string, output AspectOutput) ResponseAspect {
+func (c ResponseAspect) With(txHash string, aspectId string, output *AspectOutput) ResponseAspect {
 	c.ResultMap[txHash][aspectId] = output
 	return c
 }
-func (c ResponseAspect) GetAspectResult(txHash string, aspectId string) AspectOutput {
+func (c ResponseAspect) GetAspectResult(txHash string, aspectId string) *AspectOutput {
 	return c.ResultMap[txHash][aspectId]
 }
-func (c ResponseAspect) GetTXResult(txHash string) []AspectOutput {
+func (c ResponseAspect) GetTXResult(txHash string) []*AspectOutput {
 	m := c.ResultMap[txHash]
-	outputs := make([]AspectOutput, 0)
+	outputs := make([]*AspectOutput, 0)
 	for _, output := range m {
 		outputs = append(outputs, output)
 	}

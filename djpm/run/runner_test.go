@@ -1,6 +1,7 @@
 package run
 
 import (
+	"errors"
 	"os"
 	"path"
 	"testing"
@@ -10,9 +11,15 @@ import (
 	aspectType "github.com/artela-network/artelasdk/types"
 )
 
+// Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestRunAspect(t *testing.T) {
+	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
+		return nil, errors.New("not init")
+	}
+
 	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/controller_impl.wasm"))
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+
 	method := "onTxReceive"
 	input := &aspectType.AspectInput{
 		BlockHeight: 999,

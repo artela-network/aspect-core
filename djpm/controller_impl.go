@@ -104,7 +104,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		code := aspect.Code
 		res, err := run.RunAspect(code, methodName, &aspectInput)
 		if err != nil {
-			res = types.AspectOutput{
+			res = &types.AspectOutput{
 				Success: false,
 				Message: err.Error(),
 				Context: nil,
