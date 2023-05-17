@@ -71,11 +71,6 @@ type ResponseBlockAspect struct {
 	Result AspectOutput
 }
 
-type SdkTxEndPoint interface {
-	IsEthTx(tx sdk.Tx) bool
-	ConvertEthTx(tx sdk.Tx) ethtypes.Transaction
-}
-
 const (
 	ON_TX_RECEIVE_METHOD       = "onTxReceive"
 	ON_BLOCK_INITIALIZE_METHOD = "onBlockInitialize"
