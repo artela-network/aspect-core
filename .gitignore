@@ -1,0 +1,4 @@
+djpm/run/testdata/build
+djpm/run/testdata/node_modules
+djpm/run/testdata/runner/aspect
+djpm/run/testdata/package-lock.json

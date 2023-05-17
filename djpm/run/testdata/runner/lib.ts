@@ -1,9 +1,9 @@
 import { AString, AUint8Array } from "./types";
 import { Protobuf } from 'as-proto/assembly';
-import { BlockOutput } from "./ethermint/aspect/v1/BlockOutput"
-import { EthBlock } from "./ethermint/aspect/v1/EthBlock";
-import { AspectInput } from "./ethermint/aspect/v1/AspectInput"
-import { AspectOutput } from "./ethermint/aspect/v1/AspectOutput"
+import { BlockOutput } from "./aspect/v1/BlockOutput"
+import { EthBlock } from "./aspect/v1/EthBlock";
+import { AspectInput } from "./aspect/v1/AspectInput"
+import { AspectOutput } from "./aspect/v1/AspectOutput"
 
 export interface Aspect {
     onTxReceive(arg: AspectInput): AspectOutput

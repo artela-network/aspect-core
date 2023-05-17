@@ -20,6 +20,10 @@ const (
 var (
 	apis = map[string]interface{}{
 		"lastBlock": func() []byte {
+			if aspectType.GetHostApiHook == nil {
+				data, _ := aspectType.NewBlockRet(false, "host functions is not init", nil).MarshalProto()
+				return data
+			}
 			host, err := aspectType.GetHostApiHook()
 			if err != nil {
 				data, _ := aspectType.NewBlockRet(false, err.Error(), nil).MarshalProto()
@@ -34,6 +38,10 @@ var (
 			return data
 		},
 		"currentBlock": func() []byte {
+			if aspectType.GetHostApiHook == nil {
+				data, _ := aspectType.NewBlockRet(false, "host functions is not init", nil).MarshalProto()
+				return data
+			}
 			host, err := aspectType.GetHostApiHook()
 			if err != nil {
 				data, _ := aspectType.NewBlockRet(false, err.Error(), nil).MarshalProto()

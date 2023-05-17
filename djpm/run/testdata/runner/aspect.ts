@@ -1,7 +1,7 @@
 // The entry file of your WebAssembly module.
 import { Aspect, Context } from "./lib";
-import { AspectInput } from "./ethermint/aspect/v1/AspectInput"
-import { AspectOutput } from "./ethermint/aspect/v1/AspectOutput"
+import { AspectInput } from "./aspect/v1/AspectInput"
+import { AspectOutput } from "./aspect/v1/AspectOutput"
 
 class MyFirstAspect implements Aspect {
     onTxReceive(input: AspectInput): AspectOutput {
