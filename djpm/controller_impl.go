@@ -16,13 +16,13 @@ import (
 var globalAspect *Aspect
 
 type Aspect struct {
-	GetBondAspects func(int64, *ethtypes.Transaction) ([]types.AspectCode, error)
+	GetBondAspects func(int64, *ethtypes.Transaction) ([]*types.AspectCode, error)
 	IsEthTx        func(tx sdk.Msg) bool
 	ConvertEthTx   func(tx sdk.Msg) *ethtypes.Transaction
 }
 
 func NewAspect(
-	getFunc func(int64, *ethtypes.Transaction) ([]types.AspectCode, error),
+	getFunc func(int64, *ethtypes.Transaction) ([]*types.AspectCode, error),
 	checkTxFunc func(tx sdk.Msg) bool,
 	convertTxFunc func(tx sdk.Msg) *ethtypes.Transaction) *Aspect {
 	globalAspect = &Aspect{

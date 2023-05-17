@@ -1,70 +1,50 @@
 package scheduler
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/artela-network/artelasdk/types"
 )
 
-type ScheduleTask struct {
-	ScheduleName    string
-	AspectId        common.Address
-	ContractAddress common.Address
-	CreateHeight    uint64
-	//	0 close, 1 start
-	Status uint8
-	// 0 periodic, 1 adhoc
-	RunType uint8
-	TaskTx
-	PeriodicType
-	AdhocType
-}
-type TaskTx struct {
-	// 按以太坊交易算
-	hash common.Hash
-
-	//使用block 的 nonce
-	nonce uint64
-	//rlp， as 引入abi 编程
-	input []byte
-
-	maxFeePerGas         string
-	maxPriorityFeePerGas string
-	BrokerAddress        common.Address
-	value                string
-}
-type ScheduleTx struct {
-	hash                 common.Hash
-	blockHeight          uint64
-	input                []byte
-	maxFeePerGas         uint64
-	maxPriorityFeePerGas uint64
-	BrokerAddress        common.Address
-	value                uint64
-}
-type PeriodicType struct {
-	everyNBlocks uint64
-	maxRetry     uint32
-	count        uint32
-}
-type AdhocType struct {
-	nextNBlocks uint64
-	maxRetry    uint32
-}
-
-type Scheduler interface {
-	SubmitScheduleTask(req *ScheduleTask) error
-	CancelScheduleTask(ScheduleName string, AspectId common.Address, ContractAddress common.Address) error
-	QueryScheduleTask(Status uint8) ([]ScheduleTask, error)
-	CacheScheduleOpenTask() ([]ScheduleTask, error)
-	GenScheduleTaskTx() ([]ScheduleTx, error)
-	ConfirmScheduleTx(hash common.Hash) error
-}
+var globalManager *ScheduleManager
 
 type ScheduleManager struct {
-	MaxNewTxTotal uint32
-	TaskPool      []ScheduleTask
-	NewPool       []ScheduleTx
-	PendingPool   []ScheduleTx
-	ConfirmPool   []ScheduleTx
+	store *types.AspectStore
+	// cache schedule
+	pool []*types.Schedule
 }
 
-var SchedulerHook func() (Scheduler, error)
+func ScheduleManagerInstance() *ScheduleManager {
+	if globalManager == nil {
+		panic("aspcect instance not init,please exec NewAspect() first ")
+	}
+	return globalManager
+}
+
+func NewScheduleManager(store *types.AspectStore) *ScheduleManager {
+	manager := ScheduleManager{
+		store: store,
+		pool:  nil,
+	}
+	schedules := make([]*types.Schedule, 0)
+	// cache all active item by query
+	query, err := manager.Query(1)
+	if err != nil {
+		schedules = append(schedules, query...)
+	}
+	manager.pool = schedules
+	return &manager
+}
+
+func (manager ScheduleManager) Submit(req *types.Schedule) error {
+	return nil
+}
+
+func (manager ScheduleManager) Query(Status uint8) ([]*types.Schedule, error) {
+	return nil, nil
+}
+
+func (manager ScheduleManager) Update(req *types.Schedule) error {
+	return nil
+}
+func (manager ScheduleManager) GetActiveSchedule() error {
+	return nil
+}

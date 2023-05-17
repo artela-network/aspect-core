@@ -1,0 +1,61 @@
+syntax = "proto3";
+package aspect.v1;
+
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+
+message  Task{
+  string scheduleName = 1;
+  string aspectId = 2;
+  uint64 blockHeight = 3;
+  string txHash=4;
+  // block  nonce
+  uint64 nonce = 5;
+  TaskStatus status=6;
+  uint64 count=7;
+}
+
+enum TaskStatus {
+    NEW=0;
+    HALF_CONFIRM=1;
+    CONFIRM=2;
+    PENDING=3;
+    DELETE=4;
+}
+
+message  Schedule  {
+  string scheduleName = 1;
+  string aspectId = 2;
+  string contractAddress = 3;
+  uint64 createHeight = 4;
+  //	0 close, 1 start
+  uint32 status = 5;
+  // 0 periodic, 1 adhoc
+  RunType runType = 6;
+  Tx tx = 7;
+  PeriodicType periodic = 8;
+  AdhocType adhoc = 9;
+}
+enum RunType {
+  PERIODIC = 0;
+  ADHOC = 1;
+}
+
+message Tx {
+  // rlp， as ABI programming
+  bytes input = 3;
+  string maxFeePerGas = 4;
+  string maxPriorityFeePerGas = 5;
+  string brokerAddress = 6;
+  uint64 value = 7;
+}
+message PeriodicType {
+  uint64 everyNBlocks = 1;
+  uint64 maxRetry = 2;
+  uint64 count = 3;
+}
+message AdhocType {
+  uint64 nextNBlocks = 1;
+  uint64 maxRetry = 2;
+}
