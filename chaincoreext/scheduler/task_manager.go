@@ -3,19 +3,29 @@ package scheduler
 import "github.com/artela-network/artelasdk/types"
 
 type TaskManager struct {
-	store *types.AspectStore
-	// cache schedule
+
+	// cache schedule，key: txhash
 	pool map[string]*types.Task
 }
 
-func (manager TaskManager) GenTaskTx(heigh int64) ([]*types.Task, error) {
-	return nil, nil
-}
+// ADD TX CALL
+func (pool *TaskManager) GetTxs(height uint64) []types.Tx {
 
-func (manager TaskManager) ConfirmTx(txHash string) error {
+	// ScheduleManagerInstance.GetActiveSchedule()
+	// 判断
+	// 生成交易
+	//  检查是否有足够的费用
+	// add pool
+	// return txs[]
 	return nil
 }
 
-func (manager TaskManager) UpdateTx(txHash string) error {
+// return left tx
+func (pool *TaskManager) Confirm(txHash []string) []types.Tx {
+	// 1. configrm
+
+	// 2. left, update
+
+	// 3、clear pool
 	return nil
 }
