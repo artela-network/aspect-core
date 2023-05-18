@@ -12,6 +12,13 @@ type ScheduleManager struct {
 	pool []*types.Schedule
 }
 
+/**
+1、 key: "Schedule"+ Status  ， Value： [id,id,id...]
+2、 key: id                 ,  Value:  Schedule bytes
+3、 key: id                 ,   {ConfimTxs:[{blockheight,txhash},{blockheight,txhash}..]， count: 2}    // exec result
+4、 key: id                 ,  needRetry: false ，tryCount: 1, startblockheight：100
+*/
+
 func ScheduleManagerInstance() *ScheduleManager {
 	if globalManager == nil {
 		panic("aspcect instance not init,please exec NewAspect() first ")
@@ -42,9 +49,16 @@ func (manager ScheduleManager) Query(Status uint8) ([]*types.Schedule, error) {
 	return nil, nil
 }
 
-func (manager ScheduleManager) Update(req *types.Schedule) error {
-	return nil
+func (manager ScheduleManager) Close(req *types.ScheduleId) bool {
+	return false
 }
-func (manager ScheduleManager) GetActiveSchedule() error {
-	return nil
+
+// begin block call
+func (manager ScheduleManager) GetActiveSchedule() ([]*types.Schedule, error) {
+	// new taskpool
+	return nil, nil
+}
+
+func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight uint64, txHash string) {
+	// add count
 }

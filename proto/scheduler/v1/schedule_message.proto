@@ -1,46 +1,43 @@
 syntax = "proto3";
 package aspect.v1;
 
+import "aspect/v1/hostapi_message.proto";
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
 
 message  Task{
-  string scheduleName = 1;
-  string aspectId = 2;
-  uint64 blockHeight = 3;
-  string txHash=4;
+  ScheduleId id=1;
+  uint64 blockHeight =2;
+  string txHash=5;
   // block  nonce
-  uint64 nonce = 5;
-  TaskStatus status=6;
-  uint64 count=7;
+  uint64 nonce = 6;
+  AspTransaction tx = 9;
 }
 
-enum TaskStatus {
-    NEW=0;
-    HALF_CONFIRM=1;
-    CONFIRM=2;
-    PENDING=3;
-    DELETE=4;
-}
+
 
 message  Schedule  {
+  ScheduleId id=1;
+  uint64 createHeight = 2;
+  //	0 close, 1 start
+  uint32 status = 3;
+  // 0 periodic, 1 adhoc
+  AspTransaction tx = 4;
+  uint64 startBlock= 5;
+  uint64 everyNBlock = 6;
+  uint64 maxRetry = 7;
+  uint64 count = 8;
+}
+
+message  ScheduleId  {
   string scheduleName = 1;
   string aspectId = 2;
   string contractAddress = 3;
-  uint64 createHeight = 4;
-  //	0 close, 1 start
-  uint32 status = 5;
-  // 0 periodic, 1 adhoc
-  RunType runType = 6;
-  Tx tx = 7;
-  PeriodicType periodic = 8;
-  AdhocType adhoc = 9;
 }
-enum RunType {
-  PERIODIC = 0;
-  ADHOC = 1;
-}
+
+
+
 
 message Tx {
   // rlp， as ABI programming
@@ -51,9 +48,10 @@ message Tx {
   uint64 value = 7;
 }
 message PeriodicType {
-  uint64 everyNBlocks = 1;
-  uint64 maxRetry = 2;
-  uint64 count = 3;
+  uint64 startBlock=1;
+  uint64 everyNBlocks = 2;
+  uint64 maxRetry = 3;
+  uint64 count = 4;
 }
 message AdhocType {
   uint64 nextNBlocks = 1;
