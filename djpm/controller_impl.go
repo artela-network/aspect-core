@@ -80,10 +80,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 	}
 	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, req.Tx)
 	// load aspects
-	if err != nil {
-		return nil
-	}
-	if boundAspects == nil || len(boundAspects) == 0 {
+	if err != nil || len(boundAspects) == 0 {
 		return nil
 	}
 
@@ -92,7 +89,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 	if newErr != nil {
 		return nil
 	}
-	aspectInput := types.AspectInput{
+	aspectInput := &types.AspectInput{
 		BlockHeight: req.BlockHeight,
 		Tx:          transaction,
 		Context:     req.Context,
@@ -101,13 +98,22 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 	txHash := common.BytesToHash(transaction.Hash).String()
 	// run aspects on received transaction
 	for _, aspect := range boundAspects {
-		code := aspect.Code
-		res, err := run.RunAspect(code, methodName, &aspectInput)
+		var res *types.AspectOutput
+		runner, err := run.NewRunner(aspect.AspectId, aspect.Code)
 		if err != nil {
 			res = &types.AspectOutput{
 				Success: false,
 				Message: err.Error(),
 				Context: nil,
+			}
+		} else {
+			res, err = runner.JoinPoint(methodName, aspectInput)
+			if err != nil {
+				res = &types.AspectOutput{
+					Success: false,
+					Message: err.Error(),
+					Context: nil,
+				}
 			}
 		}
 		id := aspect.AspectId

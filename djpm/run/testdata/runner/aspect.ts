@@ -4,6 +4,24 @@ import { AspectInput } from "./aspect/v1/AspectInput"
 import { AspectOutput } from "./aspect/v1/AspectOutput"
 
 class MyFirstAspect implements Aspect {
+    isOwner(sender: string): bool {
+        let value = Context.getProperty("owner");
+        let owners = value.split(",");
+        if (owners.includes(sender)) {
+            return true;
+        }
+        return false;
+    }
+
+    onContractBinding(contractAddr: string): bool {
+        let value = Context.getProperty("binding");
+        let owners = value.split(",");
+        if (owners.includes(contractAddr)) {
+            return true;
+        }
+        return false;
+    }
+
     onTxReceive(input: AspectInput): AspectOutput {
         // call host api
         let block = Context.lastBlock();

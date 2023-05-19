@@ -125,3 +125,40 @@ export class AUint8Array {
         this.body = body;
     }
 }
+
+export class ABool {
+    public set(data: bool): void {
+        this.body = data;
+        this.head.dataLen = 1;
+    }
+
+    public get(): bool {
+        return this.body;
+    }
+
+    public load(ptr: i32): void {
+        this.head = new header(0, 0);
+        this.head.load(ptr);
+        let bodyPtr = ptr + this.head.len();
+        this.body = u8(i32.load8_u(bodyPtr)) == 0 ? false : true;
+    }
+
+    public store(): i32 {
+        let ptr = heap.alloc(this.head.dataLen + this.head.len())
+        this.head.store(ptr);
+        let bodyPtr = ptr + this.head.len();
+        memory.fill(bodyPtr, this.body ? 1 : 0, 1);
+        return ptr;
+    }
+
+    head: header;
+    body: bool;
+
+    constructor(
+        head: header = new header(typeIndex.TypeBool, 0),
+        body: bool = false,
+    ) {
+        this.head = head;
+        this.body = body;
+    }
+}

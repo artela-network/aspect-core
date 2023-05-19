@@ -28,7 +28,7 @@ type HostApi interface {
 	GetGlobalState(key string) (interface{}, error)
 
 	// GetProperty returns the configuration of aspect
-	GetProperty(key string) (interface{}, error)
+	GetProperty(aspectID string, key string) (string, error)
 
 	AddInherent()
 	ScheduledTx()

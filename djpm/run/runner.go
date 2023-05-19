@@ -2,23 +2,40 @@ package run
 
 import (
 	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/runtime"
 	"github.com/artela-network/runtime/wasmtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 
-func RunAspect(code []byte, method string, input *types.AspectInput) (*types.AspectOutput, error) {
-	wasmTimeRuntime, err := wasmtime.NewWASMTimeRuntime(code, HostApis())
+type Runner struct {
+	vm   runtime.WASMRuntime
+	fns  *runtime.HostAPICollection
+	code []byte
+}
+
+func NewRunner(aspID string, code []byte) (*Runner, error) {
+	register := NewRegister(aspID)
+	vm, err := wasmtime.NewWASMTimeRuntime(code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
+	return &Runner{
+		vm:   vm,
+		code: code,
+	}, nil
+}
 
+func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.AspectOutput, error) {
+	if r.vm == nil {
+		return nil, errors.New("not init")
+	}
 	// turn input into bytes
 	reqData, err := proto.Marshal(input)
 	if err != nil {
 		return nil, err
 	}
-	res, err := wasmTimeRuntime.Call(ApiEntrance, method, reqData)
+	res, err := r.vm.Call(ApiEntrance, name, reqData)
 	if err != nil {
 		return nil, err
 	}
@@ -34,4 +51,30 @@ func RunAspect(code []byte, method string, input *types.AspectInput) (*types.Asp
 	}
 
 	return output, nil
+}
+
+func (r *Runner) IsOwner(sender string) (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+
+	res, err := r.vm.Call(ApiEntrance, "isOwner", sender)
+	if err != nil {
+		return false, err
+	}
+
+	return res.(bool), nil
+}
+
+func (r *Runner) OnContractBinding(sender string) (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+
+	res, err := r.vm.Call(ApiEntrance, "onContractBinding", sender)
+	if err != nil {
+		return false, err
+	}
+
+	return res.(bool), nil
 }

@@ -12,7 +12,7 @@ import (
 )
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
-func TestRunAspect(t *testing.T) {
+func TestJoinPoint(t *testing.T) {
 	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
 		return nil, errors.New("not init")
 	}
@@ -20,7 +20,7 @@ func TestRunAspect(t *testing.T) {
 	cwd, _ := os.Getwd()
 	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
 
-	method := "onTxReceive"
+	name := "onTxReceive"
 	input := &aspectType.AspectInput{
 		BlockHeight: 999,
 		Tx: &aspectType.AspTransaction{
@@ -50,7 +50,9 @@ func TestRunAspect(t *testing.T) {
 			"333": "ghi",
 		},
 	}
-	output, err := RunAspect(raw, method, input)
+	runner, err := NewRunner("", raw)
+	require.Equal(t, nil, err)
+	output, err := runner.JoinPoint(name, input)
 	require.Equal(t, nil, err)
 	require.Equal(t, true, output.Success)
 
@@ -71,4 +73,36 @@ func TestRunAspect(t *testing.T) {
 	require.Equal(t, expected["k1"], ctx["k1"])
 	require.Equal(t, expected["k2"], ctx["k2"])
 	require.Equal(t, expected["lastBlockNum"], ctx["lastBlockNum"])
+}
+
+// Run "scripts/build-wasm.sh" in project root, before run this test.
+func TestIsOwner(t *testing.T) {
+	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
+		return nil, errors.New("not init")
+	}
+
+	cwd, _ := os.Getwd()
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+
+	runner, err := NewRunner("", raw)
+	require.Equal(t, nil, err)
+	ret, err := runner.IsOwner("hello")
+	require.Equal(t, nil, err)
+	require.Equal(t, false, ret)
+}
+
+// Run "scripts/build-wasm.sh" in project root, before run this test.
+func TestOnContractBinding(t *testing.T) {
+	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
+		return nil, errors.New("not init")
+	}
+
+	cwd, _ := os.Getwd()
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+
+	runner, err := NewRunner("", raw)
+	require.Equal(t, nil, err)
+	ret, err := runner.OnContractBinding("0x0000000000000000000000000000000000000001")
+	require.Equal(t, nil, err)
+	require.Equal(t, false, ret)
 }
