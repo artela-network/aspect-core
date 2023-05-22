@@ -5,11 +5,11 @@ import "github.com/artela-network/artelasdk/types"
 type TaskManager struct {
 
 	// cache schedule，key: txhash
-	pool map[string]*types.Task
+	pool map[string]*types.ScheduleTask
 }
 
 // ADD TX CALL
-func (pool *TaskManager) GetTxs(height uint64) []types.Tx {
+func (pool *TaskManager) GetTxs(height uint64) []*types.AspTransaction {
 
 	// ScheduleManagerInstance.GetActiveSchedule()
 	// 判断
@@ -21,7 +21,7 @@ func (pool *TaskManager) GetTxs(height uint64) []types.Tx {
 }
 
 // return left tx
-func (pool *TaskManager) Confirm(txHash []string) []types.Tx {
+func (pool *TaskManager) Confirm(txHash []string) []*types.AspTransaction {
 	// 1. configrm
 
 	// 2. left, update
