@@ -97,6 +97,27 @@ func (manager *ScheduleManager) StoreScheduleView(req *types.Schedule) error {
 	return nil
 }
 
+func (manager *ScheduleManager) DeleteScheduleView(status uint32, scheduleId *types.ScheduleId) error {
+	// add count
+	key := ScheduleViewKey(int64(status))
+	get := manager.Store.Get([]byte(ScheduleViewKeyPrefix), key)
+	// key=id.string , value= proto.Marshal(id)
+	set := make(map[string][]byte)
+	if get != nil {
+		err := json.Unmarshal(get, &set)
+		if err != nil {
+			return err
+		}
+	}
+	delete(set, scheduleId.String())
+	idSet, marErr := json.Marshal(set)
+	if marErr != nil {
+		return marErr
+	}
+	manager.Store.Set([]byte(ScheduleViewKeyPrefix), key, idSet)
+	return nil
+}
+
 func (manager *ScheduleManager) GetScheduleView(status int32) ([]*types.ScheduleId, error) {
 	key := ScheduleViewKey(int64(status))
 	get := manager.Store.Get([]byte(ScheduleViewKeyPrefix), key)
@@ -167,7 +188,7 @@ func (manager *ScheduleManager) GetScheduleExecResult(id *types.ScheduleId) (*ty
 	return result, nil
 }
 
-func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry *bool, blockHeight int64, txHash string) error {
+func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry bool, blockHeight int64, txHash string) error {
 	// add count
 
 	tryTask, err := manager.GetScheduleTry(id)
@@ -175,9 +196,7 @@ func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry *
 		return err
 	}
 
-	if needTry != nil {
-		tryTask.NeedRetry = *needTry
-	}
+	tryTask.NeedRetry = needTry
 	if tryTask.TaskTxs == nil {
 		tryTask.TaskTxs = make([]*types.TaskTx, 0)
 	}
