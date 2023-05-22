@@ -1,12 +1,13 @@
 package types
 
 type AspectStore interface {
+
 	// Implements KVStore
-	Get(key []byte) []byte
+	Get(prefix, key []byte) []byte
 	// Implements KVStore
-	Has(key []byte) bool
+	Has(prefix, key []byte) bool
 	// Implements KVStore
-	Set(key, value []byte)
+	Set(prefix, key, value []byte)
 	// Implements KVStore
-	Delete(key []byte)
+	Delete(prfix, key []byte)
 }

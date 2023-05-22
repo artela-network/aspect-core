@@ -7,9 +7,9 @@ import (
 var globalManager *ScheduleManager
 
 type ScheduleManager struct {
-	store *types.AspectStore
+	Store types.AspectStore
 	// cache schedule
-	pool []*types.Schedule
+	Pool []*types.Schedule
 }
 
 /**
@@ -26,10 +26,10 @@ func ScheduleManagerInstance() *ScheduleManager {
 	return globalManager
 }
 
-func NewScheduleManager(store *types.AspectStore) *ScheduleManager {
+func NewScheduleManager(store types.AspectStore) *ScheduleManager {
 	manager := ScheduleManager{
-		store: store,
-		pool:  nil,
+		Store: store,
+		Pool:  nil,
 	}
 	schedules := make([]*types.Schedule, 0)
 	// cache all active item by query
@@ -37,16 +37,30 @@ func NewScheduleManager(store *types.AspectStore) *ScheduleManager {
 	if err != nil {
 		schedules = append(schedules, query...)
 	}
-	manager.pool = schedules
+	manager.Pool = schedules
 	return &manager
 }
 
 func (manager ScheduleManager) Submit(req *types.Schedule) error {
+
 	return nil
 }
 
-func (manager ScheduleManager) Query(Status uint8) ([]*types.Schedule, error) {
-	return nil, nil
+func (manager ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Schedule, error) {
+	ids, err := manager.GetScheduleView(int32(status))
+	if err != nil {
+		return nil, err
+	}
+	schedules := make([]*types.Schedule, 0)
+	for i := range ids {
+		id := ids[i]
+		schedule, getErr := manager.GetSchedule(id)
+		if getErr != nil {
+			return nil, getErr
+		}
+		schedules = append(schedules, schedule)
+	}
+	return schedules, nil
 }
 
 func (manager ScheduleManager) Close(req *types.ScheduleId) bool {

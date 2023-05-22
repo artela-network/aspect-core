@@ -1,52 +1,41 @@
 syntax = "proto3";
-package aspect.v1;
+package scheduler.v1;
 
 import "aspect/v1/hostapi_message.proto";
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
-
-message  Task{
+message ScheduleTask{
   ScheduleId id=1;
   uint64 blockHeight =2;
   string txHash=5;
   // block  nonce
   uint64 nonce = 6;
-  AspTransaction tx = 9;
+  aspect.v1.AspTransaction tx = 9;
 }
 
-
-
-message  Schedule  {
+message Schedule  {
   ScheduleId id=1;
   uint64 createHeight = 2;
   //	0 close, 1 start
-  uint32 status = 3;
+  ScheduleStatus status = 3;
   // 0 periodic, 1 adhoc
-  AspTransaction tx = 4;
+  aspect.v1.AspTransaction tx = 4;
   uint64 startBlock= 5;
   uint64 everyNBlock = 6;
   uint64 maxRetry = 7;
   uint64 count = 8;
 }
 
-message  ScheduleId  {
+enum ScheduleStatus {
+  Close=0;
+  Open=1;
+}
+message ScheduleId  {
   string scheduleName = 1;
   string aspectId = 2;
-  string contractAddress = 3;
 }
 
-
-
-
-message Tx {
-  // rlp， as ABI programming
-  bytes input = 3;
-  string maxFeePerGas = 4;
-  string maxPriorityFeePerGas = 5;
-  string brokerAddress = 6;
-  uint64 value = 7;
-}
 message PeriodicType {
   uint64 startBlock=1;
   uint64 everyNBlocks = 2;
@@ -56,4 +45,16 @@ message PeriodicType {
 message AdhocType {
   uint64 nextNBlocks = 1;
   uint64 maxRetry = 2;
+}
+message TaskResult{ 
+ repeated TaskTx confirmTxs=1;
+ uint64 count=2;
+}
+message TaskTx{
+  int64 blockHeight=1;
+  string txHash=2;
+}
+message TryTask{
+  bool needRetry=1;
+  repeated TaskTx taskTxs=2;
 }

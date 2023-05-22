@@ -1,11 +1,12 @@
 package run
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
 	"github.com/artela-network/runtime/wasmtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/artela-network/artelasdk/types"
 )
 
 type Runner struct {
