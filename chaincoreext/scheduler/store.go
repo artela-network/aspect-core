@@ -40,6 +40,15 @@ func ScheduleViewKey(
 	return key
 }
 
+func prefixKey(prefix string, keyData []byte) []byte {
+	var key []byte
+	key = append(key, []byte(prefix)...)
+	key = append(key, []byte("/")...)
+	key = append(key, keyData...)
+	key = append(key, []byte("/")...)
+	return key
+}
+
 /*
 *
 1、 key: "Schedule"+ Status  ， Value： [id,id,id...]
@@ -50,17 +59,17 @@ func ScheduleViewKey(
 func (manager *ScheduleManager) StoreSchedule(req *types.Schedule) error {
 	// add count
 	key := ScheduleIdKey(req.Id)
-	get := manager.Store.Get([]byte(ScheduleKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleKeyPrefix, key))
 	if get != nil {
 		return errors.New("schedule exist id:" + req.Id.String())
 	}
 	reqBytes, _ := proto.Marshal(req)
-	manager.Store.Set([]byte(ScheduleKeyPrefix), key, reqBytes)
+	manager.Store.Set(prefixKey(ScheduleKeyPrefix, key), reqBytes)
 	return nil
 }
 func (manager *ScheduleManager) GetSchedule(req *types.ScheduleId) (*types.Schedule, error) {
 	key := ScheduleIdKey(req)
-	get := manager.Store.Get([]byte(ScheduleKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleKeyPrefix, key))
 	if get == nil {
 		return nil, errors.New("schedule exist id:" + req.String())
 	}
@@ -75,7 +84,7 @@ func (manager *ScheduleManager) GetSchedule(req *types.ScheduleId) (*types.Sched
 func (manager *ScheduleManager) StoreScheduleView(req *types.Schedule) error {
 	// add count
 	key := ScheduleViewKey(int64(req.Status))
-	get := manager.Store.Get([]byte(ScheduleViewKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleViewKeyPrefix, key))
 	// key=id.string , value= proto.Marshal(id)
 	set := make(map[string][]byte)
 	if get != nil {
@@ -93,14 +102,14 @@ func (manager *ScheduleManager) StoreScheduleView(req *types.Schedule) error {
 	if marErr != nil {
 		return marErr
 	}
-	manager.Store.Set([]byte(ScheduleViewKeyPrefix), key, idSet)
+	manager.Store.Set(prefixKey(ScheduleViewKeyPrefix, key), idSet)
 	return nil
 }
 
 func (manager *ScheduleManager) DeleteScheduleView(status uint32, scheduleId *types.ScheduleId) error {
 	// add count
 	key := ScheduleViewKey(int64(status))
-	get := manager.Store.Get([]byte(ScheduleViewKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleViewKeyPrefix, key))
 	// key=id.string , value= proto.Marshal(id)
 	set := make(map[string][]byte)
 	if get != nil {
@@ -114,13 +123,13 @@ func (manager *ScheduleManager) DeleteScheduleView(status uint32, scheduleId *ty
 	if marErr != nil {
 		return marErr
 	}
-	manager.Store.Set([]byte(ScheduleViewKeyPrefix), key, idSet)
+	manager.Store.Set(prefixKey(ScheduleViewKeyPrefix, key), idSet)
 	return nil
 }
 
 func (manager *ScheduleManager) GetScheduleView(status int32) ([]*types.ScheduleId, error) {
 	key := ScheduleViewKey(int64(status))
-	get := manager.Store.Get([]byte(ScheduleViewKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleViewKeyPrefix, key))
 	set := make(map[string][]byte)
 	if get != nil {
 		err := json.Unmarshal(get, &set)
@@ -172,12 +181,12 @@ func (manager *ScheduleManager) StoreScheduleExecResult(id *types.ScheduleId, bl
 		return err
 	}
 	key := ScheduleIdKey(id)
-	manager.Store.Set([]byte(ScheduleExecResultKeyPrefix), key, marshal)
+	manager.Store.Set(prefixKey(ScheduleExecResultKeyPrefix, key), marshal)
 	return nil
 }
 func (manager *ScheduleManager) GetScheduleExecResult(id *types.ScheduleId) (*types.TaskResult, error) {
 	key := ScheduleIdKey(id)
-	get := manager.Store.Get([]byte(ScheduleExecResultKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleExecResultKeyPrefix, key))
 	var result *types.TaskResult
 	if get != nil {
 		err := proto.Unmarshal(get, result)
@@ -224,13 +233,13 @@ func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry b
 		return err
 	}
 	key := ScheduleIdKey(id)
-	manager.Store.Set([]byte(ScheduleRuntimeKeyPrefix), key, idSet)
+	manager.Store.Set(prefixKey(ScheduleRuntimeKeyPrefix, key), idSet)
 	return nil
 }
 
 func (manager *ScheduleManager) GetScheduleTry(id *types.ScheduleId) (*types.TryTask, error) {
 	key := ScheduleIdKey(id)
-	get := manager.Store.Get([]byte(ScheduleRuntimeKeyPrefix), key)
+	get := manager.Store.Get(prefixKey(ScheduleRuntimeKeyPrefix, key))
 
 	var tryTask *types.TryTask
 	if get != nil {

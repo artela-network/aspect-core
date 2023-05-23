@@ -34,6 +34,11 @@ func (output *AspectOutput) FromJSON(data string) error {
 	err := json.Unmarshal([]byte(data), output)
 	return err
 }
+func (tx *AspTransaction) TxHash() string {
+	// todo
+	tx.Hash = []byte{0, 1, 3}
+	return common.Bytes2Hex(tx.Hash)
+}
 
 // NewTransactionFromData returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).

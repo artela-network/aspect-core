@@ -16,7 +16,7 @@ type ScheduleManager struct {
 1、 key: "Schedule"+ Status  ， Value： [id,id,id...]
 2、 key: id                 ,  Value:  Schedule bytes
 3、 key: id                 ,   {ConfimTxs:[{blockheight,txhash},{blockheight,txhash}..]， count: 2}    // exec result
-4、 key: id                 ,  needRetry: false ，tryCount: 1, startblockheight：100
+4、 key: id                 ,  needRetry: false ，tashTx:[{blockheight,txhash},{blockheight,txhash}..]
 */
 
 func ScheduleManagerInstance() *ScheduleManager {
@@ -26,7 +26,7 @@ func ScheduleManagerInstance() *ScheduleManager {
 	return globalManager
 }
 
-func NewScheduleManager(store types.AspectStore) (*ScheduleManager, error) {
+func NewScheduleManager(store types.AspectStore) error {
 	manager := ScheduleManager{
 		Store: store,
 		Pool:  nil,
@@ -34,9 +34,10 @@ func NewScheduleManager(store types.AspectStore) (*ScheduleManager, error) {
 	// cache all active item by query
 	err := manager.initPool()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &manager, nil
+	globalManager = &manager
+	return nil
 }
 
 func (manager ScheduleManager) Submit(req *types.Schedule) error {
@@ -69,30 +70,6 @@ func (manager ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Sche
 		schedules = append(schedules, schedule)
 	}
 	return schedules, nil
-}
-
-func (manager ScheduleManager) initPool() error {
-	query, err := manager.Query(types.ScheduleStatus_Open)
-	if err != nil {
-		return err
-	}
-	manager.Pool = query
-	return nil
-}
-
-func (manager ScheduleManager) addPool(schedule *types.Schedule) {
-	if schedule == nil {
-		return
-	}
-	manager.Pool = append(manager.Pool, schedule)
-}
-
-func (manager ScheduleManager) rmPool(id *types.ScheduleId) {
-	for i, schedule := range manager.Pool {
-		if schedule.Id.String() == id.String() {
-			manager.Pool = append(manager.Pool[0:i], manager.Pool[i+1:len(manager.Pool)]...)
-		}
-	}
 }
 
 func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
@@ -137,4 +114,28 @@ func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int6
 		return tryErr
 	}
 	return nil
+}
+
+func (manager ScheduleManager) initPool() error {
+	query, err := manager.Query(types.ScheduleStatus_Open)
+	if err != nil {
+		return err
+	}
+	manager.Pool = query
+	return nil
+}
+
+func (manager ScheduleManager) addPool(schedule *types.Schedule) {
+	if schedule == nil {
+		return
+	}
+	manager.Pool = append(manager.Pool, schedule)
+}
+
+func (manager ScheduleManager) rmPool(id *types.ScheduleId) {
+	for i, schedule := range manager.Pool {
+		if schedule.Id.String() == id.String() {
+			manager.Pool = append(manager.Pool[0:i], manager.Pool[i+1:len(manager.Pool)]...)
+		}
+	}
 }

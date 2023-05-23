@@ -7,7 +7,7 @@ option go_package = "github.com/artela-network/artelasdk/types";
 
 message ScheduleTask{
   ScheduleId id=1;
-  uint64 blockHeight =2;
+  int64 blockHeight =2;
   string txHash=5;
   // block  nonce
   uint64 nonce = 6;
