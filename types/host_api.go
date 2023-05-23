@@ -31,6 +31,6 @@ type HostApi interface {
 	GetProperty(aspectID string, key string) (string, error)
 
 	AddInherent()
-	ScheduledTx()
+	ScheduleTx(sch *Schedule) bool
 	DropTx()
 }

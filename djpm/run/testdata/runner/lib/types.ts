@@ -1,3 +1,5 @@
+import { allocate } from "./lib";
+
 enum typeIndex {
     Empty = 0,
     TypeInt8,
@@ -59,7 +61,7 @@ export class AString {
     }
 
     public store(): i32 {
-        let ptr = heap.alloc(this.head.dataLen + this.head.len())
+        let ptr = allocate(this.head.dataLen + this.head.len());
         this.head.store(ptr);
         let bodyPtr = ptr + this.head.len();
         // utf-16 <--> utf8
@@ -104,7 +106,7 @@ export class AUint8Array {
     }
 
     public store(): i32 {
-        let ptr = heap.alloc(this.head.dataLen + this.head.len())
+        let ptr = allocate(this.head.dataLen + this.head.len());
         this.head.store(ptr);
         let bodyPtr = ptr + this.head.len();
         for (let i = 0; i < this.head.dataLen; i++) {
@@ -144,7 +146,7 @@ export class ABool {
     }
 
     public store(): i32 {
-        let ptr = heap.alloc(this.head.dataLen + this.head.len())
+        let ptr = allocate(this.head.dataLen + this.head.len());
         this.head.store(ptr);
         let bodyPtr = ptr + this.head.len();
         memory.fill(bodyPtr, this.body ? 1 : 0, 1);

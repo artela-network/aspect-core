@@ -3,6 +3,7 @@ package run
 import (
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -18,11 +19,11 @@ const (
 
 // Register keeps the properity owned by current
 type Register struct {
-	aspID string
+	aspectID string
 }
 
 func NewRegister(aspectID string) *Register {
-	return &Register{aspID: aspectID}
+	return &Register{aspectID: aspectID}
 }
 
 // HostApis return the collection of aspect runtime host apis
@@ -91,11 +92,27 @@ func (r *Register) apis() interface{} {
 			if err != nil {
 				return "host functions is not init"
 			}
-			value, err := host.GetProperty(r.aspID, key)
+			value, err := host.GetProperty(r.aspectID, key)
 			if err != nil {
 				return err.Error()
 			}
 			return value
+		},
+		"scheduleTx": func(arg []byte) bool {
+			if types.GetHostApiHook == nil {
+				return false
+			}
+			host, err := types.GetHostApiHook()
+			_ = err
+			if err != nil {
+				return false
+			}
+			sch := &types.Schedule{}
+			if err := proto.Unmarshal(arg, sch); err != nil {
+				return false
+			}
+			sch.Id.AspectId = r.aspectID
+			return host.ScheduleTx(sch)
 		},
 	}
 }

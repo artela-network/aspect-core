@@ -1,9 +1,10 @@
 import { ABool, AString, AUint8Array } from "./types";
 import { Protobuf } from 'as-proto/assembly';
-import { BlockOutput } from "./aspect/v1/BlockOutput"
-import { EthBlock } from "./aspect/v1/EthBlock";
-import { AspectInput } from "./aspect/v1/AspectInput"
-import { AspectOutput } from "./aspect/v1/AspectOutput"
+import { BlockOutput } from "../aspect/v1/BlockOutput"
+import { EthBlock } from "../aspect/v1/EthBlock";
+import { AspectInput } from "../aspect/v1/AspectInput"
+import { AspectOutput } from "../aspect/v1/AspectOutput"
+import { Schedule } from "../scheduler/v1/Schedule"
 
 export interface Aspect {
     isOwner(sender: string): bool
@@ -155,11 +156,18 @@ export function allocate(size: i32): i32 {
     return heap.alloc(size) as i32;
 }
 
+export function createUint8Arrary(s: string): Uint8Array {
+    let array = new Uint8Array(s.length);
+    // TODO convert string to uint8array
+    return array;
+}
+
 declare namespace __HostApi__ {
     function lastBlock(): i32
     function currentBlock(): i32
     function localCall(ptr: i32): i32
     function getProperty(ptr: i32): i32
+    function scheduleTx(ptr: i32): i32
 }
 
 // Context part of hostapis
@@ -196,16 +204,15 @@ export class Context {
         output.load(outPtr);
         return output.get();
     }
-}
 
-// Util part of hostapis
-export class Util {
-}
-
-// Crypto part of hostapis
-export class Crypto {
-}
-
-// Tx part of hostapis
-export class Tx {
+    static scheduleTx(sch: Schedule): bool {
+        const encoded = Protobuf.encode(sch, Schedule.encode);
+        let input = new AUint8Array();
+        input.set(encoded);
+        let inputPtr = input.store();
+        let ret = __HostApi__.scheduleTx(inputPtr);
+        let output = new ABool();
+        output.load(ret);
+        return output.get();
+    }
 }
