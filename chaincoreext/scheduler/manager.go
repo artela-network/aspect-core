@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"github.com/artela-network/artelasdk/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var globalManager *ScheduleManager
@@ -9,7 +10,8 @@ var globalManager *ScheduleManager
 type ScheduleManager struct {
 	Store types.AspectStore
 	// cache schedule
-	Pool []*types.Schedule
+	Pool   []*types.Schedule
+	WrapTx func(tx *types.AspTransaction) (common.Hash, []byte, error)
 }
 
 /**
@@ -26,10 +28,11 @@ func ScheduleManagerInstance() *ScheduleManager {
 	return globalManager
 }
 
-func NewScheduleManager(store types.AspectStore) error {
+func NewScheduleManager(store types.AspectStore, wrapTx func(tx *types.AspTransaction) (common.Hash, []byte, error)) error {
 	manager := ScheduleManager{
-		Store: store,
-		Pool:  nil,
+		Store:  store,
+		Pool:   nil,
+		WrapTx: wrapTx,
 	}
 	// cache all active item by query
 	err := manager.initPool()
@@ -138,4 +141,7 @@ func (manager ScheduleManager) rmPool(id *types.ScheduleId) {
 			manager.Pool = append(manager.Pool[0:i], manager.Pool[i+1:len(manager.Pool)]...)
 		}
 	}
+}
+func (manager ScheduleManager) WrapTransition(tx *types.AspTransaction) (common.Hash, []byte, error) {
+	return manager.WrapTx(tx)
 }
