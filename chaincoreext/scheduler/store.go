@@ -250,3 +250,21 @@ func (manager *ScheduleManager) GetScheduleTry(id *types.ScheduleId) (*types.Try
 	}
 	return tryTask, nil
 }
+
+func (manager *ScheduleManager) ClearScheduleTry(id *types.ScheduleId) error {
+	tryTask, err := manager.GetScheduleTry(id)
+	if err != nil {
+		return err
+	}
+
+	tryTask.NeedRetry = false
+	tryTask.TaskTxs = make([]*types.TaskTx, 0)
+
+	idSet, err := proto.Marshal(tryTask)
+	if err != nil {
+		return err
+	}
+	key := ScheduleIdKey(id)
+	manager.Store.Set(prefixKey(ScheduleRuntimeKeyPrefix, key), idSet)
+	return nil
+}
