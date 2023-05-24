@@ -2,9 +2,9 @@ package scheduler
 
 import (
 	"crypto/sha256"
-	"github.com/pkg/errors"
 
 	"github.com/artela-network/artelasdk/types"
+	"github.com/pkg/errors"
 )
 
 // TxKeySize TxKey is same with the hash defined in cometbft
@@ -20,6 +20,12 @@ type (
 )
 
 var globalTask *TaskManager
+
+// TODO, need a better way call to schedule in cometbft.
+func TaskInstance() *TaskManager {
+	// globalTask is ensure to not empty.
+	return globalTask
+}
 
 func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	if ScheduleManagerInstance() == nil {
@@ -97,6 +103,15 @@ func (task *TaskManager) genTxPool(height int64, nonce uint64, chainId string) e
 	return nil
 }
 
+// GetTxs return the scheduled transactions
+func (task *TaskManager) GetTxs() [][]byte {
+	txs := make([][]byte, len(task.scheduleTasks))
+	for _, task := range task.scheduleTasks {
+		txs = append(txs, task.SdkTx)
+	}
+	return txs
+}
+
 // Confirm return left tx
 func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 	// configrm all the tansactions that in block
@@ -131,9 +146,6 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 	}
 
 	leftTxs := make([][]byte, len(task.scheduleTasks))
-	if len(task.scheduleTasks) == 0 {
-		return leftTxs, nil
-	}
 
 	// not confirmed tasks
 	for key, _ := range task.scheduleTasks {
@@ -167,9 +179,6 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 
 	}
 
-	//set Gloabal to nil
-	defer setGlobalNil()
-
 	// we do not need to clear the task, all the task will be renew for next proposal.
 	return leftTxs, nil
 }
@@ -177,8 +186,4 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 // getTxKey use sha256 get the tx hash, which is consistent with the cosmos mempool
 func getTxKey(tx []byte) TxKey {
 	return sha256.Sum256(tx)
-}
-
-func setGlobalNil() {
-	globalTask = nil
 }
