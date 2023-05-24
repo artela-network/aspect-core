@@ -241,11 +241,14 @@ func (manager *ScheduleManager) GetScheduleTry(id *types.ScheduleId) (*types.Try
 	key := ScheduleIdKey(id)
 	get := manager.Store.Get(prefixKey(ScheduleRuntimeKeyPrefix, key))
 
-	var tryTask *types.TryTask
+	tryTask := &types.TryTask{}
 	if get != nil {
 		err := proto.Unmarshal(get, tryTask)
 		if err != nil {
 			return nil, err
+		}
+		if tryTask == nil {
+			tryTask = &types.TryTask{}
 		}
 	}
 	return tryTask, nil
@@ -256,7 +259,6 @@ func (manager *ScheduleManager) ClearScheduleTry(id *types.ScheduleId) error {
 	if err != nil {
 		return err
 	}
-
 	tryTask.NeedRetry = false
 	tryTask.TaskTxs = make([]*types.TaskTx, 0)
 

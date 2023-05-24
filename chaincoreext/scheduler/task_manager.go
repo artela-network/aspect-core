@@ -2,11 +2,12 @@ package scheduler
 
 import (
 	"crypto/sha256"
+	"github.com/pkg/errors"
 
 	"github.com/artela-network/artelasdk/types"
 )
 
-// TxKey is same with the hash defined in cometbft
+// TxKeySize TxKey is same with the hash defined in cometbft
 const TxKeySize = sha256.Size
 
 type (
@@ -14,19 +15,31 @@ type (
 
 	TaskManager struct {
 		// cached txs，key: txhash
-		txs       map[TxKey][]byte
-		schedules map[TxKey]*types.ScheduleId
+		scheduleTasks map[TxKey]*types.ScheduleTask
 	}
 )
 
 var globalTask *TaskManager
 
 func NewTaskManager(height int64, nonce uint64, chainId string) error {
-	manager := TaskManager{
-		txs:       make(map[TxKey][]byte),
-		schedules: make(map[TxKey]*types.ScheduleId),
+	if ScheduleManagerInstance() == nil {
+		return errors.New("ScheduleManager instance not init,please exec NewScheduleManager() first")
 	}
-	return manager.genTxPool(height, nonce, chainId)
+	manager := &TaskManager{
+		scheduleTasks: make(map[TxKey]*types.ScheduleTask),
+	}
+	err := manager.genTxPool(height, nonce, chainId)
+
+	globalTask = manager
+
+	return err
+}
+
+func TaskManagerInstance() *ScheduleManager {
+	if globalManager == nil {
+		panic("task manager instance not init,please exec NewTaskManager() first ")
+	}
+	return globalManager
 }
 
 // genTxPool load transaction from scheduleManager and insert to pool
@@ -40,6 +53,10 @@ func (task *TaskManager) genTxPool(height int64, nonce uint64, chainId string) e
 	for _, schedule := range schedules {
 		needRetry := false
 
+		if schedule.Status == types.ScheduleStatus_Close {
+			continue
+		}
+
 		// get the retry flag
 		tryTasks, err := ScheduleManagerInstance().GetScheduleTry(schedule.Id)
 		if err != nil {
@@ -51,66 +68,117 @@ func (task *TaskManager) genTxPool(height int64, nonce uint64, chainId string) e
 			if err := ScheduleManagerInstance().ClearScheduleTry(schedule.Id); err != nil {
 				return err
 			}
-		} else {
-			schedule.Tx.BlockNumber = height
-			schedule.Tx.Nonce = nonce
-			needRetry = true
 		}
+
+		schedule.Tx.BlockNumber = height
+		schedule.Tx.Nonce = nonce
+		needRetry = tryTasks.NeedRetry
 
 		// check if need to retry or height satisfy periodic
 		if needRetry || (height >= int64(schedule.StartBlock) &&
 			(height-int64(schedule.StartBlock))%int64(schedule.EveryNBlock) == 0) {
 			// generate a new tx from schedule
-			_, tx, err := ScheduleManagerInstance().WrapTransition(schedule.Tx)
+			hash, tx, err := ScheduleManagerInstance().WrapTransition(schedule.Tx)
 			if err != nil {
 				return err
 			}
-
 			key := getTxKey(tx)
+			scheduleTask := &types.ScheduleTask{
+				Schedule:    schedule,
+				BlockHeight: height,
+				TxHash:      hash.String(),
+				TxNonce:     nonce,
+				SdkTx:       tx,
+			}
 			// save to task pool
-			task.txs[key] = tx
-			task.schedules[key] = schedule.Id
+			task.scheduleTasks[key] = scheduleTask
 		}
 	}
 	return nil
 }
 
-// GetTxs return the scheduled transactions
-func (task *TaskManager) GetTxs() [][]byte {
-	txs := make([][]byte, len(task.txs))
-	for _, tx := range task.txs {
-		txs = append(txs, tx)
-	}
-	return txs
-}
-
-// return left tx
-func (task *TaskManager) Confirm(txs [][]byte) error {
+// Confirm return left tx
+func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 	// configrm all the tansactions that in block
 	for _, tx := range txs {
 		key := getTxKey(tx)
-		delete(task.txs, key)
+
+		// check is task tx
+		_, ok := task.scheduleTasks[key]
+		if !ok {
+			continue
+		}
 
 		// set retry to false, clear the try task
-		schID := task.schedules[key]
-		if err := ScheduleManagerInstance().ClearScheduleTry(schID); err != nil {
-			return err
+		scheduleTask := task.scheduleTasks[key]
+
+		if err := ScheduleManagerInstance().ClearScheduleTry(scheduleTask.Schedule.Id); err != nil {
+			return nil, err
 		}
-		delete(task.schedules, key)
+
+		err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, scheduleTask.TxHash)
+		if err != nil {
+			return nil, err
+		}
+
+		//Check the number of executions,or Close schedule
+		execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
+		if execErr != nil {
+			return nil, execErr
+		}
+		//clean pool
+		delete(task.scheduleTasks, key)
+	}
+
+	leftTxs := make([][]byte, len(task.scheduleTasks))
+	if len(task.scheduleTasks) == 0 {
+		return leftTxs, nil
 	}
 
 	// not confirmed tasks
-	for key, _ := range task.txs {
+	for key, _ := range task.scheduleTasks {
 		// check and update schedule state
-		schID := task.schedules[key]
-		globalManager.StoreScheduleTry(schID, true, 0, "")
+		scheduleTask := task.scheduleTasks[key]
+
+		try, err := ScheduleManagerInstance().GetScheduleTry(scheduleTask.Schedule.Id)
+		if err != nil {
+			return nil, err
+		}
+		if uint64(len(try.TaskTxs)+1) < scheduleTask.Schedule.MaxRetry {
+			//try count less MaxRetry,then next  need try
+			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+		} else {
+			// try count more than maxRetry, Close next try
+			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
+
+			// add Fail txHash for placeholder
+			err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, "F")
+			if err != nil {
+				return nil, err
+			}
+
+			//Check the number of executions,or Close schedule
+			execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
+			if execErr != nil {
+				return nil, execErr
+			}
+		}
+		leftTxs = append(leftTxs, scheduleTask.SdkTx)
+
 	}
 
+	//set Gloabal to nil
+	defer setGlobalNil()
+
 	// we do not need to clear the task, all the task will be renew for next proposal.
-	return nil
+	return leftTxs, nil
 }
 
 // getTxKey use sha256 get the tx hash, which is consistent with the cosmos mempool
 func getTxKey(tx []byte) TxKey {
 	return sha256.Sum256(tx)
+}
+
+func setGlobalNil() {
+	globalTask = nil
 }

@@ -23,7 +23,7 @@ type ScheduleManager struct {
 
 func ScheduleManagerInstance() *ScheduleManager {
 	if globalManager == nil {
-		panic("aspcect instance not init,please exec NewAspect() first ")
+		panic(" ScheduleManager instance not init,please exec NewScheduleManager() first ")
 	}
 	return globalManager
 }
@@ -75,6 +75,37 @@ func (manager ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Sche
 	return schedules, nil
 }
 
+func (manager ScheduleManager) CheckClose(schedule *types.Schedule) error {
+	//Check the number of executions
+	result, execErr := ScheduleManagerInstance().GetScheduleExecResult(schedule.Id)
+	if execErr != nil {
+		return execErr
+	}
+	// When the number of executions is sufficient, Close schedule
+	if uint64(len(result.GetConfirmTxs())) == schedule.Count {
+		manager.Close(schedule.Id)
+	}
+	return nil
+}
+
+// begin block call
+func (manager ScheduleManager) GetActiveSchedule() []*types.Schedule {
+	return manager.Pool
+}
+
+func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int64, txHash string) error {
+	// add count
+	err := manager.StoreScheduleExecResult(id, blockHeight, txHash)
+	if err != nil {
+		return err
+	}
+	tryErr := manager.StoreScheduleTry(id, false, blockHeight, txHash)
+	if tryErr != nil {
+		return tryErr
+	}
+	return nil
+}
+
 func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
 	schedule, err := manager.GetSchedule(scheduleId)
 	if err != nil {
@@ -98,24 +129,6 @@ func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
 		return storeViewErr
 	}
 	manager.rmPool(scheduleId)
-	return nil
-}
-
-// begin block call
-func (manager ScheduleManager) GetActiveSchedule() []*types.Schedule {
-	return manager.Pool
-}
-
-func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int64, txHash string) error {
-	// add count
-	err := manager.StoreScheduleExecResult(id, blockHeight, txHash)
-	if err != nil {
-		return err
-	}
-	tryErr := manager.StoreScheduleTry(id, false, blockHeight, txHash)
-	if tryErr != nil {
-		return tryErr
-	}
 	return nil
 }
 

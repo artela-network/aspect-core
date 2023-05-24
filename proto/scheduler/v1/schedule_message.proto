@@ -6,12 +6,14 @@ import "aspect/v1/hostapi_message.proto";
 option go_package = "github.com/artela-network/artelasdk/types";
 
 message ScheduleTask{
-  ScheduleId id=1;
+  Schedule schedule=1;
   int64 blockHeight =2;
-  string txHash=5;
-  // block  nonce
-  uint64 nonce = 6;
-  aspect.v1.AspTransaction tx = 9;
+  // eth tx hash
+  string txHash=3;
+  //  nonce
+  uint64 txNonce = 4;
+  // cosmos sdk tx
+  bytes sdkTx=5;
 }
 
 message Schedule  {
