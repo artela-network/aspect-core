@@ -27,17 +27,17 @@ func NewRegister(aspectID string) *Register {
 }
 
 // HostApis return the collection of aspect runtime host apis
-func (r *Register) HostApis() *runtime.HostAPICollection {
+func (r *Register) HostApis() *runtime.HostAPIRegistry {
 	return r.hostApis(moduleHostApi, nsHostApi)
 }
 
-func (r *Register) hostApis(module, namespace string) *runtime.HostAPICollection {
-	collection := runtime.NewHostAPICollection()
+func (r *Register) hostApis(module, namespace string) *runtime.HostAPIRegistry {
+	collection := runtime.NewHostAPIRegistry()
 
 	for method, fn := range r.apis().(map[string]interface{}) {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
-		collection.AddApi(module, namespace, method, fn)
+		collection.AddApi(runtime.Module(module), runtime.Namesapce(namespace), runtime.MethodName(method), fn)
 	}
 	return collection
 }

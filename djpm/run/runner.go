@@ -2,7 +2,6 @@ package run
 
 import (
 	"github.com/artela-network/runtime"
-	"github.com/artela-network/runtime/wasmtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
@@ -10,14 +9,14 @@ import (
 )
 
 type Runner struct {
-	vm   runtime.WASMRuntime
-	fns  *runtime.HostAPICollection
+	vm   runtime.AspectRuntime
+	fns  *runtime.HostAPIRegistry
 	code []byte
 }
 
 func NewRunner(aspID string, code []byte) (*Runner, error) {
 	register := NewRegister(aspID)
-	vm, err := wasmtime.NewWASMTimeRuntime(code, register.HostApis())
+	vm, err := runtime.NewAspectRuntime(runtime.WASM, code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
