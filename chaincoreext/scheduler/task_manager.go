@@ -41,11 +41,11 @@ func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	return err
 }
 
-func TaskManagerInstance() *ScheduleManager {
-	if globalManager == nil {
+func TaskManagerInstance() *TaskManager {
+	if globalTask == nil {
 		panic("task manager instance not init,please exec NewTaskManager() first ")
 	}
-	return globalManager
+	return globalTask
 }
 
 // genTxPool load transaction from scheduleManager and insert to pool
