@@ -14,6 +14,7 @@ export class PeriodicSchedule implements Schedule {
         sch.startBlock = this._startBlock;
         sch.maxRetry = this._maxRetry;
         sch.everyNBlock = this._everyNBlocks;
+        sch.tx = tran;
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi

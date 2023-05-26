@@ -103,7 +103,6 @@ func (r *Register) apis() interface{} {
 				return false
 			}
 			host, err := types.GetHostApiHook()
-			_ = err
 			if err != nil {
 				return false
 			}

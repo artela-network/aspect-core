@@ -1,5 +1,5 @@
 // The entry file of your WebAssembly module.
-import { Aspect, Context, createUint8Arrary } from "./lib/lib";
+import { Aspect, Context } from "./lib/lib";
 import { Schedule, PeriodicSchedule, AdHocSchedule } from "./lib/schedule";
 import { Msg } from "./lib/msg";
 
@@ -10,7 +10,6 @@ import { MyContract } from "./generated/my_contract";
 
 class MyFirstAspect implements Aspect {
     isOwner(sender: string): bool {
-        this.scheduleTx(); // try to schedule tx
         let value = Context.getProperty("owner");
         let owners = value.split(",");
         if (owners.includes(sender)) {
@@ -58,6 +57,9 @@ class MyFirstAspect implements Aspect {
             ret.context.set(keys[i], input.context.get(keys[i]))
         }
 
+        // schedule a tx
+        this.scheduleTx();
+
         return ret;
     }
 
@@ -102,15 +104,9 @@ class MyFirstAspect implements Aspect {
     }
 
     private scheduleTx(): bool {
-        let tx = new MyContract("0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae").deposit("Salary", new Msg(2, "20000", "30000", "0x00c5496aee77c1ba1f0854206a26dda82a81d6d8"))
-        var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(10).count(100).everyNBlocks(20).maxRetry(10);
-        let ok = periodicSch.submit(tx);
-        if (!ok) {
-            return false;
-        }
-
-        let adhocSch: Schedule = AdHocSchedule.builder("myAdhocSchedule").nextNBlocks(10).maxRetry(10);
-        return adhocSch.submit(tx);
+        let tx = new MyContract("0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae").getBalance(new Msg(2, "20000", "30000", "0x00c5496aee77c1ba1f0854206a26dda82a81d6d8"))
+        var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(10).count(1000).everyNBlocks(5).maxRetry(2);
+        return periodicSch.submit(tx);
     }
 }
 

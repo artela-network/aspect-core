@@ -156,10 +156,13 @@ export function allocate(size: i32): i32 {
     return heap.alloc(size) as i32;
 }
 
-export function createUint8Arrary(s: string): Uint8Array {
-    let array = new Uint8Array(s.length);
-    // TODO convert string to uint8array
-    return array;
+export function stringToUint8Arrary(s: string): Uint8Array {
+    const buffer = String.UTF8.encode(s);
+    if (buffer.byteLength === 0) {
+        return new Uint8Array(0);
+    }
+
+    return Uint8Array.wrap(buffer, 0, s.length);
 }
 
 declare namespace __HostApi__ {

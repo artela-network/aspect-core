@@ -23,6 +23,9 @@ func (base *HostApiBase) ScheduleTx(sch *types.Schedule) bool {
 	}
 	sch.CreateHeight = uint64(base.lastBlockNum()) + 1
 	sch.StartBlock += sch.CreateHeight
+
+	// TODO get gaslimt from user contract.
+	sch.Tx.GasLimit = 9000000000
 	if err := scheduler.ScheduleManagerInstance().Submit(sch); err != nil {
 		return false
 	}
