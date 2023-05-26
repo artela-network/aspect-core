@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/cosmos/gogoproto/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/artelasdk/types"
 )
@@ -141,12 +141,12 @@ func (manager *ScheduleManager) GetScheduleView(status int32) ([]*types.Schedule
 	}
 	ids := make([]*types.ScheduleId, 0)
 	for _, v := range set {
-		var scheduleId *types.ScheduleId
-		err := proto.Unmarshal(v, scheduleId)
+		id := &types.ScheduleId{}
+		err := proto.Unmarshal(v, id)
 		if err != nil {
 			return nil, err
 		}
-		ids = append(ids, scheduleId)
+		ids = append(ids, id)
 	}
 	return ids, nil
 }
