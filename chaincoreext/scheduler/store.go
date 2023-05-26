@@ -73,7 +73,7 @@ func (manager *ScheduleManager) GetSchedule(req *types.ScheduleId) (*types.Sched
 	if get == nil {
 		return nil, errors.New("schedule exist id:" + req.String())
 	}
-	var schedule *types.Schedule
+	schedule := &types.Schedule{}
 	err := proto.Unmarshal(get, schedule)
 	if err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func (manager *ScheduleManager) StoreScheduleExecResult(id *types.ScheduleId, bl
 func (manager *ScheduleManager) GetScheduleExecResult(id *types.ScheduleId) (*types.TaskResult, error) {
 	key := ScheduleIdKey(id)
 	get := manager.Store.Get(prefixKey(ScheduleExecResultKeyPrefix, key))
-	var result *types.TaskResult
+	result := &types.TaskResult{}
 	if get != nil {
 		err := proto.Unmarshal(get, result)
 		if err != nil {
