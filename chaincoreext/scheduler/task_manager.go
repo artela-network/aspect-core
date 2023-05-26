@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"crypto/sha256"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/artela-network/artelasdk/types"
 	"github.com/pkg/errors"
@@ -16,6 +17,7 @@ type (
 	TaskManager struct {
 		// cached txs，key: txhash
 		scheduleTasks map[TxKey]*types.ScheduleTask
+		ethTxIndexMap map[string]TxKey
 	}
 )
 
@@ -39,13 +41,6 @@ func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	globalTask = manager
 
 	return err
-}
-
-func TaskManagerInstance() *TaskManager {
-	if globalTask == nil {
-		panic("task manager instance not init,please exec NewTaskManager() first ")
-	}
-	return globalTask
 }
 
 // genTxPool load transaction from scheduleManager and insert to pool
@@ -98,6 +93,7 @@ func (task *TaskManager) genTxPool(height int64, nonce uint64, chainId string) e
 			}
 			// save to task pool
 			task.scheduleTasks[key] = scheduleTask
+			task.ethTxIndexMap[hash.String()] = key
 		}
 	}
 	return nil
@@ -110,6 +106,12 @@ func (task *TaskManager) GetTxs() [][]byte {
 		txs = append(txs, task.SdkTx)
 	}
 	return txs
+}
+
+// GetTxs return the scheduled transactions
+func (task *TaskManager) IsScheduleTx(hash common.Hash) bool {
+	_, ok := task.ethTxIndexMap[hash.String()]
+	return ok
 }
 
 // Confirm return left tx
@@ -143,6 +145,7 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 		}
 		//clean pool
 		delete(task.scheduleTasks, key)
+		delete(task.ethTxIndexMap, scheduleTask.TxHash)
 	}
 
 	leftTxs := make([][]byte, len(task.scheduleTasks))
