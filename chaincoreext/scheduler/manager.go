@@ -93,19 +93,6 @@ func (manager ScheduleManager) GetActiveSchedule() []*types.Schedule {
 	return manager.Pool
 }
 
-func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int64, txHash string) error {
-	// add count
-	err := manager.StoreScheduleExecResult(id, blockHeight, txHash)
-	if err != nil {
-		return err
-	}
-	tryErr := manager.StoreScheduleTry(id, false, blockHeight, txHash)
-	if tryErr != nil {
-		return tryErr
-	}
-	return nil
-}
-
 func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
 	schedule, err := manager.GetSchedule(scheduleId)
 	if err != nil {

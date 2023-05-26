@@ -13,8 +13,8 @@ import (
 const (
 	ScheduleViewKeyPrefix       = "Schedule/View/"
 	ScheduleKeyPrefix           = "Schedule/Data/"
-	ScheduleRuntimeKeyPrefix    = "AspectStore/Runtime/"
-	ScheduleExecResultKeyPrefix = "AspectStore/ExecResult/"
+	ScheduleRetryKeyPrefix      = "Schedule/Retry/"
+	ScheduleExecResultKeyPrefix = "Schedule/ExecResult/"
 )
 
 func ScheduleIdKey(
@@ -233,13 +233,13 @@ func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry b
 		return err
 	}
 	key := ScheduleIdKey(id)
-	manager.Store.Set(prefixKey(ScheduleRuntimeKeyPrefix, key), idSet)
+	manager.Store.Set(prefixKey(ScheduleRetryKeyPrefix, key), idSet)
 	return nil
 }
 
 func (manager *ScheduleManager) GetScheduleTry(id *types.ScheduleId) (*types.TryTask, error) {
 	key := ScheduleIdKey(id)
-	get := manager.Store.Get(prefixKey(ScheduleRuntimeKeyPrefix, key))
+	get := manager.Store.Get(prefixKey(ScheduleRetryKeyPrefix, key))
 
 	tryTask := &types.TryTask{}
 	if get != nil {
@@ -267,6 +267,6 @@ func (manager *ScheduleManager) ClearScheduleTry(id *types.ScheduleId) error {
 		return err
 	}
 	key := ScheduleIdKey(id)
-	manager.Store.Set(prefixKey(ScheduleRuntimeKeyPrefix, key), idSet)
+	manager.Store.Set(prefixKey(ScheduleRetryKeyPrefix, key), idSet)
 	return nil
 }

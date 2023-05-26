@@ -114,7 +114,7 @@ func (task *TaskManager) GetTxs() [][]byte {
 
 // Confirm return left tx
 func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
-	// configrm all the tansactions that in block
+	// confirm all the tansactions that in block
 	for _, tx := range txs {
 		key := getTxKey(tx)
 

@@ -3,7 +3,7 @@ module github.com/artela-network/artelasdk
 go 1.19
 
 require (
-	github.com/artela-network/runtime v0.0.0-00010101000000-000000000000
+	github.com/artela-network/runtime v0.0.0
 	github.com/cosmos/cosmos-sdk v0.47.2
 	github.com/cosmos/gogoproto v1.4.8
 	github.com/ethereum/go-ethereum v1.11.6
