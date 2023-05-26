@@ -43,7 +43,7 @@ func NewScheduleManager(store types.AspectStore, wrapTx func(tx *types.AspTransa
 	return nil
 }
 
-func (manager ScheduleManager) Submit(req *types.Schedule) error {
+func (manager *ScheduleManager) Submit(req *types.Schedule) error {
 	storeErr := manager.StoreScheduleView(req)
 	if storeErr != nil {
 		return storeErr
@@ -58,7 +58,7 @@ func (manager ScheduleManager) Submit(req *types.Schedule) error {
 	return nil
 }
 
-func (manager ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Schedule, error) {
+func (manager *ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Schedule, error) {
 	ids, err := manager.GetScheduleView(int32(status))
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (manager ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Sche
 	return schedules, nil
 }
 
-func (manager ScheduleManager) CheckClose(schedule *types.Schedule) error {
+func (manager *ScheduleManager) CheckClose(schedule *types.Schedule) error {
 	//Check the number of executions
 	result, execErr := ScheduleManagerInstance().GetScheduleExecResult(schedule.Id)
 	if execErr != nil {
@@ -89,11 +89,11 @@ func (manager ScheduleManager) CheckClose(schedule *types.Schedule) error {
 }
 
 // begin block call
-func (manager ScheduleManager) GetActiveSchedule() []*types.Schedule {
+func (manager *ScheduleManager) GetActiveSchedule() []*types.Schedule {
 	return manager.Pool
 }
 
-func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int64, txHash string) error {
+func (manager *ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int64, txHash string) error {
 	// add count
 	err := manager.StoreScheduleExecResult(id, blockHeight, txHash)
 	if err != nil {
@@ -106,7 +106,7 @@ func (manager ScheduleManager) ExecRecord(id *types.ScheduleId, blockHeight int6
 	return nil
 }
 
-func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
+func (manager *ScheduleManager) Close(scheduleId *types.ScheduleId) error {
 	schedule, err := manager.GetSchedule(scheduleId)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func (manager ScheduleManager) Close(scheduleId *types.ScheduleId) error {
 	return nil
 }
 
-func (manager ScheduleManager) initPool() error {
+func (manager *ScheduleManager) initPool() error {
 	query, err := manager.Query(types.ScheduleStatus_Open)
 	if err != nil {
 		return err
@@ -141,20 +141,20 @@ func (manager ScheduleManager) initPool() error {
 	return nil
 }
 
-func (manager ScheduleManager) addPool(schedule *types.Schedule) {
+func (manager *ScheduleManager) addPool(schedule *types.Schedule) {
 	if schedule == nil {
 		return
 	}
 	manager.Pool = append(manager.Pool, schedule)
 }
 
-func (manager ScheduleManager) rmPool(id *types.ScheduleId) {
+func (manager *ScheduleManager) rmPool(id *types.ScheduleId) {
 	for i, schedule := range manager.Pool {
 		if schedule.Id.String() == id.String() {
 			manager.Pool = append(manager.Pool[0:i], manager.Pool[i+1:len(manager.Pool)]...)
 		}
 	}
 }
-func (manager ScheduleManager) WrapTransition(tx *types.AspTransaction) (common.Hash, []byte, error) {
+func (manager *ScheduleManager) WrapTransition(tx *types.AspTransaction) (common.Hash, []byte, error) {
 	return manager.WrapTx(tx)
 }
