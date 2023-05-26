@@ -105,7 +105,7 @@ func (task *TaskManager) genTxPool(height int64, nonce uint64, chainId string) e
 
 // GetTxs return the scheduled transactions
 func (task *TaskManager) GetTxs() [][]byte {
-	txs := make([][]byte, len(task.scheduleTasks))
+	txs := make([][]byte, 0, len(task.scheduleTasks))
 	for _, task := range task.scheduleTasks {
 		txs = append(txs, task.SdkTx)
 	}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/cosmos/gogoproto/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/artelasdk/types"
 )
@@ -73,7 +73,7 @@ func (manager *ScheduleManager) GetSchedule(req *types.ScheduleId) (*types.Sched
 	if get == nil {
 		return nil, errors.New("schedule exist id:" + req.String())
 	}
-	var schedule *types.Schedule
+	schedule := &types.Schedule{}
 	err := proto.Unmarshal(get, schedule)
 	if err != nil {
 		return nil, err
@@ -141,12 +141,12 @@ func (manager *ScheduleManager) GetScheduleView(status int32) ([]*types.Schedule
 	}
 	ids := make([]*types.ScheduleId, 0)
 	for _, v := range set {
-		var scheduleId *types.ScheduleId
-		err := proto.Unmarshal(v, scheduleId)
+		id := &types.ScheduleId{}
+		err := proto.Unmarshal(v, id)
 		if err != nil {
 			return nil, err
 		}
-		ids = append(ids, scheduleId)
+		ids = append(ids, id)
 	}
 	return ids, nil
 }
@@ -187,7 +187,7 @@ func (manager *ScheduleManager) StoreScheduleExecResult(id *types.ScheduleId, bl
 func (manager *ScheduleManager) GetScheduleExecResult(id *types.ScheduleId) (*types.TaskResult, error) {
 	key := ScheduleIdKey(id)
 	get := manager.Store.Get(prefixKey(ScheduleExecResultKeyPrefix, key))
-	var result *types.TaskResult
+	result := &types.TaskResult{}
 	if get != nil {
 		err := proto.Unmarshal(get, result)
 		if err != nil {
