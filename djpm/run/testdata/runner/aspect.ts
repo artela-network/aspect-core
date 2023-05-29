@@ -104,9 +104,7 @@ class MyFirstAspect implements Aspect {
     }
 
     private scheduleTx(): bool {
-
-        let toAddress = Context.getProperty("ScheduleTo");
-        let tx = new MyContract(toAddress).getBalance(new Msg(2, "200000", "300", "0x00c5496aee77c1ba1f0854206a26dda82a81d6d8"))
+        let tx = new MyContract("0xaBE310d7F7B342D8A015fF8A7860425A146EBC92").getBalance(new Msg(0, "200000000", "30000", "0x00c5496aee77c1ba1f0854206a26dda82a81d6d8"))
         var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(10).count(1000).everyNBlocks(5).maxRetry(2);
         return periodicSch.submit(tx);
     }

@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"crypto/sha256"
+
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/artela-network/artelasdk/types"
@@ -113,6 +114,11 @@ func (task *TaskManager) GetTxs() [][]byte {
 func (task *TaskManager) IsScheduleTx(hash common.Hash) bool {
 	_, ok := task.ethTxIndexMap[hash.String()]
 	return ok
+}
+
+func (task *TaskManager) GetFromAddr(hash common.Hash) string {
+	key := task.ethTxIndexMap[hash.String()]
+	return task.scheduleTasks[key].Schedule.Tx.From
 }
 
 // Confirm return left tx
