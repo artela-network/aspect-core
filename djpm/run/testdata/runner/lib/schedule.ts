@@ -1,7 +1,8 @@
-import { AspTransaction } from "../aspect/v1/AspTransaction";
-import { Context } from "./lib";
-import { Schedule as ScheduleMsg } from "../scheduler/v1/Schedule";
-import { ScheduleId as ScheduleMsgId } from "../scheduler/v1/ScheduleId";
+import {AspTransaction} from "../aspect/v1/AspTransaction";
+import {Context} from "./lib";
+import {Schedule as ScheduleMsg} from "../scheduler/v1/Schedule";
+import {ScheduleId as ScheduleMsgId} from "../scheduler/v1/ScheduleId";
+import {ScheduleStatus} from "../scheduler/v1/ScheduleStatus";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -15,6 +16,7 @@ export class PeriodicSchedule implements Schedule {
         sch.maxRetry = this._maxRetry;
         sch.everyNBlock = this._everyNBlocks;
         sch.tx = tran;
+        sch.status=ScheduleStatus.Open
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi
