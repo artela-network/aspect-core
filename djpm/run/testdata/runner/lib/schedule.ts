@@ -1,8 +1,8 @@
-import {AspTransaction} from "../aspect/v1/AspTransaction";
-import {Context} from "./lib";
-import {Schedule as ScheduleMsg} from "../scheduler/v1/Schedule";
-import {ScheduleId as ScheduleMsgId} from "../scheduler/v1/ScheduleId";
-import {ScheduleStatus} from "../scheduler/v1/ScheduleStatus";
+import { AspTransaction } from "../aspect/v1/AspTransaction";
+import { Context } from "./lib";
+import { Schedule as ScheduleMsg } from "../scheduler/v1/Schedule";
+import { ScheduleId as ScheduleMsgId } from "../scheduler/v1/ScheduleId";
+import { ScheduleStatus } from "../scheduler/v1/ScheduleStatus";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -15,8 +15,8 @@ export class PeriodicSchedule implements Schedule {
         sch.startBlock = this._startBlock;
         sch.maxRetry = this._maxRetry;
         sch.everyNBlock = this._everyNBlocks;
+        sch.status = ScheduleStatus.Open;
         sch.tx = tran;
-        sch.status=ScheduleStatus.Open
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi
@@ -76,6 +76,8 @@ export class AdHocSchedule implements Schedule {
         // startBlock add current height in host api.
         sch.startBlock = this._nextNBlocks;
         sch.maxRetry = this._maxRetry;
+        sch.status = ScheduleStatus.Open;
+        sch.tx = tran;
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi
