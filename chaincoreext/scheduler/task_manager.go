@@ -35,6 +35,7 @@ func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	}
 	manager := &TaskManager{
 		scheduleTasks: make(map[TxKey]*types.ScheduleTask),
+		ethTxIndexMap: make(map[string]TxKey),
 	}
 	err := manager.genTxPool(height, nonce, chainId)
 
