@@ -24,12 +24,13 @@ type ResponseAspect struct {
 	ResultMap map[string]map[string]*AspectOutput
 }
 
-func NewResponseAspect() *ResponseAspect {
-	resultMap := make(map[string]map[string]*AspectOutput)
-	return &ResponseAspect{ResultMap: resultMap}
-}
-
 func (c ResponseAspect) With(txHash string, aspectId string, output *AspectOutput) ResponseAspect {
+	if c.ResultMap == nil {
+		c.ResultMap = make(map[string]map[string]*AspectOutput)
+	}
+	if c.ResultMap[txHash] == nil {
+		c.ResultMap[txHash] = make(map[string]*AspectOutput)
+	}
 	c.ResultMap[txHash][aspectId] = output
 	return c
 }

@@ -45,7 +45,7 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 	if req.Tx == nil || len(req.Tx.GetMsgs()) == 0 {
 		return nil
 	}
-	result := types.NewResponseAspect()
+	result := &types.ResponseAspect{}
 	for _, msg := range req.Tx.GetMsgs() {
 		ok := aspect.IsEthTx(msg)
 		if !ok {
@@ -94,7 +94,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		Tx:          transaction,
 		Context:     req.Context,
 	}
-	response := types.NewResponseAspect()
+	response := &types.ResponseAspect{}
 	txHash := common.BytesToHash(transaction.Hash).String()
 	// run aspects on received transaction
 	for _, aspect := range boundAspects {
