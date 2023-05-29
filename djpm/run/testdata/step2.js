@@ -26,29 +26,10 @@ async function f() {
     let nonceVal = await web3.eth.getTransactionCount(accounts[0]);
 
     // instantiate an instance of demo contract
-    let schedule_contract = new web3.atl.Contract(demoContractABI.aspect.abi,
-        web3.utils.aspectCoreAddr, demoAspectContractOptions);
-    // deploy demo contract
-    let schedule_instance = schedule_contract.deploy().send({from: accounts[0], nonce: nonceVal});
-    let contractAddress="";
-    schedule_contract = await schedule_instance.on('receipt', function (receipt) {
-        console.log("=============== deployed contract ===============");
-        console.log("contract address: " + receipt.contractAddress);
-        console.log(receipt);
-        contractAddress= receipt.contractAddress
-    }).on('transactionHash', (txHash) => {
-        console.log("deploy contract tx hash: ", txHash);
-    });
-
-    console.log("== ScheduleTo ==",contractAddress)
-
-
-
-    // instantiate an instance of demo contract
     let contract = new web3.atl.Contract(demoContractABI.aspect.abi,
         web3.utils.aspectCoreAddr, demoAspectContractOptions);
     // deploy demo contract
-    let instance = contract.deploy().send({from: accounts[0], nonce: nonceVal+1});
+    let instance = contract.deploy().send({from: accounts[0], nonce: nonceVal});
     contract = await instance.on('receipt', function (receipt) {
         console.log("=============== deployed contract ===============");
         console.log("contract address: " + receipt.contractAddress);
@@ -67,8 +48,8 @@ async function f() {
         web3.utils.aspectCoreAddr, demoContractOptions);
     instance = aspect.deploy({
         data: '0x' + aspectCode,
-        properties: [{'key': '0x00', 'value': '0x02'},{'key': '0x032322', 'value': '0x2221'},{'key': '0x8a5363686564756c65546f', 'value': contractAddress}]
-    }).send({from: accounts[0], nonce: nonceVal + 2});
+        properties: [{'key': '0x00', 'value': '0x02'},{'key': '0x032322', 'value': '0x2221'}]
+    }).send({from: accounts[0], nonce: nonceVal + 1});
 
     aspect = await instance.on('receipt', (receipt) => {
         console.log("=============== deployed aspect ===============");
@@ -83,7 +64,7 @@ async function f() {
         priority: 1,
         aspectId: aspect.options.address,
         aspectVersion: 1,
-    }).send({from: accounts[0], nonce: nonceVal + 3})
+    }).send({from: accounts[0], nonce: nonceVal + 2})
         .on('receipt', function (receipt) {
             console.log("=============== bind aspect ===============")
             console.log(receipt)
@@ -96,7 +77,7 @@ async function f() {
 
     // call the smart contract, aspect should be triggered
     await contract.methods.store(100)
-        .send({from: accounts[0], nonce: nonceVal + 4})
+        .send({from: accounts[0], nonce: nonceVal + 3})
         .on('receipt', (receipt) => {
             console.log("=============== called store ===============")
             console.log(receipt);
@@ -105,20 +86,8 @@ async function f() {
             console.log("call contract tx hash: ", txHash);
         });
 
-    let result= await contract.methods.retrieve().call({from: accounts[0], nonce: nonceVal + 5})
+    let result= await contract.methods.retrieve().call({from: accounts[0], nonce: nonceVal + 4})
     console.log("==== reuslt==="+ result);
-
-    let nonceskip=6;
-    for (;;){
-        await new Promise(r => setTimeout(r, 5000));
-
-
-        let result= await schedule_contract.methods.retrieve().call({from: accounts[0], nonce: nonceVal + nonceskip})
-
-        console.log("==== schedule_contract result==="+ result);
-
-        ++nonceskip
-    }
 }
 
 f().then();

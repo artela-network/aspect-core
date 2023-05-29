@@ -34,6 +34,9 @@ func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	if ScheduleManagerInstance() == nil {
 		return errors.New("ScheduleManager instance not init,please exec NewScheduleManager() first")
 	}
+	if len(globalTask.scheduleTasks) != 0 {
+		return nil
+	}
 	manager := &TaskManager{
 		scheduleTasks: make(map[TxKey]*types.ScheduleTask),
 		ethTxIndexMap: make(map[string]TxKey),
@@ -128,13 +131,10 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 		key := getTxKey(tx)
 
 		// check is task tx
-		_, ok := task.scheduleTasks[key]
+		scheduleTask, ok := task.scheduleTasks[key]
 		if !ok {
 			continue
 		}
-
-		// set retry to false, clear the try task
-		scheduleTask := task.scheduleTasks[key]
 
 		if err := ScheduleManagerInstance().ClearScheduleTry(scheduleTask.Schedule.Id); err != nil {
 			return nil, err
@@ -185,6 +185,9 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 				return nil, execErr
 			}
 		}
+		delete(task.scheduleTasks, key)
+		delete(task.ethTxIndexMap, scheduleTask.TxHash)
+
 		leftTxs = append(leftTxs, scheduleTask.SdkTx)
 
 	}

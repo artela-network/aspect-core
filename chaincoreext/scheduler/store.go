@@ -53,7 +53,7 @@ func prefixKey(prefix string, keyData []byte) []byte {
 *
 1、 key: "Schedule"+ Status  ， Value： [id,id,id...]
 2、 key: id   ,  Value:  Schedule bytes
-3、 key: id   ,  {ConfimTxs:[{blockheight,txhash},{blockheight,txhash}..]， count: 2}    // message TaskResult
+3、 key: id   ,  {ConfimTxs:[{blockheight,txhash},{blockheight,"F"}..]， count: 2}    // message TaskResult
 4、 key: id   ,  needRetry: false ，taskTx:[{blockheight,txhash},{blockheight,txhash}..]  // message TryTask
 */
 func (manager *ScheduleManager) StoreSchedule(req *types.Schedule) error {

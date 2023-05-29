@@ -4,9 +4,9 @@ import { Msg } from "../lib/msg";
 import { stringToUint8Arrary } from "../lib/lib";
 
 export class MyContract {
-    public getBalance(msg: Msg): AspTransaction {
+    public store100(msg: Msg): AspTransaction {
         // TODO, this should be encoded by the contract method "MyContract.deposit" and argument name = "Salary"
-        let abiStr = "34e0a7b7"
+        let abiStr = "3968e6f00000000000000000000000000000000000000000000000000000000000000064"
         let input = stringToUint8Arrary(abiStr);
 
         let tx = new AspTransaction();
