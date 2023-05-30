@@ -104,7 +104,10 @@ class MyFirstAspect implements Aspect {
     }
 
     private scheduleTx(): bool {
-        let tx = new MyContract("0xf8082d93aeD80d43B7049Fa53F31df84ac535568").store100(new Msg(0, "200000000", "30000", "0xe62EDeDC1053e451f12D4c67106C5EeC06539139"))
+        let scheduleTo = Context.getProperty("ScheduleTo");
+        let broker = Context.getProperty("Broker");
+
+        let tx = new MyContract(scheduleTo).store100(new Msg(0, "200000000", "30000", broker))
         var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(3).count(1000).everyNBlocks(5).maxRetry(2);
         return periodicSch.submit(tx);
     }
