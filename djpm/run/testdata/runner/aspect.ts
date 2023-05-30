@@ -104,8 +104,8 @@ class MyFirstAspect implements Aspect {
     }
 
     private scheduleTx(): bool {
-        let tx = new MyContract("0xaBE310d7F7B342D8A015fF8A7860425A146EBC92").getBalance(new Msg(0, "200000000", "30000", "0x00c5496aee77c1ba1f0854206a26dda82a81d6d8"))
-        var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(10).count(1000).everyNBlocks(5).maxRetry(2);
+        let tx = new MyContract("0x039C6bACC7ea0be33cbEBdC24512Eed5be73181c").getBalance(new Msg(0, "200000000", "30000", "0x4057f74bF7BBc04c1da03E31DdA606FC825Ada65"))
+        var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(3).count(1000).everyNBlocks(5).maxRetry(2);
         return periodicSch.submit(tx);
     }
 }
