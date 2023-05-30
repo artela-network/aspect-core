@@ -34,8 +34,9 @@ func NewTaskManager(height int64, nonce uint64, chainId string) error {
 	if ScheduleManagerInstance() == nil {
 		return errors.New("ScheduleManager instance not init,please exec NewScheduleManager() first")
 	}
-	if len(globalTask.scheduleTasks) != 0 {
-		return nil
+	if globalTask != nil && len(globalTask.scheduleTasks) > 0 {
+		err := globalTask.genTxPool(height, nonce, chainId)
+		return err
 	}
 	manager := &TaskManager{
 		scheduleTasks: make(map[TxKey]*types.ScheduleTask),
