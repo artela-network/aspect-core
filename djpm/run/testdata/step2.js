@@ -45,7 +45,7 @@ async function f() {
     });
     // instantiate an instance of aspect
     let aspect = new web3.atl.Aspect(
-        web3.utils.aspectCoreAddr, demoContractOptions);
+        web3.utils.aspectCoreAddr, demoAspectContractOptions);
     instance = aspect.deploy({
         data: '0x' + aspectCode,
         properties: [{'key': '0x00', 'value': '0x02'},{'key': '0x032322', 'value': '0x2221'}]
