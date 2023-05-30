@@ -67,16 +67,15 @@ async function f() {
         properties: [{'key': 'ScheduleTo', 'value': contractAddress},{'key': 'Broker', 'value': accounts[0] }]
     }).send({from: accounts[0], nonce: nonceVal + 2});
 
-    let aspectId=""
     aspect = await instance.on('receipt', (receipt) => {
         console.log("=============== deployed aspect ===============");
         console.log("aspect address: " + aspect.options.address);
-        aspectId=aspect.options.address
         console.log(receipt);
     }).on('transactionHash', (txHash) => {
         console.log("deploy aspect tx hash: ", txHash);
     });
 
+    let aspectId=aspect.options.address
     // bind the smart contract with aspect
     await contract.bind({
         priority: 1,
