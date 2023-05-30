@@ -6,7 +6,7 @@ import { stringToUint8Arrary } from "../lib/lib";
 export class MyContract {
     public store100(msg: Msg): AspTransaction {
         // TODO, this should be encoded by the contract method "MyContract.deposit" and argument name = "Salary"
-        let abiStr = "3968e6f00000000000000000000000000000000000000000000000000000000000000064"
+        let abiStr = "0e8fb99a0000000000000000000000000000000000000000000000000000000000000064"
         let input = stringToUint8Arrary(abiStr);
 
         let tx = new AspTransaction();
