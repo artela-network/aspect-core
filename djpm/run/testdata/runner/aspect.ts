@@ -11,8 +11,7 @@ import { MyContract } from "./generated/my_contract";
 class MyFirstAspect implements Aspect {
     isOwner(sender: string): bool {
         let value = Context.getProperty("owner");
-        let owners = value.split(",");
-        if (owners.includes(sender)) {
+        if (value.includes(sender)) {
             return true;
         }
         return false;
@@ -20,8 +19,7 @@ class MyFirstAspect implements Aspect {
 
     onContractBinding(contractAddr: string): bool {
         let value = Context.getProperty("binding");
-        let owners = value.split(",");
-        if (owners.includes(contractAddr)) {
+        if (value.includes(contractAddr)) {
             return true;
         }
         return false;
@@ -112,5 +110,7 @@ class MyFirstAspect implements Aspect {
         return periodicSch.submit(tx);
     }
 }
+
+
 
 export default MyFirstAspect;

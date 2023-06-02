@@ -47,13 +47,16 @@ async function f() {
         web3.utils.aspectCoreAddr, demoAspectContractOptions);
     // deploy demo contract
     let instance = contract.deploy().send({from: accounts[0], nonce: nonceVal+1});
+    let contractAddr=""
     contract = await instance.on('receipt', function (receipt) {
         console.log("=============== deployed contract ===============");
         console.log("contract address: " + receipt.contractAddress);
+        contractAddr=receipt.contractAddress
         console.log(receipt);
     }).on('transactionHash', (txHash) => {
         console.log("deploy contract tx hash: ", txHash);
     });
+
 
     // load aspect code and deploy
     let aspectCode = fs.readFileSync('./build/release.wasm', {
@@ -64,7 +67,7 @@ async function f() {
         web3.utils.aspectCoreAddr, demoAspectContractOptions);
     instance = aspect.deploy({
         data: '0x' + aspectCode,
-        properties: [{'key': 'ScheduleTo', 'value': contractAddress},{'key': 'Broker', 'value': accounts[0] }]
+        properties: [{'key': 'ScheduleTo', 'value': contractAddress},{'key': 'Broker', 'value': accounts[0] },{'key': 'binding', 'value': contractAddr},{'key': 'owner', 'value': accounts[0] }]
     }).send({from: accounts[0], nonce: nonceVal + 2});
 
     aspect = await instance.on('receipt', (receipt) => {
@@ -74,6 +77,7 @@ async function f() {
     }).on('transactionHash', (txHash) => {
         console.log("deploy aspect tx hash: ", txHash);
     });
+    await new Promise(r => setTimeout(r, 5000));
 
     let aspectId=aspect.options.address
     // bind the smart contract with aspect
