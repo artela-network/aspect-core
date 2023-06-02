@@ -113,5 +113,23 @@ func (r *Register) apis() interface{} {
 			sch.Id.AspectId = r.aspectID
 			return host.ScheduleTx(sch)
 		},
+		"getStateChanges": func(addr string, variable string, key string) []byte {
+			if types.GetHostApiHook == nil {
+				return nil
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return nil
+			}
+			changes := host.GetStateChanges(addr, variable, key)
+			if changes == nil {
+				return nil
+			}
+			data, err := proto.Marshal(changes)
+			if err != nil {
+				return nil
+			}
+			return data
+		},
 	}
 }

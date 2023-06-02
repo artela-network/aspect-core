@@ -1,12 +1,11 @@
 // The entry file of your WebAssembly module.
-import { Aspect, Context } from "./lib/lib";
-import { Schedule, PeriodicSchedule, AdHocSchedule } from "./lib/schedule";
-import { Msg } from "./lib/msg";
+import { Aspect, Context, Schedule, PeriodicSchedule, AdHocSchedule, Option } from "./lib/index";
 
 import { AspectInput } from "./aspect/v1/AspectInput"
 import { AspectOutput } from "./aspect/v1/AspectOutput"
 
 import { MyContract } from "./generated/my_contract";
+import { ContractXX } from "./contractxxx"
 
 class MyFirstAspect implements Aspect {
     isOwner(sender: string): bool {
@@ -58,7 +57,10 @@ class MyFirstAspect implements Aspect {
         }
 
         // schedule a tx
-        this.scheduleTx();
+        // this.scheduleTx();
+        let dummy1 = new ContractXX.dummy1("0xdddd");
+        let before = dummy1.before();
+        ret.context.set("before", before.toString())
 
         return ret;
     }
@@ -107,7 +109,7 @@ class MyFirstAspect implements Aspect {
         let scheduleTo = Context.getProperty("ScheduleTo");
         let broker = Context.getProperty("Broker");
 
-        let tx = new MyContract(scheduleTo).store100(new Msg(0, "200000000", "30000", broker))
+        let tx = new MyContract(scheduleTo).store100(new Option(0, "200000000", "30000", broker))
         var periodicSch: Schedule = PeriodicSchedule.builder("myPeriodicSchedule").startAfter(3).count(1000).everyNBlocks(5).maxRetry(2);
         return periodicSch.submit(tx);
     }

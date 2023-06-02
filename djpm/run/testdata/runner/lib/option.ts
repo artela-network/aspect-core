@@ -1,4 +1,4 @@
-export class Msg {
+export class Option {
     value: u64;
     maxFeePerGas: string;
     maxPriorityFeePerGas: string;

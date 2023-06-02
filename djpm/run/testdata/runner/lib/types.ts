@@ -76,11 +76,10 @@ export class AString {
     body: string; // utf-16 encoder
 
     constructor(
-        head: header = new header(typeIndex.TypeString, 0),
         body: string = "",
     ) {
-        this.head = head;
         this.body = body;
+        this.head = new header(typeIndex.TypeString, body.length);
     }
 }
 
@@ -120,11 +119,10 @@ export class AUint8Array {
     body: Uint8Array;
 
     constructor(
-        head: header = new header(typeIndex.TypeByteArray, 0),
         body: Uint8Array = new Uint8Array(0),
     ) {
-        this.head = head;
         this.body = body;
+        this.head = new header(typeIndex.TypeByteArray, body.length);
     }
 }
 
@@ -157,10 +155,9 @@ export class ABool {
     body: bool;
 
     constructor(
-        head: header = new header(typeIndex.TypeBool, 0),
         body: bool = false,
     ) {
-        this.head = head;
         this.body = body;
+        this.head = new header(typeIndex.TypeBool, 1);
     }
 }

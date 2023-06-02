@@ -5,6 +5,7 @@ import { EthBlock } from "../aspect/v1/EthBlock";
 import { AspectInput } from "../aspect/v1/AspectInput"
 import { AspectOutput } from "../aspect/v1/AspectOutput"
 import { Schedule } from "../scheduler/v1/Schedule"
+import { StateChanges } from "../aspect/v1/StateChanges"
 
 export interface Aspect {
     isOwner(sender: string): bool
@@ -171,6 +172,7 @@ declare namespace __HostApi__ {
     function localCall(ptr: i32): i32
     function getProperty(ptr: i32): i32
     function scheduleTx(ptr: i32): i32
+    function getStateChanges(addr: i32, variable: i32, key: i32): i32
 }
 
 // Context part of hostapis
@@ -217,5 +219,18 @@ export class Context {
         let output = new ABool();
         output.load(ret);
         return output.get();
+    }
+
+    static getStateChanges(addr: string, variable: string, key: string): StateChanges {
+        let addrPtr = (new AString(addr)).store();
+        let variablePtr = (new AString(variable)).store();
+        let keyPtr = (new AString(key)).store();
+
+        let dataPtr = __HostApi__.getStateChanges(addrPtr, variablePtr, keyPtr);
+        let data = new AUint8Array();
+        data.load(dataPtr);
+
+        const changes = Protobuf.decode<StateChanges>(data.get(), StateChanges.decode);
+        return changes;
     }
 }
