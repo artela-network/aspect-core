@@ -40,7 +40,7 @@ func AspectInstance() *Aspect {
 	return globalAspect
 }
 
-func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkTxAspect) *types.ResponseAspect {
+func (aspect Aspect) execAspectBySdkTx(methodName string, queryHeight int64, req *types.RequestSdkTxAspect) *types.ResponseAspect {
 
 	if req.Tx == nil || len(req.Tx.GetMsgs()) == 0 {
 		return nil
@@ -62,14 +62,14 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 			BaseFee:     req.BaseFee,
 			ChainId:     req.ChainId,
 		}
-		out := aspect.execAspectByEthTx(methodName, &txAspect)
+		out := aspect.execAspectByEthTx(methodName, queryHeight, &txAspect)
 		result.Merge(out)
 	}
 	return result
 
 }
 
-func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthTxAspect) *types.ResponseAspect {
+func (aspect Aspect) execAspectByEthTx(methodName string, queryHeight int64, req *types.RequestEthTxAspect) *types.ResponseAspect {
 	if req.Tx == nil {
 		return nil
 	}
@@ -78,7 +78,7 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 		// ignore contract deployment transaction & aspect op txs
 		return nil
 	}
-	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, req.Tx)
+	boundAspects, err := aspect.GetBondAspects(queryHeight, req.Tx)
 	// load aspects
 	if err != nil || len(boundAspects) == 0 {
 		return nil
@@ -123,7 +123,8 @@ func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthT
 	return response
 }
 func (aspect Aspect) OnTxReceive(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req)
+	// As the current block is not in progress, we will utilize the req.BlockHeight query the aspect bytecode.
+	return aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req.BlockHeight, req)
 }
 
 func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
@@ -131,37 +132,49 @@ func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.Res
 
 }
 func (aspect Aspect) OnTxVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
-
-	return aspect.execAspectByEthTx(types.ON_TX_VERIFY_METHOD, req)
-
+	return aspect.execAspectByEthTx(types.ON_TX_VERIFY_METHOD, req.BlockHeight, req)
 }
 
 func (aspect Aspect) OnAccountVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.ON_ACCOUNT_VERIFY_METHOD, req)
+	return aspect.execAspectByEthTx(types.ON_ACCOUNT_VERIFY_METHOD, req.BlockHeight, req)
 }
+
 func (aspect Aspect) OnGasPayment(req *types.RequestEthTxAspect) *types.ResponseAspect {
 	return nil
 
 }
+
 func (aspect Aspect) PreTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.PRE_TX_EXECUTE_METHOD, req)
+	// The request parameter is built with current block height.
+	// As the current block is in progress, we will utilize the previous block to query the aspect bytecode.
+	queryHeight := req.BlockHeight - 1
+	return aspect.execAspectBySdkTx(types.PRE_TX_EXECUTE_METHOD, queryHeight, req)
 
 }
+
 func (aspect Aspect) PreContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.PRE_CONTRACT_CALL_METHOD, req)
+	queryHeight := req.BlockHeight - 1
+	return aspect.execAspectByEthTx(types.PRE_CONTRACT_CALL_METHOD, queryHeight, req)
 
 }
+
 func (aspect Aspect) PostContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.POST_CONTRACT_CALL_METHOD, req)
+	queryHeight := req.BlockHeight - 1
+	return aspect.execAspectByEthTx(types.POST_CONTRACT_CALL_METHOD, queryHeight, req)
 
 }
+
 func (aspect Aspect) PostTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.POST_TX_EXECUTE_METHOD, req)
+	queryHeight := req.BlockHeight - 1
+	return aspect.execAspectBySdkTx(types.POST_TX_EXECUTE_METHOD, queryHeight, req)
 
 }
-func (aspect Aspect) OnTxCommit(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.ON_TX_COMMIT_METHOD, req)
 
+func (aspect Aspect) OnTxCommit(req *types.RequestEthTxAspect) *types.ResponseAspect {
+	// The request parameter is built with current block height.
+	// As the current block is in progress, we will utilize the previous block to query the aspect bytecode.
+	queryHeight := req.BlockHeight - 1
+	return aspect.execAspectByEthTx(types.ON_TX_COMMIT_METHOD, queryHeight, req)
 }
 
 func (aspect Aspect) OnBlockFinalize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
