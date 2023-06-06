@@ -9,9 +9,11 @@ import (
 const (
 	// module of hostapis
 	moduleHostApi = "lib"
+	moduleAbis    = "abi"
 
 	// namespace of hostapis
 	nsHostApi = "__HostApi__"
+	nsAbis    = "__Abi__"
 
 	// entrance of api functions
 	ApiEntrance = "execute"
@@ -19,27 +21,30 @@ const (
 
 // Register keeps the properity owned by current
 type Register struct {
-	aspectID string
+	aspectID   string
+	collection *runtime.HostAPIRegistry
 }
 
 func NewRegister(aspectID string) *Register {
-	return &Register{aspectID: aspectID}
+	return &Register{
+		aspectID:   aspectID,
+		collection: runtime.NewHostAPIRegistry(),
+	}
 }
 
 // HostApis return the collection of aspect runtime host apis
 func (r *Register) HostApis() *runtime.HostAPIRegistry {
-	return r.hostApis(moduleHostApi, nsHostApi)
+	r.registerApis(moduleHostApi, nsHostApi, r.apis())
+	r.registerApis(moduleAbis, nsAbis, r.abis())
+	return r.collection
 }
 
-func (r *Register) hostApis(module, namespace string) *runtime.HostAPIRegistry {
-	collection := runtime.NewHostAPIRegistry()
-
-	for method, fn := range r.apis().(map[string]interface{}) {
+func (r *Register) registerApis(module, namespace string, apis interface{}) {
+	for method, fn := range apis.(map[string]interface{}) {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
-		collection.AddApi(runtime.Module(module), runtime.Namesapce(namespace), runtime.MethodName(method), fn)
+		r.collection.AddApi(runtime.Module(module), runtime.Namesapce(namespace), runtime.MethodName(method), fn)
 	}
-	return collection
 }
 
 func (r *Register) apis() interface{} {
@@ -131,5 +136,11 @@ func (r *Register) apis() interface{} {
 			}
 			return data
 		},
+	}
+}
+
+func (r *Register) abis() interface{} {
+	return map[string]interface{}{
+		"decodeInt32": decodeInt32,
 	}
 }

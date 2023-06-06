@@ -161,3 +161,39 @@ export class ABool {
         this.head = new header(typeIndex.TypeBool, 1);
     }
 }
+
+export class AI32 {
+    public set(data: i32): void {
+        this.body = data;
+        this.head.dataLen = 4;
+    }
+
+    public get(): i32 {
+        return this.body;
+    }
+
+    public load(ptr: i32): void {
+        this.head = new header(0, 0);
+        this.head.load(ptr);
+        let bodyPtr = ptr + this.head.len();
+        this.body = i32.load(bodyPtr);
+    }
+
+    public store(): i32 {
+        let ptr = allocate(this.head.dataLen + this.head.len());
+        this.head.store(ptr);
+        let bodyPtr = ptr + this.head.len();
+        i32.store(bodyPtr, this.body);
+        return ptr;
+    }
+
+    head: header;
+    body: i32;
+
+    constructor(
+        body: i32 = 0,
+    ) {
+        this.body = body;
+        this.head = new header(typeIndex.TypeBool, 4);
+    }
+}

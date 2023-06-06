@@ -24,7 +24,7 @@ type ResponseAspect struct {
 	ResultMap map[string]map[string]*AspectOutput
 }
 
-func (c ResponseAspect) With(txHash string, aspectId string, output *AspectOutput) ResponseAspect {
+func (c *ResponseAspect) With(txHash string, aspectId string, output *AspectOutput) *ResponseAspect {
 	if c.ResultMap == nil {
 		c.ResultMap = make(map[string]map[string]*AspectOutput)
 	}
@@ -34,10 +34,12 @@ func (c ResponseAspect) With(txHash string, aspectId string, output *AspectOutpu
 	c.ResultMap[txHash][aspectId] = output
 	return c
 }
-func (c ResponseAspect) GetAspectResult(txHash string, aspectId string) *AspectOutput {
+
+func (c *ResponseAspect) GetAspectResult(txHash string, aspectId string) *AspectOutput {
 	return c.ResultMap[txHash][aspectId]
 }
-func (c ResponseAspect) GetTXResult(txHash string) []*AspectOutput {
+
+func (c *ResponseAspect) GetTXResult(txHash string) []*AspectOutput {
 	m := c.ResultMap[txHash]
 	outputs := make([]*AspectOutput, 0)
 	for _, output := range m {
@@ -45,7 +47,8 @@ func (c ResponseAspect) GetTXResult(txHash string) []*AspectOutput {
 	}
 	return outputs
 }
-func (c ResponseAspect) Merge(out *ResponseAspect) {
+
+func (c *ResponseAspect) Merge(out *ResponseAspect) {
 	if out == nil {
 		return
 	}

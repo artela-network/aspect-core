@@ -5,7 +5,7 @@ import { AspectInput } from "./aspect/v1/AspectInput"
 import { AspectOutput } from "./aspect/v1/AspectOutput"
 
 import { MyContract } from "./generated/my_contract";
-import { ContractXX } from "./contractxxx"
+import { Storage } from "./contract_storage"
 
 class MyFirstAspect implements Aspect {
     isOwner(sender: string): bool {
@@ -58,9 +58,6 @@ class MyFirstAspect implements Aspect {
 
         // schedule a tx
         // this.scheduleTx();
-        let dummy1 = new ContractXX.dummy1("0xdddd");
-        let before = dummy1.before();
-        ret.context.set("before", before.toString())
 
         return ret;
     }
@@ -94,7 +91,15 @@ class MyFirstAspect implements Aspect {
     }
 
     postTxExecute(input: AspectInput): AspectOutput {
-        return new AspectOutput();
+        let ret = new AspectOutput();
+        ret.context.set("k1", "v1");
+        ret.context.set("k2", "v2");
+        if (input.tx != null) {
+            let num = new Storage.number(input.tx!.to);
+            let lastest = num.lastest();
+            ret.context.set("lastest", lastest.toString())
+        }
+        return ret;
     }
 
     onTxCommit(input: AspectInput): AspectOutput {
