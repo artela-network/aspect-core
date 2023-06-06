@@ -6,12 +6,16 @@ import { AspectInput } from "../aspect/v1/AspectInput"
 import { AspectOutput } from "../aspect/v1/AspectOutput"
 import { Schedule } from "../scheduler/v1/Schedule"
 
-export interface Aspect {
+
+
+export interface IAspectAccess{
     isOwner(sender: string): bool
     onContractBinding(contractAddr: string): bool
+}
 
+
+export interface IAspectTransition {
     onTxReceive(arg: AspectInput): AspectOutput
-    onBlockInitialize(arg: AspectInput): AspectOutput
     onTxVerify(arg: AspectInput): AspectOutput
     onAccountVerify(arg: AspectInput): AspectOutput
     onGasPayment(arg: AspectInput): AspectOutput
@@ -20,8 +24,13 @@ export interface Aspect {
     postContractCall(arg: AspectInput): AspectOutput
     postTxExecute(arg: AspectInput): AspectOutput
     onTxCommit(arg: AspectInput): AspectOutput
+}
+
+export interface IAspectBlock {
+    onBlockInitialize(arg: AspectInput): AspectOutput
     onBlockFinalize(arg: AspectInput): AspectOutput
 }
+export interface Aspect extends IAspectAccess,IAspectTransition,IAspectBlock {}
 
 class DummyAspect implements Aspect {
     isOwner(sender: string): bool {
@@ -72,6 +81,23 @@ class Entry {
         this.buildAspect = function () {
             return new DummyAspect();
         }
+    }
+    public checkAspectImpl():i32{
+        let aspect = this.buildAspect();
+        if (aspect instanceof DummyAspect) {
+            throw new Error("invalid aspect code");
+        }
+        let data=0;
+        if(aspect instanceof IAspectAccess){
+            data=data+1;
+        }
+        if(aspect instanceof IAspectTransition){
+            data=data+2;
+        }
+        if(aspect instanceof IAspectBlock){
+            data=data+4;
+        }
+        return  data
     }
 
     public execute(methodPtr: i32, argPtr: i32): i32 {
