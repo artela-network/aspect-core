@@ -17,15 +17,17 @@ export default class Generator {
     private layoutPath: string;
     private tsPath: string;
 
-    public refPro = "import { Protobuf } from 'as-proto/assembly';\n";
-    public refLib = "import { Context, Pair, Abi } from './lib/index';\n";
+    public refLib = `import { Protobuf } from 'as-proto/assembly';
+    import { Context, State, Abi, Utils, TypeValue } from "./lib/index"\n`;
 
     public endBracket  = "}\n";
-    public addrTemplate = "addr: string;\n";
+    public argsTemplage = `addr: string;
+    prefix: Uint8Array;\n`;
     public constructorTemplate = 
-    "constructor(addr: string) {\n\
-        this.addr = addr;\n\
-    }\n";    
+    `constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
+      this.addr = addr;
+      this.prefix = prefix;
+    }\n`;    
 
     constructor(layoutPath: string, tsPath: string) {
         this.layoutPath = layoutPath;
@@ -60,133 +62,80 @@ export default class Generator {
       return `export class ${argName} {\n`;
     }
 
-    getBeforeFunc(isMap: boolean, typeTag: string, paramPrefix: string, abiTag: string): string {
+    getBeforeFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
         const param1 : string = typeTag;
         const param2 : string = paramPrefix;
-        const param3 : string = abiTag;
+        const param3 : string = valueFunc;
         let message: string = 
-    `public before(): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
-      if (changes.all.length == 0) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let value = changes.all[0].value;\n\
-      return Abi.as${param3}(value);\n\
+    `public before(): State<${param1}> | null {
+      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      if (changes.all.length == 0) {
+          return null;
+      }
+
+      let account = changes.all[0].account;
+      let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+      return new State(account, value);
     }\n`;
-        let msgMap: string = 
-    `public before(key: string): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
-      if (changes.all.length == 0) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let value = changes.all[0].value;\n\
-      return Abi.as${param3}(value);\n\
-    }\n`;
-        if (isMap) {
-          return msgMap;
-        }
         return message;
     }
 
-    getChangesFunc(isMap: boolean, typeTag: string, paramPrefix: string, abiTag: string): string {
+    getChangesFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
         const param1 : string = typeTag;
         const param2 : string = paramPrefix;
-        const param3 : string = abiTag;
+        const param3 : string = valueFunc;
         let message: string = 
-    `public changes(): Array<Pair<${param1}>> | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
-      if (changes.all.length < 2) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let res = new Array<Pair<${param1}>>(changes.all.length - 1);\n\
-      for (let i: i32 = 1; i < changes.all.length; i++) {\n\
-        let parsedValue = Abi.as${param3}(changes.all[i].value);\n\
-        res[i - 1] = new Pair(changes.all[i].account, parsedValue)\n\
-      }\n\
-      return res;\n\
+    `public changes(): Array<State<${param1}>> | null {
+      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      if (changes.all.length == 0) {
+          return null;
+      }
+
+      let res = new Array<State<${param1}>>(changes.all.length);
+      for (let i = 0; i < changes.all.length; i++) {
+          let account = changes.all[i].account;
+          let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+          res[i] = new State(account, value)
+      }
+      return res;
     }\n`;
-      let msgMap: string = 
-    `public changes(key: string): Array<Pair<${param1}>> | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
-      if (changes.all.length < 2) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let res = new Array<Pair<${param1}>>(changes.all.length - 1);\n\
-      for (let i: i32 = 1; i < changes.all.length; i++) {\n\
-        let parsedValue = Abi.as${param3}(changes.all[i].value);\n\
-        res[i - 1] = new Pair(changes.all[i].account, parsedValue)\n\
-      }\n\
-      return res;\n\
-    }\n`;
-        if (isMap) {
-          return msgMap;
-        }
         return message;
     }
 
-    getLatestFunc(isMap: boolean, typeTag: string, paramPrefix: string, abiTag: string): string {
+    getLatestFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
         const param1 : string = typeTag;
         const param2 : string = paramPrefix;
-        const param3 : string = abiTag;
+        const param3 : string = valueFunc;
         let message: string = 
-    `public lastest(): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
-      if (changes.all.length == 0) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let value = changes.all[changes.all.length - 1].value;\n\
-      return Abi.as${param3}(value);\n\
+    `public latest(): State<${param1}> | null {
+      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      if (changes.all.length == 0) {
+          return null;
+      }
+
+      let index = changes.all.length - 1;
+      let account = changes.all[index].account;
+      let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+      return new State(account, value);
     }\n`;
-        let msgMap: string = 
-    `public lastest(key: string): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
-      if (changes.all.length == 0) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let value = changes.all[changes.all.length - 1].value;\n\
-      return Abi.as${param3}(value);\n\
-    }\n`;
-        if (isMap) {
-          return msgMap;
-        }
         return message;
     }
 
-    getDiffFunc(isMap: boolean, typeTag: string, paramPrefix: string, abiTag: string): string {
+    getDiffFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
         const param1 : string = typeTag;
         const param2 : string = paramPrefix;
-        const param3 : string = abiTag;
+        const param3 : string = valueFunc;
         let message: string = 
-    `public diff(): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
-      if (changes.all.length < 2) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let before = Abi.as${param3}(changes.all.values[0]);\n\
-      let end = Abi.as${param3}(changes.all.values[changes.all.length - 1]);\n\
-      return end - before;\n\
+    `public diff(): ${param1}  | null {
+      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      if (changes.all.length < 2) {
+          return null;
+      }
+
+      let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+      let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);
+      return after - before;
     }\n`;
-      let msgMap: string = 
-    `public diff(key: string): ${param1} | null {\n\
-      let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
-      if (changes.all.length < 2) {\n\
-        return null;\n\
-      }\n\
-      \n\
-      let before = Abi.as${param3}(changes.all.values[0]);\n\
-      let end = Abi.as${param3}(changes.all.values[changes.all.length - 1]);\n\
-      return end - before;\n\
-    }\n`;
-        if (isMap) {
-          return msgMap;
-        }
         return message;
     }
 }

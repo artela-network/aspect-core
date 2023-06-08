@@ -30,8 +30,16 @@ function getStrBetLastCommaAndParen(input: string): string {
 function getTypeTag(item: StorageItem): string {
     const paramType = getStrBetLastCommaAndParen(item.type);
     switch(paramType) {
+        case "t_int32":
+            return "i32";
+        case "t_uint64":
+            return "u64";
         case "t_uint256":
-            return "i256";
+            return "BigInt";
+        case "t_string":
+            return "string";
+        case "t_bool":
+            return "bool";
         default:
             return "";
     }
@@ -44,13 +52,17 @@ function getParamPrefix(item: StorageItem): string {
     return contractName + "." + item.label;
 }
 
-function getABIKey(item: StorageItem): string {
+function getValueFunc(item: StorageItem): string {
     const paramType = getStrBetLastCommaAndParen(item.type);
     switch(paramType) {
         case "t_uint32":
             return "Int32";
         case "t_uint256":
             return "Int256";
+        case "t_string":
+            return "String";
+        case "t_bool":
+            return "Bool";
         default:
             return "";
     }
@@ -64,7 +76,6 @@ const obj = tracer.getLayout();
 const items = obj.storage;
 
 // 1. append reference
-tracer.append(tracer.refPro, 0);
 tracer.append(tracer.refLib, 0);
 // 2.1 append namespace start
 tracer.append(tracer.getNameSpace(getStrAfterLastColon(items[0].contract)), 0);
@@ -74,23 +85,22 @@ tracer.append(tracer.getNameSpace(getStrAfterLastColon(items[0].contract)), 0);
 items.forEach(function (item) {
     // 3.1 append class start
     tracer.append(tracer.getClass(item.label), 1);
-    // 4.1 append addr
-    tracer.append(tracer.addrTemplate ,2);
+    // 4.1 append addr and prefix
+    tracer.append(tracer.argsTemplage ,2);
     // 4.2 append constructor
     tracer.append(tracer.constructorTemplate ,2);
     // 4.3 append before func
-    let isMap = item.type.startsWith("t_mapping");
-    tracer.append(tracer.getBeforeFunc(isMap, getTypeTag(item), 
-        getParamPrefix(item), getABIKey(item)) ,2);
+    tracer.append(tracer.getBeforeFunc(getTypeTag(item), 
+        getParamPrefix(item), getValueFunc(item)) ,2);
     // 4.4 append changes func
-    tracer.append(tracer.getChangesFunc(isMap, getTypeTag(item), 
-        getParamPrefix(item), getABIKey(item)) ,2);
+    tracer.append(tracer.getChangesFunc(getTypeTag(item), 
+        getParamPrefix(item), getValueFunc(item)) ,2);
     // 4.5 append lastest func
-    tracer.append(tracer.getLatestFunc(isMap, getTypeTag(item), 
-        getParamPrefix(item), getABIKey(item)) ,2);
+    tracer.append(tracer.getLatestFunc(getTypeTag(item), 
+        getParamPrefix(item), getValueFunc(item)) ,2);
     // 4.6 append diff func
-    tracer.append(tracer.getDiffFunc(isMap, getTypeTag(item), 
-        getParamPrefix(item), getABIKey(item)) ,2);
+    tracer.append(tracer.getDiffFunc(getTypeTag(item), 
+        getParamPrefix(item), getValueFunc(item)) ,2);
     // 3.2 append class end
     tracer.append(tracer.endBracket, 1); 
 });
