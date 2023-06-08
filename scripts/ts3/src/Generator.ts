@@ -65,20 +65,20 @@ export default class Generator {
         const param2 : string = paramPrefix;
         const param3 : string = abiTag;
         let message: string = 
-    `public before(): ${param1} {\n\
+    `public before(): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
       if (changes.all.length == 0) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let value = changes.all[0].value;\n\
       return Abi.as${param3}(value);\n\
     }\n`;
         let msgMap: string = 
-    `public before(key: string): ${param1} {\n\
+    `public before(key: string): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
       if (changes.all.length == 0) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let value = changes.all[0].value;\n\
@@ -95,10 +95,10 @@ export default class Generator {
         const param2 : string = paramPrefix;
         const param3 : string = abiTag;
         let message: string = 
-    `public changes(): Array<Pair<${param1}>> {\n\
+    `public changes(): Array<Pair<${param1}>> | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
       if (changes.all.length < 2) {\n\
-        return new Array<Pair<${param1}>>(0);\n\
+        return null;\n\
       }\n\
       \n\
       let res = new Array<Pair<${param1}>>(changes.all.length - 1);\n\
@@ -109,10 +109,10 @@ export default class Generator {
       return res;\n\
     }\n`;
       let msgMap: string = 
-    `public changes(key: string): Array<Pair<${param1}>> {\n\
+    `public changes(key: string): Array<Pair<${param1}>> | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
       if (changes.all.length < 2) {\n\
-        return new Array<Pair<${param1}>>(0);\n\
+        return null;\n\
       }\n\
       \n\
       let res = new Array<Pair<${param1}>>(changes.all.length - 1);\n\
@@ -133,20 +133,20 @@ export default class Generator {
         const param2 : string = paramPrefix;
         const param3 : string = abiTag;
         let message: string = 
-    `public lastest(): ${param1} {\n\
+    `public lastest(): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
       if (changes.all.length == 0) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let value = changes.all[changes.all.length - 1].value;\n\
       return Abi.as${param3}(value);\n\
     }\n`;
         let msgMap: string = 
-    `public lastest(key: string): ${param1} {\n\
+    `public lastest(key: string): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
       if (changes.all.length == 0) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let value = changes.all[changes.all.length - 1].value;\n\
@@ -163,10 +163,10 @@ export default class Generator {
         const param2 : string = paramPrefix;
         const param3 : string = abiTag;
         let message: string = 
-    `public diff(): ${param1} {\n\
+    `public diff(): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", "");\n\
       if (changes.all.length < 2) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let before = Abi.as${param3}(changes.all.values[0]);\n\
@@ -174,10 +174,10 @@ export default class Generator {
       return end - before;\n\
     }\n`;
       let msgMap: string = 
-    `public diff(key: string): ${param1} {\n\
+    `public diff(key: string): ${param1} | null {\n\
       let changes = Context.getStateChanges(this.addr, "${param2}", key);\n\
       if (changes.all.length < 2) {\n\
-        return 0;\n\
+        return null;\n\
       }\n\
       \n\
       let before = Abi.as${param3}(changes.all.values[0]);\n\
