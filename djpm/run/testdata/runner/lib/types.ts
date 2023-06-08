@@ -1,6 +1,6 @@
 import { allocate } from "./lib";
 
-enum typeIndex {
+export enum typeIndex {
     Empty = 0,
     TypeInt8,
     TypeInt16,

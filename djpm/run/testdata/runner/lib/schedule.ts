@@ -1,5 +1,5 @@
 import { AspTransaction } from "../aspect/v1/AspTransaction";
-import { Context } from "./lib";
+import { Context } from "./host";
 import { Schedule as ScheduleMsg } from "../scheduler/v1/Schedule";
 import { ScheduleId as ScheduleMsgId } from "../scheduler/v1/ScheduleId";
 import { ScheduleStatus } from "../scheduler/v1/ScheduleStatus";

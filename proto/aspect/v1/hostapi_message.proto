@@ -117,3 +117,23 @@ message StateChange {
 }
 
 message StateChanges { repeated StateChange all = 1; }
+
+enum ValueKind {
+  ADDRESS = 0;
+  FIXED_BYTES = 1;
+  BYTES = 2;
+  INT = 3;
+  UINT = 4;
+  BOOL = 5;
+  STRING = 6;
+  FIXED_ARRAY = 7;
+  ARRAY = 8;
+  TUPLE = 9;
+}
+
+message Value {
+  ValueKind kind = 1;
+  bytes data = 2;
+}
+
+message Values { repeated Value all = 1; }

@@ -1,4 +1,4 @@
-export class Pair<T> {
+export class State<T> {
     constructor(
         account: string,
         change: T,

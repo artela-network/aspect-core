@@ -20,6 +20,76 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ValueKind int32
+
+const (
+	ValueKind_ADDRESS     ValueKind = 0
+	ValueKind_FIXED_BYTES ValueKind = 1
+	ValueKind_BYTES       ValueKind = 2
+	ValueKind_INT         ValueKind = 3
+	ValueKind_UINT        ValueKind = 4
+	ValueKind_BOOL        ValueKind = 5
+	ValueKind_STRING      ValueKind = 6
+	ValueKind_FIXED_ARRAY ValueKind = 7
+	ValueKind_ARRAY       ValueKind = 8
+	ValueKind_TUPLE       ValueKind = 9
+)
+
+// Enum value maps for ValueKind.
+var (
+	ValueKind_name = map[int32]string{
+		0: "ADDRESS",
+		1: "FIXED_BYTES",
+		2: "BYTES",
+		3: "INT",
+		4: "UINT",
+		5: "BOOL",
+		6: "STRING",
+		7: "FIXED_ARRAY",
+		8: "ARRAY",
+		9: "TUPLE",
+	}
+	ValueKind_value = map[string]int32{
+		"ADDRESS":     0,
+		"FIXED_BYTES": 1,
+		"BYTES":       2,
+		"INT":         3,
+		"UINT":        4,
+		"BOOL":        5,
+		"STRING":      6,
+		"FIXED_ARRAY": 7,
+		"ARRAY":       8,
+		"TUPLE":       9,
+	}
+)
+
+func (x ValueKind) Enum() *ValueKind {
+	p := new(ValueKind)
+	*p = x
+	return p
+}
+
+func (x ValueKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ValueKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_aspect_v1_hostapi_message_proto_enumTypes[0].Descriptor()
+}
+
+func (ValueKind) Type() protoreflect.EnumType {
+	return &file_aspect_v1_hostapi_message_proto_enumTypes[0]
+}
+
+func (x ValueKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ValueKind.Descriptor instead.
+func (ValueKind) EnumDescriptor() ([]byte, []int) {
+	return file_aspect_v1_hostapi_message_proto_rawDescGZIP(), []int{0}
+}
+
 type AspectInput struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -882,6 +952,108 @@ func (x *StateChanges) GetAll() []*StateChange {
 	return nil
 }
 
+type Value struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Kind ValueKind `protobuf:"varint,1,opt,name=kind,proto3,enum=aspect.v1.ValueKind" json:"kind,omitempty"`
+	Data []byte    `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *Value) Reset() {
+	*x = Value{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aspect_v1_hostapi_message_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Value) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Value) ProtoMessage() {}
+
+func (x *Value) ProtoReflect() protoreflect.Message {
+	mi := &file_aspect_v1_hostapi_message_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Value.ProtoReflect.Descriptor instead.
+func (*Value) Descriptor() ([]byte, []int) {
+	return file_aspect_v1_hostapi_message_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Value) GetKind() ValueKind {
+	if x != nil {
+		return x.Kind
+	}
+	return ValueKind_ADDRESS
+}
+
+func (x *Value) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type Values struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	All []*Value `protobuf:"bytes,1,rep,name=all,proto3" json:"all,omitempty"`
+}
+
+func (x *Values) Reset() {
+	*x = Values{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aspect_v1_hostapi_message_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Values) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Values) ProtoMessage() {}
+
+func (x *Values) ProtoReflect() protoreflect.Message {
+	mi := &file_aspect_v1_hostapi_message_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Values.ProtoReflect.Descriptor instead.
+func (*Values) Descriptor() ([]byte, []int) {
+	return file_aspect_v1_hostapi_message_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *Values) GetAll() []*Value {
+	if x != nil {
+		return x.All
+	}
+	return nil
+}
+
 type BlockOutput_Result struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -894,7 +1066,7 @@ type BlockOutput_Result struct {
 func (x *BlockOutput_Result) Reset() {
 	*x = BlockOutput_Result{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v1_hostapi_message_proto_msgTypes[12]
+		mi := &file_aspect_v1_hostapi_message_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -907,7 +1079,7 @@ func (x *BlockOutput_Result) String() string {
 func (*BlockOutput_Result) ProtoMessage() {}
 
 func (x *BlockOutput_Result) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v1_hostapi_message_proto_msgTypes[12]
+	mi := &file_aspect_v1_hostapi_message_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1073,10 +1245,26 @@ var file_aspect_v1_hostapi_message_proto_rawDesc = []byte{
 	0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x12, 0x28, 0x0a, 0x03, 0x61, 0x6c,
 	0x6c, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x61, 0x73, 0x70, 0x65, 0x63, 0x74,
 	0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52,
-	0x03, 0x61, 0x6c, 0x6c, 0x42, 0x2b, 0x5a, 0x29, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
-	0x6f, 0x6d, 0x2f, 0x61, 0x72, 0x74, 0x65, 0x6c, 0x61, 0x2d, 0x6e, 0x65, 0x74, 0x77, 0x6f, 0x72,
-	0x6b, 0x2f, 0x61, 0x72, 0x74, 0x65, 0x6c, 0x61, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65,
-	0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x03, 0x61, 0x6c, 0x6c, 0x22, 0x45, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x28, 0x0a,
+	0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e, 0x61, 0x73,
+	0x70, 0x65, 0x63, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x4b, 0x69, 0x6e,
+	0x64, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x2c, 0x0a, 0x06, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x73, 0x12, 0x22, 0x0a, 0x03, 0x61, 0x6c, 0x6c, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61, 0x73, 0x70, 0x65, 0x63, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x52, 0x03, 0x61, 0x6c, 0x6c, 0x2a, 0x84, 0x01, 0x0a, 0x09, 0x56, 0x61,
+	0x6c, 0x75, 0x65, 0x4b, 0x69, 0x6e, 0x64, 0x12, 0x0b, 0x0a, 0x07, 0x41, 0x44, 0x44, 0x52, 0x45,
+	0x53, 0x53, 0x10, 0x00, 0x12, 0x0f, 0x0a, 0x0b, 0x46, 0x49, 0x58, 0x45, 0x44, 0x5f, 0x42, 0x59,
+	0x54, 0x45, 0x53, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x42, 0x59, 0x54, 0x45, 0x53, 0x10, 0x02,
+	0x12, 0x07, 0x0a, 0x03, 0x49, 0x4e, 0x54, 0x10, 0x03, 0x12, 0x08, 0x0a, 0x04, 0x55, 0x49, 0x4e,
+	0x54, 0x10, 0x04, 0x12, 0x08, 0x0a, 0x04, 0x42, 0x4f, 0x4f, 0x4c, 0x10, 0x05, 0x12, 0x0a, 0x0a,
+	0x06, 0x53, 0x54, 0x52, 0x49, 0x4e, 0x47, 0x10, 0x06, 0x12, 0x0f, 0x0a, 0x0b, 0x46, 0x49, 0x58,
+	0x45, 0x44, 0x5f, 0x41, 0x52, 0x52, 0x41, 0x59, 0x10, 0x07, 0x12, 0x09, 0x0a, 0x05, 0x41, 0x52,
+	0x52, 0x41, 0x59, 0x10, 0x08, 0x12, 0x09, 0x0a, 0x05, 0x54, 0x55, 0x50, 0x4c, 0x45, 0x10, 0x09,
+	0x42, 0x2b, 0x5a, 0x29, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61,
+	0x72, 0x74, 0x65, 0x6c, 0x61, 0x2d, 0x6e, 0x65, 0x74, 0x77, 0x6f, 0x72, 0x6b, 0x2f, 0x61, 0x72,
+	0x74, 0x65, 0x6c, 0x61, 0x73, 0x64, 0x6b, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1091,38 +1279,44 @@ func file_aspect_v1_hostapi_message_proto_rawDescGZIP() []byte {
 	return file_aspect_v1_hostapi_message_proto_rawDescData
 }
 
-var file_aspect_v1_hostapi_message_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_aspect_v1_hostapi_message_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_aspect_v1_hostapi_message_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_aspect_v1_hostapi_message_proto_goTypes = []interface{}{
-	(*AspectInput)(nil),        // 0: aspect.v1.AspectInput
-	(*AspectOutput)(nil),       // 1: aspect.v1.AspectOutput
-	(*AspAccessTuple)(nil),     // 2: aspect.v1.AspAccessTuple
-	(*AspTransaction)(nil),     // 3: aspect.v1.AspTransaction
-	(*AspectCode)(nil),         // 4: aspect.v1.AspectCode
-	(*BlockOutput)(nil),        // 5: aspect.v1.BlockOutput
-	(*EthBlock)(nil),           // 6: aspect.v1.EthBlock
-	(*EthHeader)(nil),          // 7: aspect.v1.EthHeader
-	(*StateChange)(nil),        // 8: aspect.v1.StateChange
-	(*StateChanges)(nil),       // 9: aspect.v1.StateChanges
-	nil,                        // 10: aspect.v1.AspectInput.ContextEntry
-	nil,                        // 11: aspect.v1.AspectOutput.ContextEntry
-	(*BlockOutput_Result)(nil), // 12: aspect.v1.BlockOutput.Result
+	(ValueKind)(0),             // 0: aspect.v1.ValueKind
+	(*AspectInput)(nil),        // 1: aspect.v1.AspectInput
+	(*AspectOutput)(nil),       // 2: aspect.v1.AspectOutput
+	(*AspAccessTuple)(nil),     // 3: aspect.v1.AspAccessTuple
+	(*AspTransaction)(nil),     // 4: aspect.v1.AspTransaction
+	(*AspectCode)(nil),         // 5: aspect.v1.AspectCode
+	(*BlockOutput)(nil),        // 6: aspect.v1.BlockOutput
+	(*EthBlock)(nil),           // 7: aspect.v1.EthBlock
+	(*EthHeader)(nil),          // 8: aspect.v1.EthHeader
+	(*StateChange)(nil),        // 9: aspect.v1.StateChange
+	(*StateChanges)(nil),       // 10: aspect.v1.StateChanges
+	(*Value)(nil),              // 11: aspect.v1.Value
+	(*Values)(nil),             // 12: aspect.v1.Values
+	nil,                        // 13: aspect.v1.AspectInput.ContextEntry
+	nil,                        // 14: aspect.v1.AspectOutput.ContextEntry
+	(*BlockOutput_Result)(nil), // 15: aspect.v1.BlockOutput.Result
 }
 var file_aspect_v1_hostapi_message_proto_depIdxs = []int32{
-	3,  // 0: aspect.v1.AspectInput.tx:type_name -> aspect.v1.AspTransaction
-	10, // 1: aspect.v1.AspectInput.context:type_name -> aspect.v1.AspectInput.ContextEntry
-	11, // 2: aspect.v1.AspectOutput.context:type_name -> aspect.v1.AspectOutput.ContextEntry
-	2,  // 3: aspect.v1.AspTransaction.accessList:type_name -> aspect.v1.AspAccessTuple
-	12, // 4: aspect.v1.BlockOutput.res:type_name -> aspect.v1.BlockOutput.Result
-	6,  // 5: aspect.v1.BlockOutput.block:type_name -> aspect.v1.EthBlock
-	7,  // 6: aspect.v1.EthBlock.header:type_name -> aspect.v1.EthHeader
-	7,  // 7: aspect.v1.EthBlock.uncles:type_name -> aspect.v1.EthHeader
-	3,  // 8: aspect.v1.EthBlock.transactions:type_name -> aspect.v1.AspTransaction
-	8,  // 9: aspect.v1.StateChanges.all:type_name -> aspect.v1.StateChange
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	4,  // 0: aspect.v1.AspectInput.tx:type_name -> aspect.v1.AspTransaction
+	13, // 1: aspect.v1.AspectInput.context:type_name -> aspect.v1.AspectInput.ContextEntry
+	14, // 2: aspect.v1.AspectOutput.context:type_name -> aspect.v1.AspectOutput.ContextEntry
+	3,  // 3: aspect.v1.AspTransaction.accessList:type_name -> aspect.v1.AspAccessTuple
+	15, // 4: aspect.v1.BlockOutput.res:type_name -> aspect.v1.BlockOutput.Result
+	7,  // 5: aspect.v1.BlockOutput.block:type_name -> aspect.v1.EthBlock
+	8,  // 6: aspect.v1.EthBlock.header:type_name -> aspect.v1.EthHeader
+	8,  // 7: aspect.v1.EthBlock.uncles:type_name -> aspect.v1.EthHeader
+	4,  // 8: aspect.v1.EthBlock.transactions:type_name -> aspect.v1.AspTransaction
+	9,  // 9: aspect.v1.StateChanges.all:type_name -> aspect.v1.StateChange
+	0,  // 10: aspect.v1.Value.kind:type_name -> aspect.v1.ValueKind
+	11, // 11: aspect.v1.Values.all:type_name -> aspect.v1.Value
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_aspect_v1_hostapi_message_proto_init() }
@@ -1251,7 +1445,31 @@ func file_aspect_v1_hostapi_message_proto_init() {
 				return nil
 			}
 		}
-		file_aspect_v1_hostapi_message_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_aspect_v1_hostapi_message_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Value); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aspect_v1_hostapi_message_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Values); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aspect_v1_hostapi_message_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BlockOutput_Result); i {
 			case 0:
 				return &v.state
@@ -1269,13 +1487,14 @@ func file_aspect_v1_hostapi_message_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_aspect_v1_hostapi_message_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   13,
+			NumEnums:      1,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_aspect_v1_hostapi_message_proto_goTypes,
 		DependencyIndexes: file_aspect_v1_hostapi_message_proto_depIdxs,
+		EnumInfos:         file_aspect_v1_hostapi_message_proto_enumTypes,
 		MessageInfos:      file_aspect_v1_hostapi_message_proto_msgTypes,
 	}.Build()
 	File_aspect_v1_hostapi_message_proto = out.File

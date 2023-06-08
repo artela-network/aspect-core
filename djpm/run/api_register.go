@@ -8,7 +8,7 @@ import (
 
 const (
 	// module of hostapis
-	moduleHostApi = "lib"
+	moduleHostApi = "host"
 	moduleAbis    = "abi"
 
 	// namespace of hostapis
@@ -118,7 +118,7 @@ func (r *Register) apis() interface{} {
 			sch.Id.AspectId = r.aspectID
 			return host.ScheduleTx(sch)
 		},
-		"getStateChanges": func(addr string, variable string, key string) []byte {
+		"getStateChanges": func(addr string, variable string, key []byte) []byte {
 			if types.GetHostApiHook == nil {
 				return nil
 			}
@@ -130,6 +130,7 @@ func (r *Register) apis() interface{} {
 			if changes == nil {
 				return nil
 			}
+
 			data, err := proto.Marshal(changes)
 			if err != nil {
 				return nil
@@ -141,6 +142,36 @@ func (r *Register) apis() interface{} {
 
 func (r *Register) abis() interface{} {
 	return map[string]interface{}{
-		"decodeInt32": decodeInt32,
+		"decode": func(t string, data []byte) []byte {
+			// TODO. use decode types
+			values := &types.Values{
+				All: make([]*types.Value, 0),
+			}
+			val, err := decodeType(t, data)
+			if err != nil {
+				return []byte{}
+			}
+			typeValue := &TypeValue{}
+			typeValue.SetValue(val)
+			values.All = append(values.All, typeValue.value)
+
+			byteArray, err := proto.Marshal(values)
+			if err != nil {
+				return []byte{}
+			}
+			return byteArray
+		},
+		"encode": func(t string, values *types.Values) []byte {
+			vals := make([]interface{}, len(values.All))
+			for i, value := range values.All {
+				typeValue := &TypeValue{value: value}
+				vals[i] = typeValue.GetValue()
+			}
+			data, err := encodeTypes(t, vals...)
+			if err != nil {
+				return []byte{}
+			}
+			return data
+		},
 	}
 }

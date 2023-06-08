@@ -31,7 +31,7 @@ type HostApi interface {
 	GetProperty(aspectID string, key string) (string, error)
 
 	// GetStateChanges returns the state changes of fields
-	GetStateChanges(addr string, variable string, key string) *StateChanges
+	GetStateChanges(addr string, variable string, key []byte) *StateChanges
 	AddInherent()
 	ScheduleTx(sch *Schedule) bool
 	DropTx()

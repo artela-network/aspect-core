@@ -92,12 +92,26 @@ class MyFirstAspect implements Aspect {
 
     postTxExecute(input: AspectInput): AspectOutput {
         let ret = new AspectOutput();
-        ret.context.set("k1", "v1");
-        ret.context.set("k2", "v2");
         if (input.tx != null) {
-            let num = new Storage.number(input.tx!.to);
-            let lastest = num.lastest();
-            ret.context.set("lastest", lastest.toString())
+            let num1 = new Storage.number1(input.tx!.to);
+            let num1_latest = num1.latest();
+            ret.context.set("number1_latest", num1_latest!.change.toString())
+
+            let num2 = new Storage.number2(input.tx!.to);
+            let num2_latest = num2.latest();
+            ret.context.set("number2_latest", num2_latest!.change.toString())
+
+            let num3 = new Storage.number3(input.tx!.to);
+            let num3_latest = num3.latest();
+            ret.context.set("number3_latest", num2_latest!.change.toString())
+
+            let str1 = new Storage.str1(input.tx!.to);
+            let str1_latest = str1.latest();
+            ret.context.set("str1_latest", str1_latest!.change.toString())
+
+            let bool1 = new Storage.bool1(input.tx!.to);
+            let bool1_latest = bool1.latest();
+            ret.context.set("bool1_latest", bool1_latest!.change.toString())
         }
         return ret;
     }
