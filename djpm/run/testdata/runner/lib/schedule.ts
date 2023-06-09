@@ -3,6 +3,8 @@ import { Context } from "./host";
 import { Schedule as ScheduleMsg } from "../scheduler/v1/Schedule";
 import { ScheduleId as ScheduleMsgId } from "../scheduler/v1/ScheduleId";
 import { ScheduleStatus } from "../scheduler/v1/ScheduleStatus";
+import { Utils } from "./utils";
+import { Option } from "./option";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -111,4 +113,39 @@ export class AdHocSchedule implements Schedule {
         this._nextNBlocks = nextNBlocks;
         this._maxRetry = maxRetry;
     }
+}
+
+
+export class ScheduleTx {
+    public New(input: string, msg: Option): AspTransaction {
+        let inputBytes = Utils.stringToUint8Arrary(input);
+
+        let tx = new AspTransaction();
+        tx.chainId = "";
+        tx.nonce = 0;
+        tx.gasTipCap = msg.maxPriorityFeePerGas;
+        tx.gasFeeCap = msg.maxFeePerGas;
+        tx.gasLimit = 0;
+        tx.gasPrice = 0;
+        tx.to = this._address;
+        tx.value = msg.value;
+        tx.input = inputBytes;
+        tx.accessList = [];
+        tx.blockHash = new Uint8Array(0);
+        tx.blockNumber = 0;
+        tx.from = msg.broker;
+        tx.hash = new Uint8Array(0);
+        tx.transactionIndex = 0;
+        tx.type = 0;
+        tx.v = new Uint8Array(0);
+        tx.r = new Uint8Array(0);
+        tx.s = new Uint8Array(0);
+        return tx;
+    }
+
+    constructor(address: string) {
+        this._address = address;
+    }
+
+    _address: string;
 }
