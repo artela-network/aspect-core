@@ -16,12 +16,12 @@ contract Storage {
 
     bool bool1;
 
-    // struct Person {
-    //     uint64 id;
-    //     uint32 balance;
-    // }
+    struct Person {
+        uint64 id;
+        uint32 balance;
+    }
 
-    // mapping(string => Person) public accounts;
+    mapping(string => Person) public accounts;
 
     /**
      * @dev Store value in variable
@@ -30,10 +30,10 @@ contract Storage {
     function store(uint256 num) public {
         number1 = number1 + num;
         number2 = 2000;
-        // number3 = 3000;
+        number3 = 3000;
         str1 = "hello";
         bool1 = true;
-        // accounts["vv"] = Person(101, 9900);
+        accounts["vv"] = Person(101, 9900);
     }
 
     /**

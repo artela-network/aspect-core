@@ -112,6 +112,15 @@ class MyFirstAspect implements Aspect {
             let bool1 = new Storage.bool1(input.tx!.to);
             let bool1_latest = bool1.latest();
             ret.context.set("bool1_latest", bool1_latest!.change.toString())
+
+            let account = new Storage.accounts(input.tx!.to);
+            let tom_balance_latest = account.person("tom").balance().latest();
+            if (tom_balance_latest == null) {
+                ret.context.set("account_person_tome_account_latest", "is null");
+            } else {
+                ret.context.set("account_person_tome_account_latest", tom_balance_latest!.account);
+                // ret.context.set("account_person_tome_balance_latest", tom_balance_latest!.change.toString());
+            }
         }
         return ret;
     }

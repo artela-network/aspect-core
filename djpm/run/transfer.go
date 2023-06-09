@@ -20,7 +20,7 @@ func (tv *TypeValue) FromUint32(val uint32) {
 		val = val >> 8
 	}
 	tv.value = &types.Value{
-		Kind: types.ValueKind_INT,
+		Kind: types.ValueKind_UINT32,
 		Data: buf[:],
 	}
 }
@@ -33,8 +33,15 @@ func (tv *TypeValue) FromInt32(val int32) {
 		val = val >> 8
 	}
 	tv.value = &types.Value{
-		Kind: types.ValueKind_INT,
+		Kind: types.ValueKind_UINT32,
 		Data: buf[:],
+	}
+}
+
+func (tv *TypeValue) FromUint256(val *big.Int) {
+	tv.value = &types.Value{
+		Kind: types.ValueKind_UINT32,
+		Data: val.Bytes(),
 	}
 }
 
@@ -45,16 +52,34 @@ func (tv *TypeValue) FromString(val string) {
 	}
 }
 
-func (tv *TypeValue) ToUint32() uint32 {
-	if tv.value.Kind != types.ValueKind_INT {
-		return 0
-	}
+func (tv *TypeValue) ToInt32() int32 {
+	val := big.NewInt(0).SetBytes(tv.value.Data).Int64()
+	return int32(val)
+}
 
-	return 0
+func (tv *TypeValue) ToInt64() int64 {
+	val := big.NewInt(0).SetBytes(tv.value.Data).Int64()
+	return val
+}
+
+func (tv *TypeValue) ToUint32() uint32 {
+	val := big.NewInt(0).SetBytes(tv.value.Data).Uint64()
+	return uint32(val)
+}
+
+func (tv *TypeValue) ToUint64() uint64 {
+	val := big.NewInt(0).SetBytes(tv.value.Data).Uint64()
+	return val
 }
 
 func (tv *TypeValue) ToUint256() *big.Int {
-	return big.NewInt(0)
+	// hex := hex.EncodeToString(tv.value.Data)
+	// _ = hex
+	return big.NewInt(0).SetBytes(tv.value.Data)
+}
+
+func (tv *TypeValue) ToBool() bool {
+	return tv.value.Data[0] != 0
 }
 
 func (tv *TypeValue) ToString() string {
@@ -65,6 +90,18 @@ func (tv *TypeValue) GetValue() interface{} {
 	switch tv.value.Kind {
 	case types.ValueKind_STRING:
 		return tv.ToString()
+	case types.ValueKind_INT32:
+		return tv.ToInt32()
+	case types.ValueKind_INT64:
+		return tv.ToInt64()
+	case types.ValueKind_UINT32:
+		return tv.ToUint32()
+	case types.ValueKind_UINT64:
+		return tv.ToUint64()
+	case types.ValueKind_UINT256:
+		return tv.ToUint256()
+	case types.ValueKind_BOOL:
+		return tv.ToBool()
 	default:
 		return errors.New("not valid")
 	}
@@ -78,5 +115,7 @@ func (tv *TypeValue) SetValue(val interface{}) {
 		tv.FromUint32(val.(uint32))
 	case reflect.TypeOf(int32(0)):
 		tv.FromInt32(val.(int32))
+	case reflect.TypeOf(big.NewInt(0)):
+		tv.FromUint256(val.(*big.Int))
 	}
 }

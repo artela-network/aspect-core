@@ -161,7 +161,11 @@ func (r *Register) abis() interface{} {
 			}
 			return byteArray
 		},
-		"encode": func(t string, values *types.Values) []byte {
+		"encode": func(t string, valueData []byte) []byte {
+			values := &types.Values{}
+			if err := proto.Unmarshal(valueData, values); err != nil {
+				return []byte{}
+			}
 			vals := make([]interface{}, len(values.All))
 			for i, value := range values.All {
 				typeValue := &TypeValue{value: value}

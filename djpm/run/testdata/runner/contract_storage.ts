@@ -6,7 +6,9 @@ import { TypeValue } from './lib/index';
 import { BigInt } from './lib/index'
 
 export namespace Storage {
-    // uint256 number1;
+    ///
+    /// The following codes for properity: uint256 number1;
+    ///
     export class number1 {
         public before(): State<BigInt> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
@@ -39,7 +41,6 @@ export namespace Storage {
         public latest(): State<BigInt> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
             if (changes.all.length == 0) {
-                // return a particular value, to tell aspect that value not found.
                 return null;
             }
 
@@ -74,7 +75,9 @@ export namespace Storage {
         }
     }
 
-    // int32 number2;
+    ///
+    /// The following codes for properity: int32 number2;
+    ///
     export class number2 {
         public before(): State<i32> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number2", this.prefix);
@@ -107,7 +110,6 @@ export namespace Storage {
         public latest(): State<i32> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number2", this.prefix);
             if (changes.all.length == 0) {
-                // return a particular value, to tell aspect that value not found.
                 return null;
             }
 
@@ -142,7 +144,9 @@ export namespace Storage {
         }
     }
 
-    // uint64 number3;
+    ///
+    /// The following codes for properity: uint64 number3;
+    ///
     export class number3 {
         public before(): State<u64> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number3", this.prefix);
@@ -175,7 +179,6 @@ export namespace Storage {
         public latest(): State<u64> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.number3", this.prefix);
             if (changes.all.length == 0) {
-                // return a particular value, to tell aspect that value not found.
                 return null;
             }
 
@@ -210,7 +213,9 @@ export namespace Storage {
         }
     }
 
-    // string str1;
+    ///
+    /// The following codes for properity: string str1;
+    ///
     export class str1 {
         public before(): State<string> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.str1", this.prefix);
@@ -259,7 +264,9 @@ export namespace Storage {
         }
     }
 
-    // bool bool1;
+    ///
+    /// The following codes for properity: bool bool1;
+    ///
     export class bool1 {
         public before(): State<bool> | null {
             let changes = Context.getStateChanges(this.addr, "Storage.bool1", this.prefix);
@@ -304,6 +311,184 @@ export namespace Storage {
 
         constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
             this.addr = addr;
+            this.prefix = prefix;
+        }
+    }
+
+    ///
+    /// The following codes for properity: mapping(string => Person) public accounts;
+    ///
+    export class accounts {
+        public person(key: string): Person {
+            let encoded = Abi.encodeString(key);
+            return new Person(this.addr, "Storage.accounts", Utils.concatUint8Arrays(this.prefix, encoded))
+        }
+
+        addr: string;
+        prefix: Uint8Array;
+
+        constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
+            this.addr = addr;
+            this.prefix = prefix;
+        }
+    }
+
+    export class Person {
+        public id(): Person_id {
+            let encoded = Abi.encodeString("id");
+            return new Person_id(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+        }
+
+        public balance(): Person_balance {
+            let encoded = Abi.encodeString("balance");
+            return new Person_balance(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+        }
+
+        addr: string;
+        variable: string;
+        prefix: Uint8Array;
+
+        constructor(addr: string, varibale: string, prefix: Uint8Array = new Uint8Array(0)) {
+            this.addr = addr;
+            this.variable = varibale;
+            this.prefix = prefix;
+        }
+    }
+
+    // uint64 id;
+    export class Person_id {
+        public before(): State<u64> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let account = changes.all[0].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let value = BigInt.fromString(valueHex, 16).toUInt64();
+            return new State(account, value);
+        }
+
+        public changes(): Array<State<u64>> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let res = new Array<State<u64>>(changes.all.length);
+            for (let i = 0; i < changes.all.length; i++) {
+                let account = changes.all[i].account;
+                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let value = BigInt.fromString(valueHex, 16).toUInt64();
+                res[i] = new State(account, value)
+            }
+            return res;
+        }
+
+        public latest(): State<u64> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let index = changes.all.length - 1;
+            let account = changes.all[index].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let value = BigInt.fromString(valueHex, 16).toUInt64();
+            return new State(account, value);
+        }
+
+        public diff(): u64 {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length < 2) {
+                return 0;
+            }
+
+            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let before = BigInt.fromString(beforeHex, 16).toUInt64();
+
+            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let after = BigInt.fromString(beforeHex, 16).toUInt64();
+
+            return after - before;
+        }
+
+        variable: string;
+        addr: string;
+        prefix: Uint8Array;
+
+        constructor(addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
+            this.addr = addr;
+            this.variable = variable;
+            this.prefix = prefix;
+        }
+    }
+
+    // uint32 balance;
+    export class Person_balance {
+        public before(): State<u32> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let account = changes.all[0].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let value = BigInt.fromString(valueHex, 16).toUInt32();
+            return new State(account, value);
+        }
+
+        public changes(): Array<State<u32>> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let res = new Array<State<u32>>(changes.all.length);
+            for (let i = 0; i < changes.all.length; i++) {
+                let account = changes.all[i].account;
+                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let value = BigInt.fromString(valueHex, 16).toUInt32();
+                res[i] = new State(account, value)
+            }
+            return res;
+        }
+
+        public latest(): State<u32> | null {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let index = changes.all.length - 1;
+            let account = changes.all[index].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let value = BigInt.fromString(valueHex, 16).toUInt32();
+            return new State(account, value);
+        }
+
+        public diff(): u32 {
+            let changes = Context.getStateChanges(this.addr, this.variable, this.prefix);
+            if (changes.all.length < 2) {
+                return 0;
+            }
+
+            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let before = BigInt.fromString(beforeHex, 16).toUInt32();
+
+            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let after = BigInt.fromString(beforeHex, 16).toUInt32();
+
+            return after - before;
+        }
+
+        addr: string;
+        variable: string;
+        prefix: Uint8Array;
+
+        constructor(addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
+            this.addr = addr;
+            this.variable = variable;
             this.prefix = prefix;
         }
     }

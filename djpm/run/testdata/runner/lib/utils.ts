@@ -33,7 +33,7 @@ export class Utils {
         const result = new Uint8Array(s.length / 2);
 
         for (let i = 0, j = 0; i < s.length; i += 2, j++) {
-            const byteString = s.substr(i, 2);
+            const byteString = s.substring(i, 2);
             const byte = parseInt(byteString, 16);
             if (isNaN(byte)) {
                 throw new Error("Invalid hex string");
@@ -56,6 +56,20 @@ export class Utils {
     static boolToUint8Array(b: bool): Uint8Array {
         const result = new Uint8Array(1);
         result[0] = b ? 1 : 0;
+
+        return result;
+    }
+
+    static concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
+        const result = new Uint8Array(a.length + b.length);
+
+        for (let i = 0; i < a.length; i++) {
+            result[i] = a[i];
+        }
+
+        for (let i = 0; i < b.length; i++) {
+            result[a.length + i] = b[i];
+        }
 
         return result;
     }
