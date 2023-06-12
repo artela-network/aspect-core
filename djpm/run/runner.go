@@ -8,6 +8,15 @@ import (
 	"github.com/artela-network/artelasdk/types"
 )
 
+var vmPool *runtime.RuntimePool
+
+func RuntimePool() *runtime.RuntimePool {
+	if vmPool == nil {
+		vmPool = runtime.NewRuntimePool(10)
+	}
+	return vmPool
+}
+
 type Runner struct {
 	vm   runtime.AspectRuntime
 	fns  *runtime.HostAPIRegistry
@@ -16,7 +25,7 @@ type Runner struct {
 
 func NewRunner(aspID string, code []byte) (*Runner, error) {
 	register := NewRegister(aspID)
-	vm, err := runtime.NewAspectRuntime(runtime.WASM, code, register.HostApis())
+	vm, err := RuntimePool().Runtime(runtime.WASM, code, register.HostApis(), false)
 	if err != nil {
 		return nil, err
 	}
