@@ -1,5 +1,5 @@
 syntax = "proto3";
-package aspect.v1;
+package message.v1;
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
