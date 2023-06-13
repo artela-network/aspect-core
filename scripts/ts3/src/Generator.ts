@@ -9,8 +9,11 @@ export type StorageItem = {
     type: string;
 }
 
-type Layout = {
+type StorageLayout = {
     storage:  StorageItem[];
+}
+type MembersLayout = {
+  members:  StorageItem[];
 }
 
 export default class Generator {
@@ -18,14 +21,23 @@ export default class Generator {
     private tsPath: string;
 
     public refLib = `import { Protobuf } from 'as-proto/assembly';
-    import { Context, State, Abi, Utils, TypeValue } from "./lib/index"\n`;
+    import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
 
     public endBracket  = "}\n";
     public argsTemplage = `addr: string;
     prefix: Uint8Array;\n`;
+    public argsTemplageStruct = `addr: string;
+    variable: string;
+    prefix: Uint8Array;\n`;
     public constructorTemplate = 
     `constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
       this.addr = addr;
+      this.prefix = prefix;
+    }\n`;    
+    public constructorTemplateStruct = 
+    `constructor(addr: string, varibale: string, prefix: Uint8Array = new Uint8Array(0)) {
+      this.addr = addr;
+      this.variable = varibale;
       this.prefix = prefix;
     }\n`;    
 
@@ -34,14 +46,21 @@ export default class Generator {
         this.tsPath = tsPath;
     }
 
-    getLayout(): Layout {
-        if(fs.existsSync(this.layoutPath))
-        {
-            const loadJson = fs.readFileSync(this.layoutPath, "utf-8");
-            const storageLayout = JSON.parse(loadJson) as Layout;
-            return storageLayout;
-        }
-        return <Layout>{};
+    getStorage(loadJson: string): StorageLayout {
+        const storageLayout = JSON.parse(loadJson) as StorageLayout;
+        return storageLayout;
+    }
+    getMembers(loadJson: string, key: string): MembersLayout {
+      const storageLayout = JSON.parse(loadJson) as MembersLayout;
+      return storageLayout;
+    }
+    getLayoutJson(): string {
+      if(fs.existsSync(this.layoutPath))
+      {
+          const loadJson = fs.readFileSync(this.layoutPath, "utf-8");
+          return loadJson;
+      }
+      return "";
     }
 
     append(str: string, space: number): boolean {
