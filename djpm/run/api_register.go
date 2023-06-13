@@ -8,13 +8,16 @@ import (
 
 const (
 	// module of hostapis
-	moduleHostApi = "lib"
+	moduleHostApi = "hostapi"
 
 	// namespace of hostapis
 	nsHostApi = "__HostApi__"
 
 	// entrance of api functions
 	ApiEntrance = "execute"
+
+	CheckBlockLevel       = "isBlockLevel"
+	CheckTransactionLevel = "isTransactionLevel"
 )
 
 // Register keeps the properity owned by current
@@ -83,6 +86,62 @@ func (r *Register) apis() interface{} {
 		"localCall": func(arg []byte) []byte {
 			// TODO
 			return nil
+		},
+		"getContext": func(key string) string {
+			if types.GetHostApiHook == nil {
+				return "host functions is not valid"
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return "host functions is not init"
+			}
+			value, err := host.GetContext(r.aspectID, key)
+			if err != nil {
+				return err.Error()
+			}
+			return value
+		},
+		"setContext": func(key string, value string) bool {
+			if types.GetHostApiHook == nil {
+				return false
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return false
+			}
+			err = host.SetContext(r.aspectID, key, value)
+			if err != nil {
+				return false
+			}
+			return true
+		},
+		"setAspectState": func(key string, value string) bool {
+			if types.GetHostApiHook == nil {
+				return false
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return false
+			}
+			setErr := host.SetAspectState(r.aspectID, key, value)
+			if setErr != nil {
+				return false
+			}
+			return true
+		},
+		"getAspectState": func(key string) string {
+			if types.GetHostApiHook == nil {
+				return "host functions is not valid"
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return "host functions is not init"
+			}
+			value, err := host.GetAspectState(r.aspectID, key)
+			if err != nil {
+				return err.Error()
+			}
+			return value
 		},
 		"getProperty": func(key string) string {
 			if types.GetHostApiHook == nil {

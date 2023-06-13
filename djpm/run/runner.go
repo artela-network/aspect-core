@@ -66,6 +66,17 @@ func (r *Runner) IsOwner(sender string) (bool, error) {
 	return res.(bool), nil
 }
 
+func (r *Runner) IsBlockLevel() (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+	res, err := r.vm.Call(CheckBlockLevel)
+	if err != nil {
+		return false, err
+	}
+	return res.(bool), nil
+}
+
 func (r *Runner) OnContractBinding(sender string) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")
@@ -76,5 +87,16 @@ func (r *Runner) OnContractBinding(sender string) (bool, error) {
 		return false, err
 	}
 
+	return res.(bool), nil
+}
+
+func (r *Runner) IsTransactionLevel() (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+	res, err := r.vm.Call(CheckTransactionLevel)
+	if err != nil {
+		return false, err
+	}
 	return res.(bool), nil
 }

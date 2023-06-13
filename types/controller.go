@@ -1,6 +1,8 @@
 package types
 
 import (
+	"github.com/pkg/errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -11,7 +13,6 @@ const (
 
 type RequestEthTxAspect struct {
 	Tx          *ethtypes.Transaction
-	Context     map[string]string
 	BlockHeight int64
 	BlockHash   string
 	TxIndex     int64
@@ -21,45 +22,49 @@ type RequestEthTxAspect struct {
 
 // ResponseAspect txhash->aspectId-> AspectOutPut
 type ResponseAspect struct {
-	ResultMap map[string]map[string]*AspectOutput
+	Success  bool
+	Err      error
+	GasInfo  *sdk.GasInfo
+	AspectId string
 }
 
-func (c ResponseAspect) With(txHash string, aspectId string, output *AspectOutput) ResponseAspect {
-	if c.ResultMap == nil {
-		c.ResultMap = make(map[string]map[string]*AspectOutput)
-	}
-	if c.ResultMap[txHash] == nil {
-		c.ResultMap[txHash] = make(map[string]*AspectOutput)
-	}
-	c.ResultMap[txHash][aspectId] = output
-	return c
+func (c ResponseAspect) HasErr() bool {
+	return c.Success == false || c.Err != nil
 }
-func (c ResponseAspect) GetAspectResult(txHash string, aspectId string) *AspectOutput {
-	return c.ResultMap[txHash][aspectId]
-}
-func (c ResponseAspect) GetTXResult(txHash string) []*AspectOutput {
-	m := c.ResultMap[txHash]
-	outputs := make([]*AspectOutput, 0)
-	for _, output := range m {
-		outputs = append(outputs, output)
-	}
-	return outputs
-}
-func (c ResponseAspect) Merge(out *ResponseAspect) {
-	if out == nil {
-		return
-	}
-	for tx, m := range out.ResultMap {
-		for k, v := range m {
-			c.With(tx, k, v)
+
+func (c ResponseAspect) WithAspectOutput(output *AspectOutput) ResponseAspect {
+	if output != nil {
+		c.Success = output.Success
+		if output.Success == false {
+			c.Err = errors.New(output.Message)
 		}
 	}
+	return c
+}
+func (c ResponseAspect) WithErr(err error) ResponseAspect {
+	if err != nil {
+		c.Err = err
+		c.Success = false
+	}
+	return c
+}
+func (c ResponseAspect) WithGas(gasWanted, gasUsed uint64) ResponseAspect {
+	if gasUsed > 0 && gasWanted > 0 {
+		info := &sdk.GasInfo{
+			GasWanted: gasWanted,
+			GasUsed:   gasUsed,
+		}
+		c.GasInfo = info
+	}
+	return c
+}
+func (c ResponseAspect) WithAspectId(aspectId string) ResponseAspect {
+	c.AspectId = aspectId
+	return c
 }
 
 type RequestSdkTxAspect struct {
-	Tx sdk.Tx
-
-	Context     map[string]string
+	Tx          sdk.Tx
 	BlockHeight int64
 	BlockHash   string
 	TxIndex     int64
@@ -70,11 +75,18 @@ type RequestSdkTxAspect struct {
 type RequestBlockAspect struct {
 	BlockHeight int64
 	ChainId     string
-	Context     map[string]string
 }
 
 type ResponseBlockAspect struct {
-	Result AspectOutput
+	ResultMap map[string]*AspectOutput
+}
+
+func (c ResponseBlockAspect) With(aspectId string, output *AspectOutput) ResponseBlockAspect {
+	if c.ResultMap == nil {
+		c.ResultMap = make(map[string]*AspectOutput)
+	}
+	c.ResultMap[aspectId] = output
+	return c
 }
 
 const (

@@ -18,7 +18,7 @@ func TestJoinPoint(t *testing.T) {
 	}
 
 	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+	raw, _ := os.ReadFile(path.Join(cwd, "/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm"))
 
 	name := "onTxReceive"
 	input := &aspectType.AspectInput{
@@ -44,11 +44,6 @@ func TestJoinPoint(t *testing.T) {
 			R:                []byte{},
 			S:                []byte{},
 		},
-		Context: map[string]string{
-			"111": "abc",
-			"222": "def",
-			"333": "ghi",
-		},
 	}
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
@@ -56,23 +51,6 @@ func TestJoinPoint(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, true, output.Success)
 
-	// verify the context
-	ctx := output.Context
-	require.Equal(t, 6, len(ctx))
-	expected := map[string]string{
-		"111":          "abc",
-		"222":          "def",
-		"333":          "ghi",
-		"k1":           "v1",
-		"k2":           "v2",
-		"lastBlockNum": "not found",
-	}
-	require.Equal(t, expected["111"], ctx["111"])
-	require.Equal(t, expected["222"], ctx["222"])
-	require.Equal(t, expected["333"], ctx["333"])
-	require.Equal(t, expected["k1"], ctx["k1"])
-	require.Equal(t, expected["k2"], ctx["k2"])
-	require.Equal(t, expected["lastBlockNum"], ctx["lastBlockNum"])
 }
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
@@ -81,8 +59,8 @@ func TestIsOwner(t *testing.T) {
 		return nil, errors.New("not init")
 	}
 
-	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+	//cwd, _ := os.Getwd()
+	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm")
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
@@ -98,7 +76,7 @@ func TestOnContractBinding(t *testing.T) {
 	}
 
 	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/build/release.wasm"))
+	raw, _ := os.ReadFile(path.Join(cwd, "/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm"))
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
