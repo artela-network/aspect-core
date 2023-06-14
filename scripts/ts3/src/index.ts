@@ -117,35 +117,26 @@ function handleBasic(item: StorageItem, tracer: Generator) {
     tracer.append(tracer.endBracket, 1);
 }
 
-function handleStruct(item: StorageItem, tracer: Generator, structName: string) {
+function handleStruct(item: StorageItem, tracer: Generator, 
+    structName: string, members: StorageItem[]) {
     // 1 append class start
     tracer.append(tracer.getClass(structName), 1);
     // 2 append addr and variable and prefix
     tracer.append(tracer.argsTemplageStruct ,2);
     // 3 append constructor
     tracer.append(tracer.constructorTemplateStruct ,2);
-
     // 4 handle params
+    members.forEach(function (item) {
+        tracer.append(tracer.getStructParam(item.label, structName+"_"+item.label) ,2)
+    });
 
-    
     // 1' append class end
     tracer.append(tracer.endBracket, 1);
 
-
-
-
-    // 5 append before func
-    tracer.append(tracer.getBeforeFunc(getTypeTag(item), 
-    getParamPrefix(item), getValueFunc(item)) ,2);
-    // 6 append changes func
-    tracer.append(tracer.getChangesFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
-    // 7 append lastest func
-    tracer.append(tracer.getLatestFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
-    // 8 append diff func
-    tracer.append(tracer.getDiffFunc(getTypeTag(item),
-        getParamPrefix(item), getValueFunc(item)) ,2);
+    // 5 handle struct params to class
+    members.forEach(function (item) {
+        handleBasic(item, tracer);
+    });
 }
 
 const tracer: Generator = new Generator(
@@ -167,8 +158,10 @@ items.forEach(function (item) {
     let structName = getStructName(item);
     if (isStringEmpty(structName)) {
         handleBasic(item, tracer);
+    } else {
+        let members = obj.types[item.type].members as StorageItem[];
+        handleStruct(item, tracer, structName, members);
     }
-    handleStruct(item, tracer, structName);
 });
 // ----- 3.2 Loop to handle multi params end ------
 

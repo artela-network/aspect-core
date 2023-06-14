@@ -9,13 +9,19 @@ export type StorageItem = {
     type: string;
 }
 
-type StorageLayout = {
-    storage:  StorageItem[];
-}
-type MembersLayout = {
-  members:  StorageItem[];
+export type StorageType = {
+  encoding: string;
+  label: string;
+  numberOfBytes: string;
+  members?: StorageItem[];
+  key?: string;
+  value?: string;
 }
 
+export type StorageLayout = {
+  storage: StorageItem[];
+  types: Record<string, StorageType>;
+}
 export default class Generator {
     private layoutPath: string;
     private tsPath: string;
@@ -49,10 +55,6 @@ export default class Generator {
     getStorage(loadJson: string): StorageLayout {
         const storageLayout = JSON.parse(loadJson) as StorageLayout;
         return storageLayout;
-    }
-    getMembers(loadJson: string, key: string): MembersLayout {
-      const storageLayout = JSON.parse(loadJson) as MembersLayout;
-      return storageLayout;
     }
     getLayoutJson(): string {
       if(fs.existsSync(this.layoutPath))
@@ -156,5 +158,16 @@ export default class Generator {
       return after - before;
     }\n`;
         return message;
+    }
+
+    getStructParam(name: string, wrapName: string): string {
+      const param1 : string = name;
+      const param2 : string = wrapName;
+      let message: string =
+      `public ${param1}(): ${param2} {
+        let encoded = Abi.encodeString("${param1}");
+        return new ${param2}(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+    }\n`;
+      return message;
     }
 }
