@@ -10,11 +10,11 @@ pragma solidity >=0.7.0 <0.9.0;
 contract Storage {
     uint256 number1;
 
-    int32 number2;
-    uint64 number3;
-    string str1;
+    // int32 number2;
+    // uint64 number3;
+    // string str1;
 
-    bool bool1;
+    // bool bool1;
 
     struct Person {
         uint64 id;
@@ -29,11 +29,11 @@ contract Storage {
      */
     function store(uint256 num) public {
         number1 = number1 + num;
-        number2 = 2000;
-        number3 = 3000;
-        str1 = "hello";
-        bool1 = true;
-        accounts["vv"] = Person(101, 9900);
+        // number2 = 2000;
+        // number3 = 3000;
+        // str1 = "hello";
+        // bool1 = true;
+        accounts["tom"] = Person(101, 9900);
     }
 
     /**

@@ -57,7 +57,7 @@ class MyFirstAspect implements Aspect {
         }
 
         // schedule a tx
-        this.scheduleTx();
+        // this.scheduleTx();
 
         return ret;
     }
@@ -97,29 +97,29 @@ class MyFirstAspect implements Aspect {
             let num1_latest = num1.latest();
             ret.context.set("number1_latest", num1_latest!.change.toString())
 
-            let num2 = new Storage.number2(input.tx!.to);
-            let num2_latest = num2.latest();
-            ret.context.set("number2_latest", num2_latest!.change.toString())
+            // let num2 = new Storage.number2(input.tx!.to);
+            // let num2_latest = num2.latest();
+            // ret.context.set("number2_latest", num2_latest!.change.toString())
 
-            let num3 = new Storage.number3(input.tx!.to);
-            let num3_latest = num3.latest();
-            ret.context.set("number3_latest", num2_latest!.change.toString())
+            // let num3 = new Storage.number3(input.tx!.to);
+            // let num3_latest = num3.latest();
+            // ret.context.set("number3_latest", num2_latest!.change.toString())
 
-            let str1 = new Storage.str1(input.tx!.to);
-            let str1_latest = str1.latest();
-            ret.context.set("str1_latest", str1_latest!.change.toString())
+            // let str1 = new Storage.str1(input.tx!.to);
+            // let str1_latest = str1.latest();
+            // ret.context.set("str1_latest", str1_latest!.change.toString())
 
-            let bool1 = new Storage.bool1(input.tx!.to);
-            let bool1_latest = bool1.latest();
-            ret.context.set("bool1_latest", bool1_latest!.change.toString())
+            // let bool1 = new Storage.bool1(input.tx!.to);
+            // let bool1_latest = bool1.latest();
+            // ret.context.set("bool1_latest", bool1_latest!.change.toString())
 
             let account = new Storage.accounts(input.tx!.to);
             let tom_balance_latest = account.person("tom").balance().latest();
             if (tom_balance_latest == null) {
-                ret.context.set("account_person_tome_account_latest", "is null");
+                ret.context.set("account_person_tom_account_latest", "is null");
             } else {
-                ret.context.set("account_person_tome_account_latest", tom_balance_latest!.account);
-                // ret.context.set("account_person_tome_balance_latest", tom_balance_latest!.change.toString());
+                ret.context.set("account_person_tom_account_latest_acct", tom_balance_latest.account);
+                ret.context.set("account_person_tom_balance_latest_value", tom_balance_latest.change.toString());
             }
         }
         return ret;

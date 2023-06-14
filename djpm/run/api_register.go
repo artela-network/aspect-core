@@ -142,18 +142,20 @@ func (r *Register) apis() interface{} {
 
 func (r *Register) abis() interface{} {
 	return map[string]interface{}{
-		"decode": func(t string, data []byte) []byte {
-			// TODO. use decode types
-			values := &types.Values{
-				All: make([]*types.Value, 0),
-			}
-			val, err := decodeType(t, data)
+		"decodeParams": func(t string, data []byte) []byte {
+			decodes, err := decodeParams(t, data)
 			if err != nil {
 				return []byte{}
 			}
-			typeValue := &TypeValue{}
-			typeValue.SetValue(val)
-			values.All = append(values.All, typeValue.value)
+
+			values := &types.Values{
+				All: make([]*types.Value, len(decodes)),
+			}
+			for i, decoded := range decodes {
+				typeValue := &TypeValue{}
+				typeValue.SetValue(decoded)
+				values.All[i] = typeValue.value
+			}
 
 			byteArray, err := proto.Marshal(values)
 			if err != nil {
@@ -161,7 +163,7 @@ func (r *Register) abis() interface{} {
 			}
 			return byteArray
 		},
-		"encode": func(t string, valueData []byte) []byte {
+		"encodeParams": func(t string, valueData []byte) []byte {
 			values := &types.Values{}
 			if err := proto.Unmarshal(valueData, values); err != nil {
 				return []byte{}
@@ -171,7 +173,7 @@ func (r *Register) abis() interface{} {
 				typeValue := &TypeValue{value: value}
 				vals[i] = typeValue.GetValue()
 			}
-			data, err := encodeTypes(t, vals...)
+			data, err := encodeParams(t, vals...)
 			if err != nil {
 				return []byte{}
 			}

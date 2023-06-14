@@ -8,8 +8,8 @@ import { BigInt } from "./bigint";
 
 
 declare namespace __Abi__ {
-    function encode(types: i32, val: i32): i32;
-    function decode(types: i32, data: i32): i32;
+    function encodeParams(types: i32, val: i32): i32;
+    function decodeParams(types: i32, data: i32): i32;
 }
 
 export class Abi {
@@ -77,7 +77,7 @@ export class Abi {
         let valPtr = new AUint8Array(bytes).store();
 
         let ret = new AUint8Array();
-        ret.load(__Abi__.encode(typesPtr, valPtr));
+        ret.load(__Abi__.encodeParams(typesPtr, valPtr));
         return ret.get();
     }
 
@@ -87,7 +87,7 @@ export class Abi {
         let dataPtr = new AUint8Array(data).store();
         let ret = new AUint8Array();
 
-        ret.load(__Abi__.decode(typePtr, dataPtr));
+        ret.load(__Abi__.decodeParams(typePtr, dataPtr));
         const output = Protobuf.decode<Values>(ret.get(), Values.decode);
         return output;
     }
