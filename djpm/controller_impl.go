@@ -1,34 +1,32 @@
 package djpm
 
 import (
-	"math/big"
-	"strconv"
-	"strings"
-
+	"github.com/artela-network/artelasdk/djpm/run"
+	"github.com/artela-network/artelasdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
-	"github.com/artela-network/artelasdk/djpm/run"
-	"github.com/artela-network/artelasdk/types"
 )
 
 var globalAspect *Aspect
 
 type Aspect struct {
-	GetBondAspects func(int64, *ethtypes.Transaction) ([]*types.AspectCode, error)
-	IsEthTx        func(tx sdk.Msg) bool
-	ConvertEthTx   func(tx sdk.Msg) *ethtypes.Transaction
+	GetBondAspects      func(int64, common.Address) ([]*types.AspectCode, error)
+	GetBondBlockAspects func(int64) ([]*types.AspectCode, error)
+	IsEthTx             func(tx sdk.Msg) bool
+	ConvertEthTx        func(tx sdk.Msg) *ethtypes.Transaction
 }
 
 func NewAspect(
-	getFunc func(int64, *ethtypes.Transaction) ([]*types.AspectCode, error),
+	getFunc func(int64, common.Address) ([]*types.AspectCode, error),
+	getBlockAspectsFunc func(int64) ([]*types.AspectCode, error),
 	checkTxFunc func(tx sdk.Msg) bool,
 	convertTxFunc func(tx sdk.Msg) *ethtypes.Transaction) *Aspect {
 	globalAspect = &Aspect{
-		GetBondAspects: getFunc,
-		IsEthTx:        checkTxFunc,
-		ConvertEthTx:   convertTxFunc,
+		GetBondAspects:      getFunc,
+		GetBondBlockAspects: getBlockAspectsFunc,
+		IsEthTx:             checkTxFunc,
+		ConvertEthTx:        convertTxFunc,
 	}
 	return globalAspect
 }
@@ -41,11 +39,12 @@ func AspectInstance() *Aspect {
 }
 
 func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkTxAspect) *types.ResponseAspect {
-
-	if req.Tx == nil || len(req.Tx.GetMsgs()) == 0 {
-		return nil
+	result := &types.ResponseAspect{
+		Success: true,
 	}
-	result := &types.ResponseAspect{}
+	if req.Tx == nil || len(req.Tx.GetMsgs()) == 0 {
+		return result
+	}
 	for _, msg := range req.Tx.GetMsgs() {
 		ok := aspect.IsEthTx(msg)
 		if !ok {
@@ -53,118 +52,169 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 			continue
 		}
 		ethTx := aspect.ConvertEthTx(msg)
-		txAspect := types.RequestEthTxAspect{
-			Tx:          ethTx,
-			Context:     req.Context,
+		if ethTx.To() == nil || types.IsAspectContract(ethTx.To()) {
+			continue
+		}
+
+		var signer ethtypes.Signer
+		if ethTx.Protected() {
+			signer = ethtypes.LatestSignerForChainID(ethTx.ChainId())
+		} else {
+			signer = ethtypes.HomesteadSigner{}
+		}
+		from, _ := ethtypes.Sender(signer, ethTx)
+		hash := ethTx.Hash()
+		txAspect := &types.RequestEthMsgAspect{
 			BlockHeight: req.BlockHeight,
-			BlockHash:   req.BlockHash,
-			TxIndex:     req.TxIndex,
-			BaseFee:     req.BaseFee,
+			TxHash:      &hash,
+			TxIndex:     uint(req.TxIndex),
+			To:          ethTx.To(),
+			From:        from,
+			Nonce:       ethTx.Nonce(),
+			GasLimit:    ethTx.Gas(),
+			GasPrice:    ethTx.GasPrice(),
+			GasFeeCap:   ethTx.GasFeeCap(),
+			GasTipCap:   ethTx.GasTipCap(),
+			Value:       ethTx.Value(),
+			TxType:      0,
+			TxData:      ethTx.Data(),
+			AccessList:  ethTx.AccessList(),
 			ChainId:     req.ChainId,
 		}
-		out := aspect.execAspectByEthTx(methodName, &txAspect)
-		result.Merge(out)
+
+		result = aspect.execAspectByEthMsg(methodName, txAspect)
+		if result.HasErr() {
+			return result
+		}
 	}
 	return result
 
 }
 
-func (aspect Aspect) execAspectByEthTx(methodName string, req *types.RequestEthTxAspect) *types.ResponseAspect {
-	if req.Tx == nil {
-		return nil
+func (aspect Aspect) execAspectBlock(methodName string, req *types.RequestBlockAspect) *types.ResponseAspect {
+	response := &types.ResponseAspect{Success: true}
+
+	if req == nil {
+		return response
 	}
-	to := req.Tx.To()
-	if to == nil || strings.EqualFold(types.ARTELA_ADDR, to.Hex()) {
-		// ignore contract deployment transaction & aspect op txs
-		return nil
-	}
-	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, req.Tx)
+	boundAspects, err := aspect.GetBondBlockAspects(req.BlockHeight)
 	// load aspects
 	if err != nil || len(boundAspects) == 0 {
-		return nil
-	}
-
-	chain, _ := strconv.ParseInt(req.ChainId, 10, 64)
-	transaction, newErr := types.NewTx(req.Tx, common.HexToHash(req.BlockHash), req.BlockHeight, req.TxIndex, big.NewInt(req.BaseFee), big.NewInt(chain))
-	if newErr != nil {
-		return nil
+		return response
 	}
 	aspectInput := &types.AspectInput{
 		BlockHeight: req.BlockHeight,
-		Tx:          transaction,
-		Context:     req.Context,
 	}
-	response := &types.ResponseAspect{}
-	txHash := common.BytesToHash(transaction.Hash).String()
+	//todo gas
+	response.WithGas(10000, 10000)
 	// run aspects on received transaction
 	for _, aspect := range boundAspects {
-		var res *types.AspectOutput
+		res := &types.AspectOutput{}
 		runner, err := run.NewRunner(aspect.AspectId, aspect.Code)
 		if err != nil {
-			res = &types.AspectOutput{
-				Success: false,
-				Message: err.Error(),
-				Context: nil,
-			}
+			response.WithErr(err)
 		} else {
 			res, err = runner.JoinPoint(methodName, aspectInput)
-			if err != nil {
-				res = &types.AspectOutput{
-					Success: false,
-					Message: err.Error(),
-					Context: nil,
-				}
-			}
+			response.WithErr(err).WithAspectOutput(res)
+
 		}
 		id := aspect.AspectId
-
-		response.With(txHash, id, res)
+		response.WithAspectId(id)
+		if response.HasErr() {
+			// short-circuit Aspect call
+			return response
+		}
 	}
 	return response
 }
+
+func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	response := &types.ResponseAspect{
+		Success: true,
+	}
+	if req.To == nil || types.IsAspectContract(req.To) {
+		return response
+	}
+	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, *req.To)
+	// load aspects
+	if err != nil || len(boundAspects) == 0 {
+		return response
+	}
+
+	transaction := req.ToAspTx()
+	aspectInput := &types.AspectInput{
+		BlockHeight: req.BlockHeight,
+		Tx:          transaction,
+	}
+
+	return runAspect(methodName, boundAspects, aspectInput)
+}
+
+func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput *types.AspectInput) *types.ResponseAspect {
+	response := &types.ResponseAspect{
+		Success: true,
+	}
+	response.WithGas(10000, 10000)
+	// run aspects on received transaction
+	for _, aspect := range boundAspects {
+		res := &types.AspectOutput{}
+		response.WithAspectId(aspect.AspectId)
+		runner, err := run.NewRunner(aspect.AspectId, aspect.Code)
+		if err != nil {
+			response.WithErr(err)
+		} else {
+			res, err = runner.JoinPoint(methodName, aspectInput)
+			response.WithErr(err).WithAspectOutput(res)
+		}
+		if response.HasErr() {
+			// short-circuit Aspect call
+			return response
+		}
+	}
+	return response
+}
+
 func (aspect Aspect) OnTxReceive(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req)
+	tx := aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req)
+	return tx
 }
 
-func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
+func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.ResponseAspect {
+	return aspect.execAspectBlock(types.ON_BLOCK_INITIALIZE_METHOD, req)
+}
+func (aspect Aspect) OnTxVerify(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.ON_TX_VERIFY_METHOD, req)
+
+}
+
+func (aspect Aspect) OnAccountVerify(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.ON_ACCOUNT_VERIFY_METHOD, req)
+}
+func (aspect Aspect) OnGasPayment(req *types.RequestEthMsgAspect) *types.ResponseAspect {
 	return nil
 
 }
-func (aspect Aspect) OnTxVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
+func (aspect Aspect) PreTxExecute(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.PRE_TX_EXECUTE_METHOD, req)
 
-	return aspect.execAspectByEthTx(types.ON_TX_VERIFY_METHOD, req)
+}
+func (aspect Aspect) PreContractCall(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.PRE_CONTRACT_CALL_METHOD, req)
+
+}
+func (aspect Aspect) PostContractCall(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.POST_CONTRACT_CALL_METHOD, req)
+
+}
+func (aspect Aspect) PostTxExecute(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.PRE_TX_EXECUTE_METHOD, req)
+
+}
+func (aspect Aspect) OnTxCommit(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+	return aspect.execAspectByEthMsg(types.ON_TX_COMMIT_METHOD, req)
 
 }
 
-func (aspect Aspect) OnAccountVerify(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.ON_ACCOUNT_VERIFY_METHOD, req)
-}
-func (aspect Aspect) OnGasPayment(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return nil
-
-}
-func (aspect Aspect) PreTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.PRE_TX_EXECUTE_METHOD, req)
-
-}
-func (aspect Aspect) PreContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.PRE_CONTRACT_CALL_METHOD, req)
-
-}
-func (aspect Aspect) PostContractCall(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.POST_CONTRACT_CALL_METHOD, req)
-
-}
-func (aspect Aspect) PostTxExecute(req *types.RequestSdkTxAspect) *types.ResponseAspect {
-	return aspect.execAspectBySdkTx(types.POST_TX_EXECUTE_METHOD, req)
-
-}
-func (aspect Aspect) OnTxCommit(req *types.RequestEthTxAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthTx(types.ON_TX_COMMIT_METHOD, req)
-
-}
-
-func (aspect Aspect) OnBlockFinalize(req *types.RequestBlockAspect) *types.ResponseBlockAspect {
-	return nil
-
+func (aspect Aspect) OnBlockFinalize(req *types.RequestBlockAspect) *types.ResponseAspect {
+	return aspect.execAspectBlock(types.ON_BLOCK_FINALIZE_METHOD, req)
 }

@@ -1,0 +1,76 @@
+import { Protobuf } from 'as-proto/assembly';
+import { Context, State, Abi, Utils } from "./lib/index";
+import { TypeValue } from './lib/index';
+import { BigInt } from './lib/index'
+
+
+export namespace Storage {
+    {{~ it.storage:item:index }}
+
+    export class {{= item.label }} {
+
+        public before(): State<BigInt> | null {
+            let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+            let account = changes.all[0].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let value = BigInt.fromString(valueHex, 16);
+            return new State(account, value);
+        }
+
+        public changes(): Array<State<BigInt>> | null {
+            let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let res = new Array<State<BigInt>>(changes.all.length);
+            for (let i = 0; i < changes.all.length; i++) {
+                let account = changes.all[i].account;
+                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let value = BigInt.fromString(valueHex, 16);
+                res[i] = new State(account, value)
+            }
+            return res;
+        }
+
+        public latest(): State<BigInt> | null {
+            let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
+            if (changes.all.length == 0) {
+                return null;
+            }
+
+            let index = changes.all.length - 1;
+            let account = changes.all[index].account;
+            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let value = BigInt.fromString(valueHex, 16);
+            return new State(account, value);
+        }
+
+        public diff(): BigInt {
+            let changes = Context.getStateChanges(this.addr, "Storage.number1", this.prefix);
+            if (changes.all.length < 2) {
+                return BigInt.ZERO;
+            }
+
+            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let before = BigInt.fromString(beforeHex, 16);
+
+            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let after = BigInt.fromString(beforeHex, 16);
+
+            return after.sub(before);
+        }
+
+        addr: string;
+        prefix: Uint8Array;
+
+        constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
+            this.addr = addr;
+            this.prefix = prefix;
+        }
+    }
+    {{~ }}
+  }
