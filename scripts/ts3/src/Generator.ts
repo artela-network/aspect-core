@@ -27,7 +27,7 @@ export default class Generator {
     private tsPath: string;
 
     public refLib = `import { Protobuf } from 'as-proto/assembly';
-    import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
+import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
 
     public endBracket  = "}\n";
     public argsTemplage = `addr: string;
@@ -83,9 +83,12 @@ export default class Generator {
       return `export class ${argName} {\n`;
     }
 
-    getBeforeFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
+    getBeforeFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
         const param1 : string = typeTag;
-        const param2 : string = paramPrefix;
+        let param2 : string = "\""+paramPrefix+"\"";
+        if (isStruct) {
+          param2 = "this.variable";
+        }
         const param3 : string = valueFunc;
         let message: string = 
     `public before(): State<${param1}> | null {
@@ -101,9 +104,12 @@ export default class Generator {
         return message;
     }
 
-    getChangesFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
+    getChangesFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
         const param1 : string = typeTag;
-        const param2 : string = paramPrefix;
+        let param2 : string = "\""+paramPrefix+"\"";
+        if (isStruct) {
+          param2 = "this.variable";
+        }
         const param3 : string = valueFunc;
         let message: string = 
     `public changes(): Array<State<${param1}>> | null {
@@ -123,9 +129,12 @@ export default class Generator {
         return message;
     }
 
-    getLatestFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
+    getLatestFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
         const param1 : string = typeTag;
-        const param2 : string = paramPrefix;
+        let param2 : string = "\""+paramPrefix+"\"";
+        if (isStruct) {
+          param2 = "this.variable";
+        }
         const param3 : string = valueFunc;
         let message: string = 
     `public latest(): State<${param1}> | null {
@@ -142,9 +151,12 @@ export default class Generator {
         return message;
     }
 
-    getDiffFunc(typeTag: string, paramPrefix: string, valueFunc: string): string {
+    getDiffFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
         const param1 : string = typeTag;
-        const param2 : string = paramPrefix;
+        let param2 : string = "\""+paramPrefix+"\"";
+        if (isStruct) {
+          param2 = "this.variable";
+        }
         const param3 : string = valueFunc;
         let message: string = 
     `public diff(): ${param1}  | null {
@@ -160,6 +172,83 @@ export default class Generator {
         return message;
     }
 
+    getBeforeFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+      const param1 : string = typeTag;
+      const param2 : string = paramPrefix;
+      const param3 : string = valueFunc;
+      let message: string = 
+  `public before(key: string): State<${param1}> | null {
+    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    if (changes.all.length == 0) {
+        return null;
+    }
+
+    let account = changes.all[0].account;
+    let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+    return new State(account, value);
+  }\n`;
+      return message;
+  }
+
+  getChangesFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+      const param1 : string = typeTag;
+      const param2 : string = paramPrefix;
+      const param3 : string = valueFunc;
+      let message: string = 
+  `public changes(key: string): Array<State<${param1}>> | null {
+    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    if (changes.all.length == 0) {
+        return null;
+    }
+
+    let res = new Array<State<${param1}>>(changes.all.length);
+    for (let i = 0; i < changes.all.length; i++) {
+        let account = changes.all[i].account;
+        let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+        res[i] = new State(account, value)
+    }
+    return res;
+  }\n`;
+      return message;
+  }
+
+  getLatestFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+      const param1 : string = typeTag;
+      const param2 : string = paramPrefix;
+      const param3 : string = valueFunc;
+      let message: string = 
+  `public latest(key: string): State<${param1}> | null {
+    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    if (changes.all.length == 0) {
+        return null;
+    }
+
+    let index = changes.all.length - 1;
+    let account = changes.all[index].account;
+    let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+    return new State(account, value);
+  }\n`;
+      return message;
+  }
+
+  getDiffFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+      const param1 : string = typeTag;
+      const param2 : string = paramPrefix;
+      const param3 : string = valueFunc;
+      let message: string = 
+  `public diff(key: string): ${param1}  | null {
+    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    if (changes.all.length < 2) {
+        return null;
+    }
+
+    let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+    let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);
+    return after - before;
+  }\n`;
+      return message;
+  }
+
     getStructParam(name: string, wrapName: string): string {
       const param1 : string = name;
       const param2 : string = wrapName;
@@ -167,6 +256,18 @@ export default class Generator {
       `public ${param1}(): ${param2} {
         let encoded = Abi.encodeString("${param1}");
         return new ${param2}(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+    }\n`;
+      return message;
+    }
+
+    getMappintSecondParam(name: string, type: string, prefix: string): string {
+      const param1 : string = name;
+      const param2 : string = type;
+      const param3 : string = prefix; //ContractName.ParamNameInContract
+      let message: string =
+      `public ${param1}(key: string): ${param2} {
+        let encoded = Abi.encodeString(key);
+        return new ${param2}(this.addr, "${param3}", Utils.concatUint8Arrays(this.prefix, encoded))
     }\n`;
       return message;
     }

@@ -41,20 +41,20 @@
 			"type": "t_bool"
 		},
 		{
-			"astId": 20,
+			"astId": 22,
 			"contract": "contracts/Storage.sol:Storage",
-			"label": "p1",
+			"label": "accounts",
 			"offset": 0,
 			"slot": "4",
-			"type": "t_struct(Person)17_storage"
+			"type": "t_mapping(t_string_memory_ptr,t_struct(Person)17_storage)"
 		},
 		{
 			"astId": 25,
 			"contract": "contracts/Storage.sol:Storage",
-			"label": "accounts",
+			"label": "p1",
 			"offset": 0,
 			"slot": "5",
-			"type": "t_mapping(t_string_memory_ptr,t_struct(Person)17_storage)"
+			"type": "t_struct(Person)17_storage"
 		}
 	],
 	"types": {

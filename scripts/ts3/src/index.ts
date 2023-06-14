@@ -6,20 +6,14 @@ function isStringEmpty(str: string): boolean {
 }
   
 function getStrBetweenColon(str: string): string {
-    if (str.length < 2) {
-        return '';
-    }
+    const startIndex = str.indexOf('(');
+  const endIndex = str.indexOf(')');
 
-    const firstChar = str.charAt(0);
-    const lastChar = str.charAt(str.length - 1);
-    const startIndex = str.indexOf(firstChar) + 1;
-    const endIndex = str.lastIndexOf(lastChar);
+  if (startIndex === -1 || endIndex === -1 || startIndex >= endIndex) {
+    return '';
+  }
 
-    if (startIndex >= endIndex) {
-        return '';
-    }
-
-    return str.substring(startIndex, endIndex);
+  return str.substring(startIndex + 1, endIndex);
 }
   
 function getStrAfterLastColon(input: string): string {
@@ -44,8 +38,8 @@ function getStrBetLastCommaAndParen(input: string): string {
     return input.slice(lastCommaIndex + 1, lastParenthesisIndex).trim();
   }  
 
-function getTypeTag(item: StorageItem): string {
-    const paramType = getStrBetLastCommaAndParen(item.type);
+function getTypeTag(itemType: string): string {
+    const paramType = getStrBetLastCommaAndParen(itemType);
     switch(paramType) {
         case "t_int32":
             return "i32";
@@ -69,8 +63,11 @@ function getParamPrefix(item: StorageItem): string {
     return contractName + "." + item.label;
 }
 
-function getStructName(item: StorageItem): string {
-    const paramType = getStrBetLastCommaAndParen(item.type);
+function getStructName(typeStr: string): string {
+    if (typeStr.startsWith("t_mapping")) {
+        return typeStr;
+    }
+    const paramType = getStrBetLastCommaAndParen(typeStr);
     if (paramType.startsWith("t_struct")) {
         const structName = getStrBetweenColon(paramType);
         return structName;
@@ -78,8 +75,8 @@ function getStructName(item: StorageItem): string {
     return "";
 }
 
-function getValueFunc(item: StorageItem): string {
-    const paramType = getStrBetLastCommaAndParen(item.type);
+function getValueFunc(itemType: string): string {
+    const paramType = getStrBetLastCommaAndParen(itemType);
     switch(paramType) {
         case "t_uint32":
             return "Int32";
@@ -94,9 +91,10 @@ function getValueFunc(item: StorageItem): string {
     }
 }
 
-function handleBasic(item: StorageItem, tracer: Generator, isStruct: boolean) {
+function handleBasic(className: string, item: StorageItem, 
+    tracer: Generator, isStruct: boolean) {
     // 1 append class start
-    tracer.append(tracer.getClass(item.label), 1);
+    tracer.append(tracer.getClass(className), 1);
     // 2 append addr and prefix
     if (isStruct) {
         tracer.append(tracer.argsTemplageStruct ,2);
@@ -110,17 +108,17 @@ function handleBasic(item: StorageItem, tracer: Generator, isStruct: boolean) {
         tracer.append(tracer.constructorTemplate ,2);
     }
     // 4 append before func
-    tracer.append(tracer.getBeforeFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
+    tracer.append(tracer.getBeforeFunc(getTypeTag(item.type), 
+        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
     // 5 append changes func
-    tracer.append(tracer.getChangesFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
+    tracer.append(tracer.getChangesFunc(getTypeTag(item.type), 
+        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
     // 6 append lastest func
-    tracer.append(tracer.getLatestFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
-    // 7 append diff func
-    tracer.append(tracer.getDiffFunc(getTypeTag(item), 
-        getParamPrefix(item), getValueFunc(item)) ,2);
+    tracer.append(tracer.getLatestFunc(getTypeTag(item.type), 
+        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
+    // 7 append diff func (only for number type)
+    // tracer.append(tracer.getDiffFunc(getTypeTag(item.type), 
+    //     getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
     // 1' append class end
     tracer.append(tracer.endBracket, 1);
 }
@@ -137,20 +135,62 @@ function handleStruct(item: StorageItem, tracer: Generator,
     members.forEach(function (item) {
         tracer.append(tracer.getStructParam(item.label, structName+"_"+item.label) ,2)
     });
-
     // 1' append class end
     tracer.append(tracer.endBracket, 1);
 
     // 5 handle struct params to class
     members.forEach(function (item) {
-        handleBasic(item, tracer, true);
+        handleBasic(structName+"_"+item.label, item, tracer, true);
     });
+}
+
+function handleMapping(item: StorageItem, tracer: Generator, structNameSet: Set<string>) {
+    // 1 append class start
+    tracer.append(tracer.getClass(item.label), 1);
+    // 2 append addr and prefix
+    tracer.append(tracer.argsTemplage ,2);
+    // 3 append constructor
+    tracer.append(tracer.constructorTemplate ,2);
+    // 4 handle map second param
+    let secondParamIsBasic = true;
+    let secondParamType = getStrBetLastCommaAndParen(item.type);
+    if (secondParamType.startsWith("t_struct")) {
+        secondParamIsBasic = false;
+    }
+    if (!secondParamIsBasic) {
+        let structName = getStructName(secondParamType);
+        let prefix = getStrAfterLastColon(item.contract) + "." + item.label;
+        tracer.append(tracer.getMappintSecondParam(structName.toLowerCase(), structName, prefix), 2);
+        // if struct has not been hadle
+        if (!structNameSet.has(structName)) {
+            let members = obj.types[getStrBetLastCommaAndParen(item.type)].members as StorageItem[];
+            structNameSet.add(structName);
+            handleStruct(item, tracer, structName, members);
+        }
+    } else {
+        // 4.1 append before func
+        tracer.append(tracer.getBeforeFuncMap(getTypeTag(item.type), 
+            getParamPrefix(item), getValueFunc(item.type)) ,2);
+        // 4.2 append changes func
+        tracer.append(tracer.getChangesFuncMap(getTypeTag(item.type), 
+            getParamPrefix(item), getValueFunc(item.type)) ,2);
+        // 4.3 append lastest func
+        tracer.append(tracer.getLatestFuncMap(getTypeTag(item.type), 
+            getParamPrefix(item), getValueFunc(item.type)) ,2);
+        // 4.4 append diff func (only for number type)
+        // tracer.append(tracer.getDiffFuncMap(getTypeTag(item.type), 
+        //     getParamPrefix(item), getValueFunc(item.type)) ,2);
+    }
+    
+    // 1' append class end
+    tracer.append(tracer.endBracket, 1);        
 }
 
 const tracer: Generator = new Generator(
     "/Users/yuanyuan/go/src/github.com/artela-network/artelasdk/scripts/ts3/src/LayoutHoneyPot.json",
     "/Users/yuanyuan/go/src/github.com/artela-network/artelasdk/scripts/ts3/src/HoneyPot.ts");
-
+    
+const structNameSet: Set<string> = new Set();
 const jsonStr = tracer.getLayoutJson();
 const obj = tracer.getStorage(jsonStr);
 const items = obj.storage;
@@ -163,12 +203,15 @@ tracer.append(tracer.getNameSpace(getStrAfterLastColon(items[0].contract)), 0);
 
 // ----- 3.1 Loop to handle multi params start ------
 items.forEach(function (item) {
-    let structName = getStructName(item);
-    if (isStringEmpty(structName)) {
-        handleBasic(item, tracer, false);
-    } else {
+    let structName = getStructName(item.type);
+    if (structName.startsWith("t_mapping")) {
+        handleMapping(item, tracer, structNameSet);
+    } else if(!isStringEmpty(structName)) {
         let members = obj.types[item.type].members as StorageItem[];
+        structNameSet.add(structName);
         handleStruct(item, tracer, structName, members);
+    } else {
+        handleBasic(item.label ,item, tracer, false);
     }
 });
 // ----- 3.2 Loop to handle multi params end ------
