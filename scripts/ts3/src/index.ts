@@ -94,13 +94,21 @@ function getValueFunc(item: StorageItem): string {
     }
 }
 
-function handleBasic(item: StorageItem, tracer: Generator) {
+function handleBasic(item: StorageItem, tracer: Generator, isStruct: boolean) {
     // 1 append class start
     tracer.append(tracer.getClass(item.label), 1);
     // 2 append addr and prefix
-    tracer.append(tracer.argsTemplage ,2);
+    if (isStruct) {
+        tracer.append(tracer.argsTemplageStruct ,2);
+    } else {
+        tracer.append(tracer.argsTemplage ,2);
+    }
     // 3 append constructor
-    tracer.append(tracer.constructorTemplate ,2);
+    if (isStruct) {
+        tracer.append(tracer.constructorTemplateStruct ,2);
+    } else {
+        tracer.append(tracer.constructorTemplate ,2);
+    }
     // 4 append before func
     tracer.append(tracer.getBeforeFunc(getTypeTag(item), 
         getParamPrefix(item), getValueFunc(item)) ,2);
@@ -135,7 +143,7 @@ function handleStruct(item: StorageItem, tracer: Generator,
 
     // 5 handle struct params to class
     members.forEach(function (item) {
-        handleBasic(item, tracer);
+        handleBasic(item, tracer, true);
     });
 }
 
@@ -157,7 +165,7 @@ tracer.append(tracer.getNameSpace(getStrAfterLastColon(items[0].contract)), 0);
 items.forEach(function (item) {
     let structName = getStructName(item);
     if (isStringEmpty(structName)) {
-        handleBasic(item, tracer);
+        handleBasic(item, tracer, false);
     } else {
         let members = obj.types[item.type].members as StorageItem[];
         handleStruct(item, tracer, structName, members);
