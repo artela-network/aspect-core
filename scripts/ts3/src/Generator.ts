@@ -83,13 +83,23 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       return `export class ${argName} {\n`;
     }
 
-    getBeforeFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
+    getBeforeFunc(typeTag: string, paramPrefix: string, valueFunc: string, 
+      isStruct: boolean, isNumber: boolean): string {
         const param1 : string = typeTag;
         let param2 : string = "\""+paramPrefix+"\"";
         if (isStruct) {
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
+        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value)`;
+        if (isNumber) {
+          let param5 : string = "";
+          if ("BigInt" != typeTag) {
+            param5 = ".to"+valueFunc+"()";
+          }
+          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          let value = BigInt.fromString(valueHex, 16)${param5};`;
+        }
         let message: string = 
     `public before(): State<${param1}> | null {
       let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
@@ -98,19 +108,29 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       }
 
       let account = changes.all[0].account;
-      let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+      ${param4}
       return new State(account, value);
     }\n`;
         return message;
     }
 
-    getChangesFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
+    getChangesFunc(typeTag: string, paramPrefix: string, valueFunc: string, 
+      isStruct: boolean, isNumber: boolean): string {
         const param1 : string = typeTag;
         let param2 : string = "\""+paramPrefix+"\"";
         if (isStruct) {
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
+        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[i].value);`;
+        if (isNumber) {
+          let param5 : string = "";
+          if ("BigInt" != typeTag) {
+            param5 = ".to"+valueFunc+"()";
+          }
+          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          let value = BigInt.fromString(valueHex, 16)${param5};`;
+        }
         let message: string = 
     `public changes(): Array<State<${param1}>> | null {
       let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
@@ -121,7 +141,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       let res = new Array<State<${param1}>>(changes.all.length);
       for (let i = 0; i < changes.all.length; i++) {
           let account = changes.all[i].account;
-          let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+          ${param4}
           res[i] = new State(account, value)
       }
       return res;
@@ -129,13 +149,23 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         return message;
     }
 
-    getLatestFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
+    getLatestFunc(typeTag: string, paramPrefix: string, valueFunc: string, 
+      isStruct: boolean, isNumber: boolean): string {
         const param1 : string = typeTag;
         let param2 : string = "\""+paramPrefix+"\"";
         if (isStruct) {
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
+        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[index].value);`;
+        if (isNumber) {
+          let param5 : string = "";
+          if ("BigInt" != typeTag) {
+            param5 = ".to"+valueFunc+"()";
+          }
+          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);;
+          let value = BigInt.fromString(valueHex, 16)${param5};`;
+        }
         let message: string = 
     `public latest(): State<${param1}> | null {
       let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
@@ -145,19 +175,36 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
 
       let index = changes.all.length - 1;
       let account = changes.all[index].account;
-      let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+      ${param4}
       return new State(account, value);
     }\n`;
         return message;
     }
 
-    getDiffFunc(typeTag: string, paramPrefix: string, valueFunc: string, isStruct: boolean): string {
+    getDiffFunc(typeTag: string, paramPrefix: string, valueFunc: string, 
+      isStruct: boolean, isNumber: boolean): string {
         const param1 : string = typeTag;
         let param2 : string = "\""+paramPrefix+"\"";
+        let forNumber : string = "after - before";
+        if ("BigInt" == typeTag) {
+          forNumber = "after.sub(before)";
+        }
         if (isStruct) {
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
+        let param4 : string = `let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+        let param5 : string = `let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
+        if (isNumber) {
+          let param6 : string = "";
+          if ("BigInt" != typeTag) {
+            param6 = ".to"+valueFunc+"()";
+          }
+          param4 = `let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          let before = BigInt.fromString(beforeHex, 16)${param6};`;
+          param5 = `let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+          let after = BigInt.fromString(afterHex, 16)${param6};`;
+        }
         let message: string = 
     `public diff(): ${param1}  | null {
       let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
@@ -165,17 +212,28 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
           return null;
       }
 
-      let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);
-      let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);
-      return after - before;
+      ${param4}
+      ${param5}
+      
+      return ${forNumber};
     }\n`;
         return message;
     }
 
-    getBeforeFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+    getBeforeFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+      isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
+      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+      if (isNumber) {
+        let param5 : string = "";
+        if ("BigInt" != typeTag) {
+          param5 = ".to"+valueFunc+"()";
+        }
+        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        let value = BigInt.fromString(valueHex, 16)${param5};`;
+      }
       let message: string = 
   `public before(key: string): State<${param1}> | null {
     let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
@@ -184,16 +242,26 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
     }
 
     let account = changes.all[0].account;
-    let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+    ${param4}
     return new State(account, value);
   }\n`;
       return message;
   }
 
-  getChangesFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+  getChangesFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+    isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
+      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[i].value);`;
+      if (isNumber) {
+        let param5 : string = "";
+        if ("BigInt" != typeTag) {
+          param5 = ".to"+valueFunc+"()";
+        }
+        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        let value = BigInt.fromString(valueHex, 16)${param5};`;
+      }
       let message: string = 
   `public changes(key: string): Array<State<${param1}>> | null {
     let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
@@ -204,7 +272,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
     let res = new Array<State<${param1}>>(changes.all.length);
     for (let i = 0; i < changes.all.length; i++) {
         let account = changes.all[i].account;
-        let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+        ${param4}
         res[i] = new State(account, value)
     }
     return res;
@@ -212,10 +280,20 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       return message;
   }
 
-  getLatestFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+  getLatestFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+    isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
+      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[index].value);`;
+      if (isNumber) {
+        let param5 : string = "";
+        if ("BigInt" != typeTag) {
+          param5 = ".to"+valueFunc+"()";
+        }
+        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);;
+        let value = BigInt.fromString(valueHex, 16)${param5};`;
+      }
       let message: string = 
   `public latest(key: string): State<${param1}> | null {
     let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
@@ -225,16 +303,33 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
 
     let index = changes.all.length - 1;
     let account = changes.all[index].account;
-    let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);
+    ${param4}
     return new State(account, value);
   }\n`;
       return message;
   }
 
-  getDiffFuncMap(typeTag: string, paramPrefix: string, valueFunc: string): string {
+  getDiffFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+    isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
+      let param4 : string = `let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+      let param5 : string = `let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
+      let forNumber : string = "after - before";
+      if ("BigInt" == typeTag) {
+        forNumber = "after.sub(before)";
+      }
+      if (isNumber) {
+        let param6 : string = "";
+        if ("BigInt" != typeTag) {
+          param6 = ".to"+valueFunc+"()";
+        }
+        param4 = `let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        let before = BigInt.fromString(beforeHex, 16)${param6};`;
+        param5 = `let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+        let after = BigInt.fromString(afterHex, 16)${param6};`;
+      }
       let message: string = 
   `public diff(key: string): ${param1}  | null {
     let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
@@ -242,9 +337,10 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         return null;
     }
 
-    let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);
-    let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);
-    return after - before;
+    ${param4}
+    ${param5}
+
+    return ${forNumber};
   }\n`;
       return message;
   }

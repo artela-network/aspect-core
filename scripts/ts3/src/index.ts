@@ -43,6 +43,12 @@ function getTypeTag(itemType: string): string {
     switch(paramType) {
         case "t_int32":
             return "i32";
+        case "t_int64":
+            return "i64";
+        case "t_int256":
+            return "BigInt";
+        case "t_uint32":
+            return "u32";
         case "t_uint64":
             return "u64";
         case "t_uint256":
@@ -78,16 +84,48 @@ function getStructName(typeStr: string): string {
 function getValueFunc(itemType: string): string {
     const paramType = getStrBetLastCommaAndParen(itemType);
     switch(paramType) {
-        case "t_uint32":
+        case "t_int32":
             return "Int32";
-        case "t_uint256":
+        case "t_int64":
+            return "Int64";
+        case "t_int256":
             return "Int256";
-        case "t_string":
+        case "t_uint32":
+            return "UInt32";
+        case "t_uint64":
+            return "UInt64";
+        case "t_uint256":
+            return "UInt256";
+        case "t_string_storage":
             return "String";
         case "t_bool":
             return "Bool";
         default:
             return "";
+    }
+}
+
+function isNumber(itemType: string): boolean {
+    const paramType = getStrBetLastCommaAndParen(itemType);
+    switch(paramType) {
+        case "t_int32":
+            return true;
+        case "t_int64":
+            return true;
+        case "t_int256":
+            return true;
+        case "t_uint32":
+            return true;
+        case "t_uint64":
+            return true;
+        case "t_uint256":
+            return true;
+        case "t_string_storage":
+            return false;
+        case "t_bool":
+            return false;
+        default:
+            return false;
     }
 }
 
@@ -109,16 +147,19 @@ function handleBasic(className: string, item: StorageItem,
     }
     // 4 append before func
     tracer.append(tracer.getBeforeFunc(getTypeTag(item.type), 
-        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
+        getParamPrefix(item), getValueFunc(item.type), isStruct, isNumber(item.type)) ,2);
     // 5 append changes func
     tracer.append(tracer.getChangesFunc(getTypeTag(item.type), 
-        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
+        getParamPrefix(item), getValueFunc(item.type), isStruct, isNumber(item.type)) ,2);
     // 6 append lastest func
     tracer.append(tracer.getLatestFunc(getTypeTag(item.type), 
-        getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
+        getParamPrefix(item), getValueFunc(item.type), isStruct, isNumber(item.type)) ,2);
     // 7 append diff func (only for number type)
-    // tracer.append(tracer.getDiffFunc(getTypeTag(item.type), 
-    //     getParamPrefix(item), getValueFunc(item.type), isStruct) ,2);
+    if (isNumber(item.type)) {
+        tracer.append(tracer.getDiffFunc(getTypeTag(item.type), 
+        getParamPrefix(item), getValueFunc(item.type), isStruct, isNumber(item.type)) ,2);
+    }
+    
     // 1' append class end
     tracer.append(tracer.endBracket, 1);
 }
@@ -170,16 +211,18 @@ function handleMapping(item: StorageItem, tracer: Generator, structNameSet: Set<
     } else {
         // 4.1 append before func
         tracer.append(tracer.getBeforeFuncMap(getTypeTag(item.type), 
-            getParamPrefix(item), getValueFunc(item.type)) ,2);
+            getParamPrefix(item), getValueFunc(item.type), isNumber(item.type)) ,2);
         // 4.2 append changes func
         tracer.append(tracer.getChangesFuncMap(getTypeTag(item.type), 
-            getParamPrefix(item), getValueFunc(item.type)) ,2);
+            getParamPrefix(item), getValueFunc(item.type), isNumber(item.type)) ,2);
         // 4.3 append lastest func
         tracer.append(tracer.getLatestFuncMap(getTypeTag(item.type), 
-            getParamPrefix(item), getValueFunc(item.type)) ,2);
+            getParamPrefix(item), getValueFunc(item.type), isNumber(item.type)) ,2);
         // 4.4 append diff func (only for number type)
-        // tracer.append(tracer.getDiffFuncMap(getTypeTag(item.type), 
-        //     getParamPrefix(item), getValueFunc(item.type)) ,2);
+        if (isNumber(item.type)) {
+            tracer.append(tracer.getDiffFuncMap(getTypeTag(item.type), 
+            getParamPrefix(item), getValueFunc(item.type), isNumber(item.type)) ,2);
+        }
     }
     
     // 1' append class end
