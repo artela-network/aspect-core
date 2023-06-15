@@ -207,7 +207,7 @@ func (aspect Aspect) PostContractCall(req *types.RequestEthMsgAspect) *types.Res
 
 }
 func (aspect Aspect) PostTxExecute(req *types.RequestEthMsgAspect) *types.ResponseAspect {
-	return aspect.execAspectByEthMsg(types.PRE_TX_EXECUTE_METHOD, req)
+	return aspect.execAspectByEthMsg(types.POST_TX_EXECUTE_METHOD, req)
 
 }
 func (aspect Aspect) OnTxCommit(req *types.RequestEthMsgAspect) *types.ResponseAspect {
