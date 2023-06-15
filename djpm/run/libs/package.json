@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node tests",
-    "asbuild:debug": "asc runner/index.ts --target debug",
-    "asbuild:release": "asc runner/index.ts --target release",
+    "asbuild:debug": "asc as/index.ts --target debug",
+    "asbuild:release": "asc as/index.ts --target release",
     "asbuild": "npm run asbuild:debug && npm run asbuild:release",
     "start": "npx serve ."
   },
@@ -16,7 +16,6 @@
     "as-proto-gen": "^1.3.0",
     "assemblyscript": "^0.27.0",
     "web3": "^1.9.0",
-    "web3-atl-aspect": "^1.9.0",
     "web3-eth-contract": "^1.9.0",
     "web3-utils": "^1.9.0"
   },
