@@ -250,9 +250,11 @@ items.forEach(function (item) {
     if (structName.startsWith("t_mapping")) {
         handleMapping(item, tracer, structNameSet);
     } else if(!isStringEmpty(structName)) {
-        let members = obj.types[item.type].members as StorageItem[];
-        structNameSet.add(structName);
-        handleStruct(item, tracer, structName, members);
+        if (!structNameSet.has(structName)) {
+            let members = obj.types[item.type].members as StorageItem[];
+            structNameSet.add(structName);
+            handleStruct(item, tracer, structName, members);
+        }
     } else {
         handleBasic(item.label ,item, tracer, false);
     }

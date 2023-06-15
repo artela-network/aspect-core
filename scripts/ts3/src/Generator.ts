@@ -91,7 +91,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
-        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value)`;
+        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
         if (isNumber) {
           let param5 : string = "";
           if ("BigInt" != typeTag) {
@@ -163,7 +163,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
           if ("BigInt" != typeTag) {
             param5 = ".to"+valueFunc+"()";
           }
-          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);;
+          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
           let value = BigInt.fromString(valueHex, 16)${param5};`;
         }
         let message: string = 
@@ -291,7 +291,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         if ("BigInt" != typeTag) {
           param5 = ".to"+valueFunc+"()";
         }
-        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);;
+        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
