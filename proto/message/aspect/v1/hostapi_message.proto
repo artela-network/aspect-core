@@ -6,13 +6,11 @@ option go_package = "github.com/artela-network/artelasdk/types";
 message AspectInput {
   int64 blockHeight = 1;
   AspTransaction tx = 2;
-  map<string, string> context = 3;
 }
 
 message AspectOutput {
   bool success = 1;
   string message = 2;
-  map<string, string> context = 3;
 }
 
 // AccessTuple is the element type of an access list.

@@ -1,8 +1,5 @@
 version: v1
 deps:
-build:
-  roots:
-    - proto
 breaking:
   use:
     - FILE

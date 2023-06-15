@@ -5,3 +5,5 @@ djpm/run/testdata/package-lock.json
 djpm/run/testdata/runner/scheduler
 
 .idea
+
+combined.json

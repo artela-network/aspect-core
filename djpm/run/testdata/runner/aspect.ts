@@ -10,8 +10,7 @@ import { Storage } from "./contract_storage"
 class MyFirstAspect implements Aspect {
     isOwner(sender: string): bool {
         let value = Context.getProperty("owner");
-        let owners = value.split(",");
-        if (owners.includes(sender)) {
+        if (value.includes(sender)) {
             return true;
         }
         return false;
@@ -19,8 +18,7 @@ class MyFirstAspect implements Aspect {
 
     onContractBinding(contractAddr: string): bool {
         let value = Context.getProperty("binding");
-        let owners = value.split(",");
-        if (owners.includes(contractAddr)) {
+        if (value.includes(contractAddr)) {
             return true;
         }
         return false;
@@ -34,27 +32,7 @@ class MyFirstAspect implements Aspect {
         let ret = new AspectOutput();
         ret.success = true;
 
-        // add test data
-        ret.context.set("k1", "v1");
-        ret.context.set("k2", "v2");
 
-        // add hostapi return data
-        if (block) {
-            let header = block.header ? block.header : null;
-            if (header) {
-                ret.context.set("lastBlockNum", header.number.toString());
-            } else {
-                ret.context.set("lastBlockNum", "empty");
-            }
-        } else {
-            ret.context.set("lastBlockNum", "not found");
-        }
-
-        // add input data to output
-        const keys = input.context.keys();
-        for (let i = 0, len = keys.length; i < len; i++) {
-            ret.context.set(keys[i], input.context.get(keys[i]))
-        }
 
         // schedule a tx
         // this.scheduleTx();
@@ -151,5 +129,7 @@ class MyFirstAspect implements Aspect {
         return periodicSch.submit(tx);
     }
 }
+
+
 
 export default MyFirstAspect;
