@@ -1,15 +1,23 @@
-package run
+package types
 
 import (
 	"errors"
 	"math/big"
 	"reflect"
-
-	"github.com/artela-network/artelasdk/types"
 )
 
 type TypeValue struct {
-	value *types.Value
+	value *Value
+}
+
+func NewTypeValue(value *Value) *TypeValue {
+	return &TypeValue{
+		value: value,
+	}
+}
+
+func (tv *TypeValue) Value() *Value {
+	return tv.value
 }
 
 func (tv *TypeValue) FromUint32(val uint32) {
@@ -19,8 +27,8 @@ func (tv *TypeValue) FromUint32(val uint32) {
 		buf[i] = b
 		val = val >> 8
 	}
-	tv.value = &types.Value{
-		Kind: types.ValueKind_UINT32,
+	tv.value = &Value{
+		Kind: ValueKind_UINT32,
 		Data: buf[:],
 	}
 }
@@ -32,22 +40,22 @@ func (tv *TypeValue) FromInt32(val int32) {
 		buf[i] = b
 		val = val >> 8
 	}
-	tv.value = &types.Value{
-		Kind: types.ValueKind_UINT32,
+	tv.value = &Value{
+		Kind: ValueKind_INT32,
 		Data: buf[:],
 	}
 }
 
 func (tv *TypeValue) FromUint256(val *big.Int) {
-	tv.value = &types.Value{
-		Kind: types.ValueKind_UINT32,
+	tv.value = &Value{
+		Kind: ValueKind_UINT256,
 		Data: val.Bytes(),
 	}
 }
 
 func (tv *TypeValue) FromString(val string) {
-	tv.value = &types.Value{
-		Kind: types.ValueKind_STRING,
+	tv.value = &Value{
+		Kind: ValueKind_STRING,
 		Data: []byte(val),
 	}
 }
@@ -73,8 +81,6 @@ func (tv *TypeValue) ToUint64() uint64 {
 }
 
 func (tv *TypeValue) ToUint256() *big.Int {
-	// hex := hex.EncodeToString(tv.value.Data)
-	// _ = hex
 	return big.NewInt(0).SetBytes(tv.value.Data)
 }
 
@@ -88,19 +94,19 @@ func (tv *TypeValue) ToString() string {
 
 func (tv *TypeValue) GetValue() interface{} {
 	switch tv.value.Kind {
-	case types.ValueKind_STRING:
+	case ValueKind_STRING:
 		return tv.ToString()
-	case types.ValueKind_INT32:
+	case ValueKind_INT32:
 		return tv.ToInt32()
-	case types.ValueKind_INT64:
+	case ValueKind_INT64:
 		return tv.ToInt64()
-	case types.ValueKind_UINT32:
+	case ValueKind_UINT32:
 		return tv.ToUint32()
-	case types.ValueKind_UINT64:
+	case ValueKind_UINT64:
 		return tv.ToUint64()
-	case types.ValueKind_UINT256:
+	case ValueKind_UINT256:
 		return tv.ToUint256()
-	case types.ValueKind_BOOL:
+	case ValueKind_BOOL:
 		return tv.ToBool()
 	default:
 		return errors.New("not valid")

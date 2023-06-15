@@ -1,6 +1,8 @@
 package run
 
 import (
+	"encoding/hex"
+
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
 	"google.golang.org/protobuf/proto"
@@ -10,10 +12,12 @@ const (
 	// module of hostapis
 	moduleHostApi = "host"
 	moduleAbis    = "abi"
+	moduleUtils   = "utils"
 
 	// namespace of hostapis
 	nsHostApi = "__HostApi__"
 	nsAbis    = "__Abi__"
+	nsUtils   = "__Util__"
 
 	// entrance of api functions
 	ApiEntrance = "execute"
@@ -36,6 +40,7 @@ func NewRegister(aspectID string) *Register {
 func (r *Register) HostApis() *runtime.HostAPIRegistry {
 	r.registerApis(moduleHostApi, nsHostApi, r.apis())
 	r.registerApis(moduleAbis, nsAbis, r.abis())
+	r.registerApis(moduleUtils, nsUtils, r.utils())
 	return r.collection
 }
 
@@ -152,9 +157,9 @@ func (r *Register) abis() interface{} {
 				All: make([]*types.Value, len(decodes)),
 			}
 			for i, decoded := range decodes {
-				typeValue := &TypeValue{}
+				typeValue := &types.TypeValue{}
 				typeValue.SetValue(decoded)
-				values.All[i] = typeValue.value
+				values.All[i] = typeValue.Value()
 			}
 
 			byteArray, err := proto.Marshal(values)
@@ -170,7 +175,7 @@ func (r *Register) abis() interface{} {
 			}
 			vals := make([]interface{}, len(values.All))
 			for i, value := range values.All {
-				typeValue := &TypeValue{value: value}
+				typeValue := types.NewTypeValue(value)
 				vals[i] = typeValue.GetValue()
 			}
 			data, err := encodeParams(t, vals...)
@@ -178,6 +183,21 @@ func (r *Register) abis() interface{} {
 				return []byte{}
 			}
 			return data
+		},
+	}
+}
+
+func (r *Register) utils() interface{} {
+	return map[string]interface{}{
+		"fromHexString": func(s string) []byte {
+			data, err := hex.DecodeString(s)
+			if err != nil {
+				return []byte{}
+			}
+			return data
+		},
+		"toHexString": func(data []byte) string {
+			return hex.EncodeToString(data)
 		},
 	}
 }

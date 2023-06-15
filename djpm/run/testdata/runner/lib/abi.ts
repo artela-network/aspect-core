@@ -68,6 +68,15 @@ export class Abi {
         return this.encode(types, values);
     }
 
+    static encodeBigInit(val: BigInt): Uint8Array {
+        let types = "uint256";
+        let typeValue = new TypeValue();
+        typeValue.fromBigInt(val);
+        let values = new Values(new Array<Value>(1));
+        values.all[0] = typeValue.value;
+        return this.encode(types, values);
+    }
+
     // encode receives the types and values, return the hex of abi codes
     // the types is a array of type with a separator of ','
     // the values should be perfect match to the types.
@@ -131,7 +140,7 @@ export class TypeValue {
     }
 
     fromBigInt(input: BigInt): void {
-        let data = Utils.hexToUint8Array(input.toString());
+        let data = Utils.hexToUint8Array(input.toString(16));
         this.value = new Value(ValueKind.UINT256, data);
     }
 

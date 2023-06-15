@@ -1,3 +1,10 @@
+import { AString, AUint8Array } from "./types";
+
+declare namespace __Util__ {
+    function fromHexString(input: i32): i32;
+    function toHexString(input: i32): i32;
+}
+
 export class Utils {
     static stringToUint8Arrary(s: string): Uint8Array {
         const buffer = String.UTF8.encode(s);
@@ -13,35 +20,25 @@ export class Utils {
     }
 
     static uint8ArrayToHex(data: Uint8Array): string {
-        let hexString = "";
-        for (let i = 0; i < data.length; i++) {
-            let hex = data[i].toString(16);
-            if (hex.length < 2) {
-                hex = "0" + hex;
-            }
-            hexString += hex;
-        }
-        return hexString;
+        let outPtr = __Util__.toHexString(new AUint8Array(data).store());
+        let out = new AString();
+        out.load(outPtr);
+        return out.get();
     }
 
     static hexToUint8Array(s: string): Uint8Array {
-        s = s.replace(/\s/g, "");
         if (s.length % 2 !== 0) {
             throw new Error("Invalid hex string");
         }
 
-        const result = new Uint8Array(s.length / 2);
-
-        for (let i = 0, j = 0; i < s.length; i += 2, j++) {
-            const byteString = s.substring(i, 2);
-            const byte = parseInt(byteString, 16);
-            if (isNaN(byte)) {
-                throw new Error("Invalid hex string");
-            }
-            result[j] = byte;
+        let outPtr = __Util__.fromHexString(new AString(s).store());
+        let out = new AUint8Array();
+        out.load(outPtr);
+        let data = out.get();
+        if (data.length == 0 && s.length != 0) {
+            throw new Error("Invalid hex string");
         }
-
-        return result;
+        return data;
     }
 
     static uint8ArrayToBool(data: Uint8Array): bool {
