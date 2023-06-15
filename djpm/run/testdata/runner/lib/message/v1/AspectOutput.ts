@@ -10,12 +10,15 @@ export class AspectOutput {
     writer.uint32(8);
     writer.bool(message.success);
 
+    writer.uint32(18);
+    writer.string(message.message);
+
     const context = message.context;
     if (context !== null) {
       const contextKeys = context.keys();
       for (let i: i32 = 0; i < contextKeys.length; ++i) {
         const contextKey = contextKeys[i];
-        writer.uint32(18);
+        writer.uint32(26);
         writer.fork();
         writer.uint32(10);
         writer.string(contextKey);
@@ -38,6 +41,10 @@ export class AspectOutput {
           break;
 
         case 2:
+          message.message = reader.string();
+          break;
+
+        case 3:
           let contextKey: string = "";
           let contextValue: string = "";
           let contextHasKey: bool = false;
@@ -83,10 +90,16 @@ export class AspectOutput {
   }
 
   success: bool;
+  message: string;
   context: Map<string, string>;
 
-  constructor(success: bool = false, context: Map<string, string> = new Map()) {
+  constructor(
+    success: bool = false,
+    message: string = "",
+    context: Map<string, string> = new Map()
+  ) {
     this.success = success;
+    this.message = message;
     this.context = context;
   }
 }

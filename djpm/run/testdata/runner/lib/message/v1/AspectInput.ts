@@ -9,7 +9,7 @@ import { AspTransaction } from "./AspTransaction";
 export class AspectInput {
   static encode(message: AspectInput, writer: Writer): void {
     writer.uint32(8);
-    writer.uint64(message.blockHeight);
+    writer.int64(message.blockHeight);
 
     const tx = message.tx;
     if (tx !== null) {
@@ -43,7 +43,7 @@ export class AspectInput {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.blockHeight = reader.uint64();
+          message.blockHeight = reader.int64();
           break;
 
         case 2:
@@ -95,12 +95,12 @@ export class AspectInput {
     return message;
   }
 
-  blockHeight: u64;
+  blockHeight: i64;
   tx: AspTransaction | null;
   context: Map<string, string>;
 
   constructor(
-    blockHeight: u64 = 0,
+    blockHeight: i64 = 0,
     tx: AspTransaction | null = null,
     context: Map<string, string> = new Map()
   ) {

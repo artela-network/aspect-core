@@ -1,78 +1,49 @@
-import { ABool, AString, AUint8Array } from "./types";
+import { ABool, AString, AUint8Array, AspectInput, AspectOutput } from "./message";
+
+import { IAspectBlock, IAspectTransaction } from "./interfaces"
 import { Protobuf } from 'as-proto/assembly';
-import { BlockOutput } from "../aspect/v1/BlockOutput"
-import { EthBlock } from "../aspect/v1/EthBlock";
-import { AspectInput } from "../aspect/v1/AspectInput"
-import { AspectOutput } from "../aspect/v1/AspectOutput"
-import { Schedule } from "../scheduler/v1/Schedule"
-import { StateChanges } from "../aspect/v1/StateChanges"
+import { Context } from "./host";
 
-export interface Aspect {
-    isOwner(sender: string): bool
-    onContractBinding(contractAddr: string): bool
+export class Entry {
+    private readonly blockAspect: IAspectBlock;
+    private readonly transactionAspect: IAspectTransaction;
 
-    onTxReceive(arg: AspectInput): AspectOutput
-    onBlockInitialize(arg: AspectInput): AspectOutput
-    onTxVerify(arg: AspectInput): AspectOutput
-    onAccountVerify(arg: AspectInput): AspectOutput
-    onGasPayment(arg: AspectInput): AspectOutput
-    preTxExecute(arg: AspectInput): AspectOutput
-    preContractCall(arg: AspectInput): AspectOutput
-    postContractCall(arg: AspectInput): AspectOutput
-    postTxExecute(arg: AspectInput): AspectOutput
-    onTxCommit(arg: AspectInput): AspectOutput
-    onBlockFinalize(arg: AspectInput): AspectOutput
-}
+    constructor(blockAspect: IAspectBlock, transactionAspect: IAspectTransaction) {
+        this.blockAspect = blockAspect;
+        this.transactionAspect = transactionAspect;
+    }
 
-class DummyAspect implements Aspect {
-    isOwner(sender: string): bool {
-        return false;
+    public isBlockLevel(): i32 {
+        return this.storeOutputBool(this.blockAspect != null);
     }
-    onContractBinding(contractAddr: string): bool {
-        return false;
-    }
-    onTxReceive(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onBlockInitialize(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onTxVerify(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onAccountVerify(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onGasPayment(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    preTxExecute(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    preContractCall(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    postContractCall(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    postTxExecute(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onTxCommit(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-    onBlockFinalize(arg: AspectInput): AspectOutput {
-        return new AspectOutput();
-    }
-}
 
-class Entry {
-    public buildAspect: () => Aspect;
+    public isTransactionLevel(): i32 {
+        return this.storeOutputBool(this.transactionAspect != null);
+    }
 
-    constructor() {
-        this.buildAspect = function () {
-            return new DummyAspect();
-        }
+    loadAspectInput(argPtr: i32): AspectInput {
+        let encodedArg = new AUint8Array();
+        encodedArg.load(argPtr);
+        return Protobuf.decode<AspectInput>(encodedArg.get(), AspectInput.decode);
+    }
+
+    loadInputString(argPtr: i32): string {
+        let arg = new AString();
+        arg.load(argPtr);
+        return arg.get();
+    }
+
+    storeOutputBool(out: bool): i32 {
+        let b = new ABool();
+        b.set(out);
+        return b.store();
+    }
+
+    storeAspectOutput(output: AspectOutput): i32 {
+        let encodedOutput = Protobuf.encode(output, AspectOutput.encode);
+        let ret = new AUint8Array();
+        ret.set(encodedOutput);
+        return ret.store();
     }
 
     public execute(methodPtr: i32, argPtr: i32): i32 {
@@ -80,80 +51,78 @@ class Entry {
         methodArg.load(methodPtr);
         let method = methodArg.get();
 
-        let aspect = this.buildAspect();
-        if (aspect instanceof DummyAspect) {
+        if (this.blockAspect == null && this.transactionAspect == null) {
             throw new Error("invalid aspect code");
         }
 
-        if (method == "isOwner" || method == "onContractBinding") {
-            let arg = new AString();
-            arg.load(argPtr);
-            var out: bool;
-            if (method == "isOwner") {
-                out = aspect.isOwner(arg.get());
-            } else {
-                out = aspect.onContractBinding(arg.get());
-            }
-            let b = new ABool();
-            b.set(out);
-            return b.store();
-        }
-
-        let encodedArg = new AUint8Array();
-        encodedArg.load(argPtr);
-
-        const input = Protobuf.decode<AspectInput>(encodedArg.get(), AspectInput.decode);
-        var output: AspectOutput
         switch (true) {
-            case method == "onTxReceive":
-                output = aspect.onTxReceive(input);
-                break;
-            case method == "onBlockInitialize":
-                output = aspect.onBlockInitialize(input);
-                break;
-            case method == "onTxVerify":
-                output = aspect.onTxVerify(input);
-                break;
-            case method == "onAccountVerify":
-                output = aspect.onAccountVerify(input);
-                break;
-            case method == "onGasPayment":
-                output = aspect.onGasPayment(input);
-                break;
-            case method == "preTxExecute":
-                output = aspect.preTxExecute(input);
-                break;
-            case method == "preContractCall":
-                output = aspect.preContractCall(input);
-                break;
-            case method == "postTxExecute":
-                output = aspect.postTxExecute(input);
-                break;
-            case method == "onTxCommit":
-                output = aspect.onTxCommit(input);
-                break;
-            case method == "onBlockFinalize":
-                output = aspect.onBlockFinalize(input);
-                break;
-            default:
-                throw new Error("method " + method + " not valid");
+            case method === "onContractBinding" && this.transactionAspect != null:
+                let arg = this.loadInputString(argPtr);
+                let out = this.transactionAspect.onContractBinding(arg);
+                return this.storeOutputBool(out);
+
+            case method === "isOwner":
+                let arg = this.loadInputString(argPtr);
+                if (this.transactionAspect != null) {
+                    let out = this.transactionAspect.isOwner(arg);
+                    return this.storeOutputBool(out);
+                }
+
+                let out = this.blockAspect.isOwner(arg);
+                return this.storeOutputBool(out);
         }
 
-        let encodedOutput = Protobuf.encode(output, AspectOutput.encode);
-        let ret = new AUint8Array();
-        ret.set(encodedOutput);
-        let retPtr = ret.store();
-        return retPtr;
+        let arg = this.loadAspectInput(argPtr);
+        var out: AspectOutput;
+        switch (true) {
+            case (method == "onTxReceive" && this.transactionAspect != null):
+                out = this.transactionAspect.onTxReceive(arg);
+                break;
+
+            case method == "onBlockInitialize" && this.blockAspect != null:
+                out = this.blockAspect.onBlockInitialize(arg);
+                break;
+
+            case method == "onTxVerify" && this.transactionAspect != null:
+                out = this.transactionAspect.onTxVerify(arg);
+                break
+
+            case method == "onAccountVerify" && this.transactionAspect != null:
+                out = this.transactionAspect.onAccountVerify(arg);
+                break;
+
+            case method == "onGasPayment" && this.transactionAspect != null:
+                out = this.transactionAspect.onGasPayment(arg);
+                break;
+
+            case method == "preTxExecute" && this.transactionAspect != null:
+                out = this.transactionAspect.preTxExecute(arg);
+                break;
+
+            case method == "preContractCall" && this.transactionAspect != null:
+
+                out = this.transactionAspect.preContractCall(arg);
+                break;
+
+            case method == "postContractCall" && this.transactionAspect != null:
+                out = this.transactionAspect.postContractCall(arg);
+                break;
+
+            case method == "postTxExecute" && this.transactionAspect != null:
+                out = this.transactionAspect.postTxExecute(arg);
+                break;
+
+            case method == "onTxCommit" && this.transactionAspect != null:
+                out = this.transactionAspect.onTxCommit(arg);
+                break;
+
+            case method == "onBlockFinalize" && this.blockAspect != null:
+                out = this.blockAspect.onBlockFinalize(arg);
+                break;
+
+            default:
+                throw new Error("method " + method + " not found");
+        }
+        return this.storeAspectOutput(out);
     }
 }
-
-export let entry = new Entry();
-
-export function execute(methodPtr: i32, argPtr: i32): i32 {
-    return entry.execute(methodPtr, argPtr)
-}
-
-export function allocate(size: i32): i32 {
-    return heap.alloc(size) as i32;
-}
-

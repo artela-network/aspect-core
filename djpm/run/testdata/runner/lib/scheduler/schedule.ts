@@ -1,10 +1,7 @@
-import { AspTransaction } from "../aspect/v1/AspTransaction";
-import { Context } from "./host";
-import { Schedule as ScheduleMsg } from "../scheduler/v1/Schedule";
-import { ScheduleId as ScheduleMsgId } from "../scheduler/v1/ScheduleId";
-import { ScheduleStatus } from "../scheduler/v1/ScheduleStatus";
-import { Utils } from "./utils";
-import { Option } from "./option";
+import { AspTransaction } from "../message";
+import { Context } from "../host/hostapi";
+import { ScheduleMsg, ScheduleMsgId, ScheduleStatus, Opts } from "./index";
+import { Utils } from "../utils";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -115,9 +112,8 @@ export class AdHocSchedule implements Schedule {
     }
 }
 
-
 export class ScheduleTx {
-    public New(input: string, msg: Option): AspTransaction {
+    public New(input: string, msg: Opts): AspTransaction {
         let inputBytes = Utils.stringToUint8Arrary(input);
 
         let tx = new AspTransaction();

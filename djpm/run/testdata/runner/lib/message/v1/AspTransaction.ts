@@ -47,7 +47,7 @@ export class AspTransaction {
     writer.bytes(message.blockHash);
 
     writer.uint32(96);
-    writer.uint64(message.blockNumber);
+    writer.int64(message.blockNumber);
 
     writer.uint32(106);
     writer.string(message.from);
@@ -56,7 +56,7 @@ export class AspTransaction {
     writer.bytes(message.hash);
 
     writer.uint32(120);
-    writer.uint64(message.transactionIndex);
+    writer.int64(message.transactionIndex);
 
     writer.uint32(128);
     writer.uint64(message.type);
@@ -125,7 +125,7 @@ export class AspTransaction {
           break;
 
         case 12:
-          message.blockNumber = reader.uint64();
+          message.blockNumber = reader.int64();
           break;
 
         case 13:
@@ -137,7 +137,7 @@ export class AspTransaction {
           break;
 
         case 15:
-          message.transactionIndex = reader.uint64();
+          message.transactionIndex = reader.int64();
           break;
 
         case 16:
@@ -176,10 +176,10 @@ export class AspTransaction {
   input: Uint8Array;
   accessList: Array<AspAccessTuple>;
   blockHash: Uint8Array;
-  blockNumber: u64;
+  blockNumber: i64;
   from: string;
   hash: Uint8Array;
-  transactionIndex: u64;
+  transactionIndex: i64;
   type: u64;
   v: Uint8Array;
   r: Uint8Array;
@@ -197,10 +197,10 @@ export class AspTransaction {
     input: Uint8Array = new Uint8Array(0),
     accessList: Array<AspAccessTuple> = [],
     blockHash: Uint8Array = new Uint8Array(0),
-    blockNumber: u64 = 0,
+    blockNumber: i64 = 0,
     from: string = "",
     hash: Uint8Array = new Uint8Array(0),
-    transactionIndex: u64 = 0,
+    transactionIndex: i64 = 0,
     type: u64 = 0,
     v: Uint8Array = new Uint8Array(0),
     r: Uint8Array = new Uint8Array(0),

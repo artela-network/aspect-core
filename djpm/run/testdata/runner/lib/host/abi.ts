@@ -1,10 +1,6 @@
-import { AI32, AString, AUint8Array, typeIndex } from "./types";
-import { Utils } from "./utils"
-import { ValueKind } from "../aspect/v1/ValueKind";
-import { Values } from "../aspect/v1/Values";
+import { AString, AUint8Array, ValueKind, Values, Value, BigInt } from "../message";
+import { Utils } from "../utils"
 import { Protobuf } from 'as-proto/assembly';
-import { Value } from "../aspect/v1/Value";
-import { BigInt } from "./bigint";
 
 
 declare namespace __Abi__ {

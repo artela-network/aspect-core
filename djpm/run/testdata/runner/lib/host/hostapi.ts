@@ -1,16 +1,27 @@
-import { ABool, AString, AUint8Array } from "./types";
-import { Protobuf } from 'as-proto/assembly';
-import { BlockOutput } from "../aspect/v1/BlockOutput"
-import { EthBlock } from "../aspect/v1/EthBlock";
-import { Schedule } from "../scheduler/v1/Schedule"
-import { StateChanges } from "../aspect/v1/StateChanges"
+import { BlockOutput, EthBlock, StateChanges, ABool, AString, AUint8Array } from "../message";
+import { Protobuf } from "as-proto/assembly";
+import { ScheduleMsg } from "../scheduler";
+
 
 declare namespace __HostApi__ {
     function lastBlock(): i32
+
     function currentBlock(): i32
+
     function localCall(ptr: i32): i32
+
     function getProperty(ptr: i32): i32
+
     function scheduleTx(ptr: i32): i32
+
+    function setContext(keyPtr: i32, valuePtr: i32): bool
+
+    function getContext(ptr: i32): i32
+
+    function setAspectState(keyPtr: i32, valuePtr: i32): bool
+
+    function getAspectState(ptr: i32): i32
+
     function getStateChanges(addr: i32, variable: i32, key: i32): i32
 }
 
@@ -49,8 +60,50 @@ export class Context {
         return output.get();
     }
 
-    static scheduleTx(sch: Schedule): bool {
-        const encoded = Protobuf.encode(sch, Schedule.encode);
+    static setContext(key: string, value: string): bool {
+        let inputKey = new AString();
+        inputKey.set(key);
+        let inPtr = inputKey.store();
+        let inputValue = new AString();
+        inputValue.set(value);
+        let ptrValue = inputValue.store();
+        return __HostApi__.setContext(inPtr, ptrValue);
+    }
+
+    static getContext(key: string): string {
+        let input = new AString();
+        input.set(key);
+        let inPtr = input.store();
+        let outPtr = __HostApi__.getContext(inPtr);
+        let output = new AString();
+        output.load(outPtr);
+        return output.get();
+    }
+
+    static setAspectState(key: string, value: string): bool {
+        let inputKey = new AString();
+        inputKey.set(key);
+        let inPtr = inputKey.store();
+        let inputValue = new AString();
+        inputValue.set(value);
+        let ptrValue = inputValue.store();
+
+        return __HostApi__.setAspectState(inPtr, ptrValue);
+
+    }
+
+    static getAspectState(key: string): string {
+        let input = new AString();
+        input.set(key);
+        let inPtr = input.store();
+        let outPtr = __HostApi__.getAspectState(inPtr);
+        let output = new AString();
+        output.load(outPtr);
+        return output.get();
+    }
+
+    static scheduleTx(sch: ScheduleMsg): bool {
+        const encoded = Protobuf.encode(sch, ScheduleMsg.encode);
         let input = new AUint8Array();
         input.set(encoded);
         let inputPtr = input.store();
