@@ -46,6 +46,11 @@ func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.Aspect
 	}
 	res, err := r.vm.Call(ApiEntrance, name, reqData)
 	if err != nil {
+		call, err := r.vm.Call(GetErr)
+		if err == nil && call != nil {
+			message := call.(string)
+			return nil, errors.New(message)
+		}
 		return nil, err
 	}
 
@@ -69,6 +74,12 @@ func (r *Runner) IsOwner(sender string) (bool, error) {
 
 	res, err := r.vm.Call(ApiEntrance, "isOwner", sender)
 	if err != nil {
+		call, err := r.vm.Call(GetErr)
+		if err == nil && call != nil {
+			message := call.(string)
+			return false, errors.New(message)
+		}
+
 		return false, err
 	}
 
@@ -81,6 +92,11 @@ func (r *Runner) IsBlockLevel() (bool, error) {
 	}
 	res, err := r.vm.Call(CheckBlockLevel)
 	if err != nil {
+		call, err := r.vm.Call(GetErr)
+		if err == nil && call != nil {
+			message := call.(string)
+			return false, errors.New(message)
+		}
 		return false, err
 	}
 	return res.(bool), nil
@@ -93,6 +109,11 @@ func (r *Runner) OnContractBinding(sender string) (bool, error) {
 
 	res, err := r.vm.Call(ApiEntrance, "onContractBinding", sender)
 	if err != nil {
+		call, err := r.vm.Call(GetErr)
+		if err == nil && call != nil {
+			message := call.(string)
+			return false, errors.New(message)
+		}
 		return false, err
 	}
 
@@ -105,6 +126,11 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	}
 	res, err := r.vm.Call(CheckTransactionLevel)
 	if err != nil {
+		call, err := r.vm.Call(GetErr)
+		if err == nil && call != nil {
+			message := call.(string)
+			return false, errors.New(message)
+		}
 		return false, err
 	}
 	return res.(bool), nil

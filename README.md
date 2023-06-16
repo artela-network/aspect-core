@@ -33,4 +33,4 @@ All of our major modules are currently under `/artela/aspect` folder, includes t
 - `djpm/run` : Provides basic aspect functionalities, including call WASM runtime, gas metering and etc.
 - `scheduler` : Provides the functionalities to generate automated on-chain transaction
 - `proto` : define protobuf message for Aspect
-- `types` : Basic data types of aspects
+- `types` : Basic data type of aspects

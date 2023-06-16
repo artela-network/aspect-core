@@ -24,6 +24,7 @@ const (
 
 	CheckBlockLevel       = "isBlockLevel"
 	CheckTransactionLevel = "isTransactionLevel"
+	GetErr                = "getErr"
 )
 
 // Register keeps the properity owned by current
