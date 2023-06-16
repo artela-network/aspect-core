@@ -20,6 +20,9 @@ type HostApi interface {
 	// GetProperty returns the configuration of aspect
 	GetProperty(aspectID string, key string) (string, error)
 
+	// GetStateChanges returns the state changes of fields
+	GetStateChanges(addr string, variable string, key []byte) *StateChanges
+
 	SetContext(aspectID string, key, value string) error
 	GetContext(aspectID string, key string) (string, error)
 

@@ -18,7 +18,7 @@ func TestJoinPoint(t *testing.T) {
 	}
 
 	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm"))
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
 
 	name := "onTxReceive"
 	input := &aspectType.AspectInput{
@@ -59,14 +59,14 @@ func TestIsOwner(t *testing.T) {
 		return nil, errors.New("not init")
 	}
 
-	//cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm")
+	cwd, _ := os.Getwd()
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
 	ret, err := runner.IsOwner("hello")
 	require.Equal(t, nil, err)
-	require.Equal(t, false, ret)
+	require.Equal(t, true, ret)
 }
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
@@ -76,11 +76,11 @@ func TestOnContractBinding(t *testing.T) {
 	}
 
 	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/basic/wasm/build/release.wasm"))
+	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
 	ret, err := runner.OnContractBinding("0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
-	require.Equal(t, false, ret)
+	require.Equal(t, true, ret)
 }

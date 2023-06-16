@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
 	"math/big"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"

@@ -1,6 +1,8 @@
 package run
 
 import (
+	"encoding/hex"
+
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
 	"google.golang.org/protobuf/proto"
@@ -9,9 +11,13 @@ import (
 const (
 	// module of hostapis
 	moduleHostApi = "hostapi"
+	moduleAbis    = "abi"
+	moduleUtils   = "utils"
 
 	// namespace of hostapis
 	nsHostApi = "__HostApi__"
+	nsAbis    = "__Abi__"
+	nsUtils   = "__Util__"
 
 	// entrance of api functions
 	ApiEntrance = "execute"
@@ -22,27 +28,31 @@ const (
 
 // Register keeps the properity owned by current
 type Register struct {
-	aspectID string
+	aspectID   string
+	collection *runtime.HostAPIRegistry
 }
 
 func NewRegister(aspectID string) *Register {
-	return &Register{aspectID: aspectID}
+	return &Register{
+		aspectID:   aspectID,
+		collection: runtime.NewHostAPIRegistry(),
+	}
 }
 
 // HostApis return the collection of aspect runtime host apis
 func (r *Register) HostApis() *runtime.HostAPIRegistry {
-	return r.hostApis(moduleHostApi, nsHostApi)
+	r.registerApis(moduleHostApi, nsHostApi, r.apis())
+	r.registerApis(moduleAbis, nsAbis, r.abis())
+	r.registerApis(moduleUtils, nsUtils, r.utils())
+	return r.collection
 }
 
-func (r *Register) hostApis(module, namespace string) *runtime.HostAPIRegistry {
-	collection := runtime.NewHostAPIRegistry()
-
-	for method, fn := range r.apis().(map[string]interface{}) {
+func (r *Register) registerApis(module, namespace string, apis interface{}) {
+	for method, fn := range apis.(map[string]interface{}) {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
-		collection.AddApi(runtime.Module(module), runtime.Namesapce(namespace), runtime.MethodName(method), fn)
+		r.collection.AddApi(runtime.Module(module), runtime.Namesapce(namespace), runtime.MethodName(method), fn)
 	}
-	return collection
 }
 
 func (r *Register) apis() interface{} {
@@ -171,6 +181,82 @@ func (r *Register) apis() interface{} {
 			}
 			sch.Id.AspectId = r.aspectID
 			return host.ScheduleTx(sch)
+		},
+		"getStateChanges": func(addr string, variable string, key []byte) []byte {
+			if types.GetHostApiHook == nil {
+				return nil
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return nil
+			}
+			changes := host.GetStateChanges(addr, variable, key)
+			if changes == nil {
+				return nil
+			}
+
+			data, err := proto.Marshal(changes)
+			if err != nil {
+				return nil
+			}
+			return data
+		},
+	}
+}
+
+func (r *Register) abis() interface{} {
+	return map[string]interface{}{
+		"decodeParams": func(t string, data []byte) []byte {
+			decodes, err := decodeParams(t, data)
+			if err != nil {
+				return []byte{}
+			}
+
+			values := &types.Values{
+				All: make([]*types.Value, len(decodes)),
+			}
+			for i, decoded := range decodes {
+				typeValue := &types.TypeValue{}
+				typeValue.SetValue(decoded)
+				values.All[i] = typeValue.Value()
+			}
+
+			byteArray, err := proto.Marshal(values)
+			if err != nil {
+				return []byte{}
+			}
+			return byteArray
+		},
+		"encodeParams": func(t string, valueData []byte) []byte {
+			values := &types.Values{}
+			if err := proto.Unmarshal(valueData, values); err != nil {
+				return []byte{}
+			}
+			vals := make([]interface{}, len(values.All))
+			for i, value := range values.All {
+				typeValue := types.NewTypeValue(value)
+				vals[i] = typeValue.GetValue()
+			}
+			data, err := encodeParams(t, vals...)
+			if err != nil {
+				return []byte{}
+			}
+			return data
+		},
+	}
+}
+
+func (r *Register) utils() interface{} {
+	return map[string]interface{}{
+		"fromHexString": func(s string) []byte {
+			data, err := hex.DecodeString(s)
+			if err != nil {
+				return []byte{}
+			}
+			return data
+		},
+		"toHexString": func(data []byte) string {
+			return hex.EncodeToString(data)
 		},
 	}
 }

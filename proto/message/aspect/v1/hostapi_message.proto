@@ -1,18 +1,16 @@
 syntax = "proto3";
 package aspect.v1;
 
-
 option go_package = "github.com/artela-network/artelasdk/types";
 
-
-message AspectInput  {
+message AspectInput {
   int64 blockHeight = 1;
   AspTransaction tx = 2;
 }
 
-message AspectOutput  {
-  bool  success = 1;
-  string  message=2;
+message AspectOutput {
+  bool success = 1;
+  string message = 2;
 }
 
 // AccessTuple is the element type of an access list.
@@ -21,39 +19,39 @@ message AspAccessTuple {
   // address is a hex formatted ethereum address
   string address = 1;
   // storage_keys are hex formatted hashes of the storage keys
-  repeated string storage_keys = 2 ;
+  repeated string storage_keys = 2;
 }
 
 message AspTransaction {
   // chain_id of the destination EVM chain
-  string chain_id = 1 ;
+  string chain_id = 1;
   // nonce corresponds to the account nonce (transaction sequence).
   uint64 nonce = 2;
   // gas_tip_cap defines the max value for the gas tip
-  string gas_tip_cap = 3 ;
+  string gas_tip_cap = 3;
   // gas_fee_cap defines the max value for the gas fee
   string gas_fee_cap = 4;
   // gas defines the gas limit defined for the transaction.
   uint64 gas_limit = 5;
 
-  uint64 gas_price=6;
+  uint64 gas_price = 6;
 
   // to is the hex formatted address of the recipient
   string to = 7;
   // value defines the the transaction amount.
-  uint64 value = 8 ;
+  uint64 value = 8;
   // data is the data payload bytes of the transaction.
   bytes input = 9;
   // accesses is an array of access tuples
   repeated AspAccessTuple accessList = 10;
 
-  bytes  blockHash = 11;
+  bytes blockHash = 11;
 
-  int64  blockNumber = 12;
+  int64 blockNumber = 12;
 
-  string  from = 13;
+  string from = 13;
 
-  bytes  hash = 14;
+  bytes hash = 14;
 
   int64 transactionIndex = 15;
 
@@ -66,12 +64,11 @@ message AspTransaction {
   bytes s = 19;
 }
 
-
-message AspectCode{
-  string aspectId=1;
-  uint64 version=2;
-  uint32 priority=3;
-  bytes code=4;
+message AspectCode {
+  string aspectId = 1;
+  uint64 version = 2;
+  uint32 priority = 3;
+  bytes code = 4;
 }
 
 message BlockOutput {
@@ -111,3 +108,30 @@ message EthHeader {
   uint64 nonce = 14;
   uint64 baseFeePerGas = 15;
 }
+
+message StateChange {
+  string account = 1; // hex string of account
+  bytes value = 2;
+}
+
+message StateChanges { repeated StateChange all = 1; }
+
+enum ValueKind {
+  INT16 = 0;
+  INT32 = 1;
+  INT64 = 2;
+  INT256 = 3;
+  UINT16 = 4;
+  UINT32 = 5;
+  UINT64 = 6;
+  UINT256 = 7;
+  BOOL = 8;
+  STRING = 9;
+}
+
+message Value {
+  ValueKind kind = 1;
+  bytes data = 2;
+}
+
+message Values { repeated Value all = 1; }
