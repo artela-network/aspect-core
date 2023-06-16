@@ -3,11 +3,22 @@ import { AString, AUint8Array } from "./message";
 declare namespace __Util__ {
     function fromHexString(input: i32): i32;
     function toHexString(input: i32): i32;
+    function revert(input: i32): i32;
+
 }
 
 export namespace Utils {
     export function alloc(size: i32): i32 {
         return heap.alloc(size) as i32;
+    }
+
+
+    export function revert(message: string): void {
+        let input = new AString();
+        input.set(message);
+        let inPtr = input.store();
+         __Util__.revert(inPtr);
+         throw new Error(message)
     }
 
     export function stringToUint8Arrary(s: string): Uint8Array {

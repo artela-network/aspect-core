@@ -20,17 +20,16 @@ const (
 	nsUtils   = "__Util__"
 
 	// entrance of api functions
-	ApiEntrance = "execute"
-
+	ApiEntrance           = "execute"
 	CheckBlockLevel       = "isBlockLevel"
 	CheckTransactionLevel = "isTransactionLevel"
-	GetErr                = "getErr"
 )
 
 // Register keeps the properity owned by current
 type Register struct {
-	aspectID   string
-	collection *runtime.HostAPIRegistry
+	aspectID    string
+	collection  *runtime.HostAPIRegistry
+	errCallback func(message string)
 }
 
 func NewRegister(aspectID string) *Register {
@@ -38,6 +37,9 @@ func NewRegister(aspectID string) *Register {
 		aspectID:   aspectID,
 		collection: runtime.NewHostAPIRegistry(),
 	}
+}
+func (r *Register) SetErrCallback(errfunc func(message string)) {
+	r.errCallback = errfunc
 }
 
 // HostApis return the collection of aspect runtime host apis
@@ -258,6 +260,11 @@ func (r *Register) utils() interface{} {
 		},
 		"toHexString": func(data []byte) string {
 			return hex.EncodeToString(data)
+		},
+		"revert": func(msg string) {
+			if r.errCallback != nil {
+				r.errCallback(msg)
+			}
 		},
 	}
 }

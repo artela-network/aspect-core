@@ -4,6 +4,7 @@ import (
 	"github.com/artela-network/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
+	"strings"
 
 	"github.com/artela-network/artelasdk/types"
 )
@@ -18,9 +19,10 @@ func RuntimePool() *runtime.RuntimePool {
 }
 
 type Runner struct {
-	vm   runtime.AspectRuntime
-	fns  *runtime.HostAPIRegistry
-	code []byte
+	vm       runtime.AspectRuntime
+	fns      *runtime.HostAPIRegistry
+	register *Register
+	code     []byte
 }
 
 func NewRunner(aspID string, code []byte) (*Runner, error) {
@@ -30,8 +32,9 @@ func NewRunner(aspID string, code []byte) (*Runner, error) {
 		return nil, err
 	}
 	return &Runner{
-		vm:   vm,
-		code: code,
+		vm:       vm,
+		register: register,
+		code:     code,
 	}, nil
 }
 
@@ -44,12 +47,17 @@ func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.Aspect
 	if err != nil {
 		return nil, err
 	}
+
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
+
 	res, err := r.vm.Call(ApiEntrance, name, reqData)
 	if err != nil {
-		call, err := r.vm.Call(GetErr)
-		if err == nil && call != nil {
-			message := call.(string)
-			return nil, errors.New(message)
+		if !strings.EqualFold(revertMsg, "") {
+			return nil, errors.New(revertMsg)
 		}
 		return nil, err
 	}
@@ -71,13 +79,15 @@ func (r *Runner) IsOwner(sender string) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")
 	}
-
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(ApiEntrance, "isOwner", sender)
 	if err != nil {
-		call, err := r.vm.Call(GetErr)
-		if err == nil && call != nil {
-			message := call.(string)
-			return false, errors.New(message)
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
 		}
 
 		return false, err
@@ -90,12 +100,16 @@ func (r *Runner) IsBlockLevel() (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")
 	}
+
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(CheckBlockLevel)
 	if err != nil {
-		call, err := r.vm.Call(GetErr)
-		if err == nil && call != nil {
-			message := call.(string)
-			return false, errors.New(message)
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
 		}
 		return false, err
 	}
@@ -106,13 +120,15 @@ func (r *Runner) OnContractBinding(sender string) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")
 	}
-
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(ApiEntrance, "onContractBinding", sender)
 	if err != nil {
-		call, err := r.vm.Call(GetErr)
-		if err == nil && call != nil {
-			message := call.(string)
-			return false, errors.New(message)
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
 		}
 		return false, err
 	}
@@ -124,12 +140,15 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")
 	}
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(CheckTransactionLevel)
 	if err != nil {
-		call, err := r.vm.Call(GetErr)
-		if err == nil && call != nil {
-			message := call.(string)
-			return false, errors.New(message)
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
 		}
 		return false, err
 	}
