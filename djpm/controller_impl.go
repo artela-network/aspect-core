@@ -1,6 +1,8 @@
 package djpm
 
 import (
+	"fmt"
+
 	"github.com/artela-network/artelasdk/djpm/run"
 	"github.com/artela-network/artelasdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -151,6 +153,13 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 }
 
 func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput *types.AspectInput) *types.ResponseAspect {
+	errCode := int32(0)
+	revertMsg := ""
+	callback := func(code int32, msg string) {
+		errCode = code
+		revertMsg = msg
+	}
+
 	response := &types.ResponseAspect{
 		Success: true,
 	}
@@ -159,8 +168,17 @@ func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput 
 	for _, aspect := range boundAspects {
 		res := &types.AspectOutput{}
 		response.WithAspectId(aspect.AspectId)
-		runner, err := run.NewRunner(aspect.AspectId, aspect.Code)
+		runner, err := run.NewRunnerWithCallBack(aspect.AspectId, aspect.Code, run.CallBackRevertFunc(callback))
 		if err != nil {
+			switch errCode {
+			case 0:
+				fmt.Println("run error", revertMsg)
+			case 1:
+				fmt.Println("transaction reverted", revertMsg)
+				// TOOD revert tx.
+			default:
+				fmt.Println(revertMsg)
+			}
 			response.WithErr(err)
 		} else {
 			res, err = runner.JoinPoint(methodName, aspectInput)

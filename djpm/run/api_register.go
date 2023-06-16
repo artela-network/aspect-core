@@ -27,16 +27,22 @@ const (
 	GetErr                = "getErr"
 )
 
+type CallBackRevertFunc func(code int32, msg string)
+
 // Register keeps the properity owned by current
 type Register struct {
 	aspectID   string
 	collection *runtime.HostAPIRegistry
+
+	// callback method, for hostapi revert message
+	cbRevert CallBackRevertFunc
 }
 
-func NewRegister(aspectID string) *Register {
+func NewRegister(aspectID string, cb CallBackRevertFunc) *Register {
 	return &Register{
 		aspectID:   aspectID,
 		collection: runtime.NewHostAPIRegistry(),
+		cbRevert:   cb,
 	}
 }
 
@@ -201,6 +207,11 @@ func (r *Register) apis() interface{} {
 				return nil
 			}
 			return data
+		},
+		"revert": func(code int32, msg string) {
+			if r.cbRevert != nil {
+				r.cbRevert(code, msg)
+			}
 		},
 	}
 }

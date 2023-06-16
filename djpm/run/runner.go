@@ -24,8 +24,12 @@ type Runner struct {
 }
 
 func NewRunner(aspID string, code []byte) (*Runner, error) {
-	register := NewRegister(aspID)
-	vm, err := RuntimePool().Runtime(runtime.WASM, code, register.HostApis(), false)
+	return NewRunnerWithCallBack(aspID, code, nil)
+}
+
+func NewRunnerWithCallBack(aspID string, code []byte, cbRevert CallBackRevertFunc) (*Runner, error) {
+	register := NewRegister(aspID, cbRevert)
+	_, vm, err := RuntimePool().Get(runtime.WASM, code, register.HostApis(), false)
 	if err != nil {
 		return nil, err
 	}
