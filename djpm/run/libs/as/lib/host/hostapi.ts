@@ -1,6 +1,6 @@
-import { BlockOutput, EthBlock, StateChanges, ABool, AString, AUint8Array } from "../message";
-import { Protobuf } from "as-proto/assembly";
-import { ScheduleMsg } from "../scheduler";
+import {ABool, AString, AUint8Array, BlockOutput, EthBlock, StateChanges} from "../message";
+import {Protobuf} from "as-proto/assembly";
+import {ScheduleMsg} from "../scheduler";
 
 
 declare namespace __HostApi__ {
@@ -23,6 +23,23 @@ declare namespace __HostApi__ {
     function getAspectState(ptr: i32): i32
 
     function getStateChanges(addr: i32, variable: i32, key: i32): i32
+
+    function hash(hasher: u8, dataPtr: i32): i32;
+}
+
+export namespace crypto {
+    enum Hasher {
+        Keccak,
+    }
+
+    export function keccak(data: Uint8Array): Uint8Array {
+        let ptr = new AUint8Array(data).store();
+        let resPtr = __HostApi__.hash(Hasher.Keccak, ptr);
+        let resRaw=  new AUint8Array();
+        resRaw.load(resPtr);
+
+        return resRaw.body;
+    }
 }
 
 // Context part of hostapis

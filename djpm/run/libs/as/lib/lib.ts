@@ -1,8 +1,7 @@
-import { ABool, AString, AUint8Array, AspectInput, AspectOutput } from "./message";
+import {ABool, AspectInput, AspectOutput, AString, AUint8Array} from "./message";
 
-import { IAspectBlock, IAspectTransaction } from "./interfaces"
-import { Protobuf } from 'as-proto/assembly';
-import { Context } from "./host";
+import {IAspectBlock, IAspectTransaction} from "./interfaces"
+import {Protobuf} from 'as-proto/assembly';
 
 export class Entry {
     private readonly blockAspect: IAspectBlock;
