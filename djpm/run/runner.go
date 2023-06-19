@@ -40,8 +40,8 @@ func NewRunner(aspID string, code []byte) (*Runner, error) {
 	}, nil
 }
 
-func (r *Runner) PutBack() {
-	RuntimePool().PutBack(r.vmKey, r.vm)
+func (r *Runner) Return() {
+	RuntimePool().Return(r.vmKey, r.vm)
 }
 
 func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.AspectOutput, error) {
