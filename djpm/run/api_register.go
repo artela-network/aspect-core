@@ -2,7 +2,7 @@ package run
 
 import (
 	"encoding/hex"
-
+	"fmt"
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
 	"google.golang.org/protobuf/proto"
@@ -13,11 +13,13 @@ const (
 	moduleHostApi = "hostapi"
 	moduleAbis    = "abi"
 	moduleUtils   = "utils"
+	moduleDebug   = "debug"
 
 	// namespace of hostapis
 	nsHostApi = "__HostApi__"
 	nsAbis    = "__Abi__"
 	nsUtils   = "__Util__"
+	nsDebug   = "__debug__"
 
 	// entrance of api functions
 	ApiEntrance           = "execute"
@@ -47,6 +49,7 @@ func (r *Register) HostApis() *runtime.HostAPIRegistry {
 	r.registerApis(moduleHostApi, nsHostApi, r.apis())
 	r.registerApis(moduleAbis, nsAbis, r.abis())
 	r.registerApis(moduleUtils, nsUtils, r.utils())
+	r.registerApis(moduleDebug, nsDebug, r.debug())
 	return r.collection
 }
 
@@ -204,7 +207,8 @@ func (r *Register) apis() interface{} {
 			}
 			return data
 		},
-		"hash": func(hasher uint8, data []byte) []byte {
+		"hash": func(hasher int32, data []byte) []byte {
+			fmt.Println(string(data))
 			hashFunc, ok := hashers[Hasher(hasher)]
 			if !ok {
 				return nil
@@ -253,6 +257,14 @@ func (r *Register) abis() interface{} {
 				return []byte{}
 			}
 			return data
+		},
+	}
+}
+
+func (r *Register) debug() interface{} {
+	return map[string]interface{}{
+		"log": func(s string) {
+			fmt.Println(s)
 		},
 	}
 }

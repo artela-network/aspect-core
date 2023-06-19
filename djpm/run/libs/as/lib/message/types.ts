@@ -194,6 +194,6 @@ export class AI32 {
         body: i32 = 0,
     ) {
         this.body = body;
-        this.head = new header(typeIndex.TypeBool, 4);
+        this.head = new header(typeIndex.TypeInt32, 4);
     }
 }

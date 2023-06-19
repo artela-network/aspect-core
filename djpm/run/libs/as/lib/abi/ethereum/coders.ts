@@ -3,9 +3,9 @@ import {crypto} from "../../host/hostapi";
 
 export namespace ethereum {
     export function abiEncode(method: string, types: Coder[]): string {
-        let enc = '';
+        let enc = '0x';
         if (method.length > 0) {
-            let methodSig = method + '(' + types.map(t => t.typeName()).join(',') + ')';
+            let methodSig = method + '(' + types.map((t: Coder) => t.typeName()).join(',') + ')';
             enc += utils.uint8ArrayToHex(crypto.keccak(utils.stringToUint8Array(methodSig)).slice(0, 4));
         }
 

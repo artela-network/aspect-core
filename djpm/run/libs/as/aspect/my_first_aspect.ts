@@ -1,10 +1,12 @@
 // The entry file of your WebAssembly module.
-import { Schedule, PeriodicSchedule, AdHocSchedule, Opts, ScheduleTx } from "../lib/scheduler";
-import { Context } from "../lib/host"
-import { AspectInput, AspectOutput } from "../lib/message"
-import { IAspectBlock, IAspectTransaction } from "../lib/interfaces";
+import {Opts, PeriodicSchedule, Schedule, ScheduleTx} from "../lib/scheduler";
+import {Context} from "../lib/host"
+import {AspectInput, AspectOutput} from "../lib/message"
+import {IAspectBlock, IAspectTransaction} from "../lib/interfaces";
 
-import { Storage } from "./contract_storage"
+import {Storage} from "./contract_storage"
+import {ethereum} from "../lib/abi/ethereum/coders";
+import {debug} from "../lib/host/debug";
 
 class MyFirstAspect implements IAspectTransaction, IAspectBlock {
     isOwner(sender: string): bool {
@@ -28,6 +30,8 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
     }
 
     onTxReceive(input: AspectInput): AspectOutput {
+        this.scheduleTx();
+
         // call host api
         let block = Context.lastBlock();
 
@@ -135,8 +139,18 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         let broker = Context.getProperty("Broker");
 
         // let tx = new MyContract(scheduleTo).store100(new Option(0, "200000000", "30000", broker))
+        let num = ethereum.Number.fromU64(1);
+        let addr = ethereum.Address.fromHexString('0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c');
+        let str = ethereum.String.fromString('haha');
+
+        let tuple = ethereum.Tuple.fromCoders([num, addr, str]);
+        let array = ethereum.ArraySlice.fromCoders([tuple]);
+        let payload = ethereum.abiEncode('myMethod', [array, tuple, num, addr, str]);
+
+        debug.log(payload);
+
         let tx = new ScheduleTx(scheduleTo).New(
-            "0x6057361d00000000000000000000000000000000000000000000000000000000000003e8",
+            payload,
             new Opts(0, "200000000", "30000", broker))
 
         var periodicSch: Schedule = PeriodicSchedule

@@ -1,4 +1,4 @@
-import {ABool, AString, AUint8Array, BlockOutput, EthBlock, StateChanges} from "../message";
+import {ABool, AI32, AString, AUint8Array, BlockOutput, EthBlock, StateChanges} from "../message";
 import {Protobuf} from "as-proto/assembly";
 import {ScheduleMsg} from "../scheduler";
 
@@ -24,18 +24,19 @@ declare namespace __HostApi__ {
 
     function getStateChanges(addr: i32, variable: i32, key: i32): i32
 
-    function hash(hasher: u8, dataPtr: i32): i32;
+    function hash(hasher: i32, dataPtr: i32): i32;
 }
 
 export namespace crypto {
     enum Hasher {
-        Keccak,
+        Keccak ,
     }
 
     export function keccak(data: Uint8Array): Uint8Array {
-        let ptr = new AUint8Array(data).store();
-        let resPtr = __HostApi__.hash(Hasher.Keccak, ptr);
-        let resRaw=  new AUint8Array();
+        let dataPtr = new AUint8Array(data).store();
+        let hasher = new AI32(Hasher.Keccak as i32).store();
+        let resPtr = __HostApi__.hash(hasher, dataPtr);
+        let resRaw = new AUint8Array();
         resRaw.load(resPtr);
 
         return resRaw.body;
