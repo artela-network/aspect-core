@@ -7,11 +7,10 @@ declare namespace __Util__ {
 
 }
 
-export namespace Utils {
+export namespace utils {
     export function alloc(size: i32): i32 {
         return heap.alloc(size) as i32;
     }
-
 
     export function revert(message: string): void {
         let input = new AString();
@@ -21,7 +20,7 @@ export namespace Utils {
          throw new Error(message)
     }
 
-    export function stringToUint8Arrary(s: string): Uint8Array {
+    export function stringToUint8Array(s: string): Uint8Array {
         const buffer = String.UTF8.encode(s);
         if (buffer.byteLength === 0) {
             return new Uint8Array(0);
@@ -84,5 +83,9 @@ export namespace Utils {
         }
 
         return result;
+    }
+
+    export function encodeStringUTF8(str: string) : ArrayBuffer {
+        return String.UTF8.encode(str);
     }
 }

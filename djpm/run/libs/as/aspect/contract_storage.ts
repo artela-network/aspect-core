@@ -3,7 +3,7 @@
 import { Protobuf } from 'as-proto/assembly';
 import { Context, Abi } from "../lib/host";
 import { State } from "../lib/states"
-import { Utils } from "../lib/utils"
+import { utils } from "../lib/utils"
 import { BigInt } from "../lib/message"
 
 export namespace Storage {
@@ -18,7 +18,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
             let value = BigInt.fromString(valueHex, 16);
             return new State(account, value);
         }
@@ -32,7 +32,7 @@ export namespace Storage {
             let res = new Array<State<BigInt>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16);
                 res[i] = new State(account, value)
             }
@@ -47,7 +47,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
             let value = BigInt.fromString(valueHex, 16);
             return new State(account, value);
         }
@@ -58,10 +58,10 @@ export namespace Storage {
                 return BigInt.ZERO;
             }
 
-            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
             let before = BigInt.fromString(beforeHex, 16);
 
-            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
             let after = BigInt.fromString(beforeHex, 16);
 
             return after.sub(before);
@@ -87,7 +87,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
             let value = BigInt.fromString(valueHex, 16).toInt32();
             return new State(account, value);
         }
@@ -101,7 +101,7 @@ export namespace Storage {
             let res = new Array<State<i32>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toInt32();
                 res[i] = new State(account, value)
             }
@@ -116,7 +116,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
             let value = BigInt.fromString(valueHex, 16).toInt32();
             return new State(account, value);
         }
@@ -127,10 +127,10 @@ export namespace Storage {
                 return 0;
             }
 
-            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
             let before = BigInt.fromString(beforeHex, 16).toInt32();
 
-            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
             let after = BigInt.fromString(beforeHex, 16).toInt32();
 
             return after - before;
@@ -156,7 +156,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
             let value = BigInt.fromString(valueHex, 16).toUInt64();
             return new State(account, value);
         }
@@ -170,7 +170,7 @@ export namespace Storage {
             let res = new Array<State<u64>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toUInt64();
                 res[i] = new State(account, value)
             }
@@ -185,7 +185,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
             let value = BigInt.fromString(valueHex, 16).toUInt64();
             return new State(account, value);
         }
@@ -196,10 +196,10 @@ export namespace Storage {
                 return 0;
             }
 
-            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
             let before = BigInt.fromString(beforeHex, 16).toUInt64();
 
-            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
             let after = BigInt.fromString(beforeHex, 16).toUInt64();
 
             return after - before;
@@ -225,7 +225,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let value = Utils.uint8ArrayToString(changes.all[0].value);
+            let value = utils.uint8ArrayToString(changes.all[0].value);
             return new State(account, value)
         }
 
@@ -238,7 +238,7 @@ export namespace Storage {
             let res = new Array<State<string>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let value = Utils.uint8ArrayToString(changes.all[i].value)
+                let value = utils.uint8ArrayToString(changes.all[i].value)
                 res[i] = new State(account, value)
             }
             return res;
@@ -252,7 +252,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[changes.all.length - 1].account;
-            let value = Utils.uint8ArrayToString(changes.all[changes.all.length - 1].value)
+            let value = utils.uint8ArrayToString(changes.all[changes.all.length - 1].value)
             return new State(account, value);
         }
 
@@ -276,7 +276,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let value = Utils.uint8ArrayToBool(changes.all[0].value);
+            let value = utils.uint8ArrayToBool(changes.all[0].value);
             return new State(account, value);
         }
 
@@ -289,7 +289,7 @@ export namespace Storage {
             let res = new Array<State<bool>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let value = Utils.uint8ArrayToBool(changes.all[i].value);
+                let value = utils.uint8ArrayToBool(changes.all[i].value);
                 res[i] = new State(account, value)
             }
             return res;
@@ -303,7 +303,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let value = Utils.uint8ArrayToBool(changes.all[index].value);
+            let value = utils.uint8ArrayToBool(changes.all[index].value);
             return new State(account, value);
         }
 
@@ -322,7 +322,7 @@ export namespace Storage {
     export class accounts {
         public person(key: string): Person {
             let encoded = Abi.encodeString(key);
-            return new Person(this.addr, "Storage.accounts", Utils.concatUint8Arrays(this.prefix, encoded))
+            return new Person(this.addr, "Storage.accounts", utils.concatUint8Arrays(this.prefix, encoded))
         }
 
         addr: string;
@@ -337,12 +337,12 @@ export namespace Storage {
     export class Person {
         public id(): Person_id {
             let encoded = Abi.encodeString("id");
-            return new Person_id(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+            return new Person_id(this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
         }
 
         public balance(): Person_balance {
             let encoded = Abi.encodeString("balance");
-            return new Person_balance(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+            return new Person_balance(this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
         }
 
         addr: string;
@@ -365,7 +365,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
             let value = BigInt.fromString(valueHex, 16).toUInt64();
             return new State(account, value);
         }
@@ -379,7 +379,7 @@ export namespace Storage {
             let res = new Array<State<u64>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toUInt64();
                 res[i] = new State(account, value)
             }
@@ -394,7 +394,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
             let value = BigInt.fromString(valueHex, 16).toUInt64();
             return new State(account, value);
         }
@@ -405,10 +405,10 @@ export namespace Storage {
                 return 0;
             }
 
-            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
             let before = BigInt.fromString(beforeHex, 16).toUInt64();
 
-            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
             let after = BigInt.fromString(beforeHex, 16).toUInt64();
 
             return after - before;
@@ -434,7 +434,7 @@ export namespace Storage {
             }
 
             let account = changes.all[0].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
             let value = BigInt.fromString(valueHex, 16).toUInt32();
             return new State(account, value);
         }
@@ -448,7 +448,7 @@ export namespace Storage {
             let res = new Array<State<u32>>(changes.all.length);
             for (let i = 0; i < changes.all.length; i++) {
                 let account = changes.all[i].account;
-                let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+                let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toUInt32();
                 res[i] = new State(account, value)
             }
@@ -463,7 +463,7 @@ export namespace Storage {
 
             let index = changes.all.length - 1;
             let account = changes.all[index].account;
-            let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
             let value = BigInt.fromString(valueHex, 16).toUInt32();
             return new State(account, value);
         }
@@ -474,10 +474,10 @@ export namespace Storage {
                 return 0;
             }
 
-            let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
             let before = BigInt.fromString(beforeHex, 16).toUInt32();
 
-            let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
             let after = BigInt.fromString(beforeHex, 16).toUInt32();
 
             return after - before;

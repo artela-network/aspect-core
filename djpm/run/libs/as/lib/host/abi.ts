@@ -1,5 +1,5 @@
 import { AString, AUint8Array, ValueKind, Values, Value, BigInt } from "../message";
-import { Utils } from "../utils"
+import { utils } from "../utils"
 import { Protobuf } from 'as-proto/assembly';
 
 
@@ -101,42 +101,42 @@ export class Abi {
 export class TypeValue {
     fromInt16(input: i16): void {
         let num = BigInt.fromInt16(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.INT16, data)
     }
 
     fromInt32(input: i32): void {
         let num = BigInt.fromInt32(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.INT32, data)
     }
 
     fromInt64(input: i64): void {
         let num = BigInt.fromInt64(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.INT64, data)
     }
 
     fromUint16(input: u16): void {
         let num = BigInt.fromUInt16(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.UINT16, data)
     }
 
     fromUint32(input: u32): void {
         let num = BigInt.fromUInt32(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.UINT32, data)
     }
 
     fromUint64(input: u64): void {
         let num = BigInt.fromUInt64(input).toString(16);
-        let data = Utils.hexToUint8Array(num);
+        let data = utils.hexToUint8Array(num);
         this.value = new Value(ValueKind.UINT64, data)
     }
 
     fromBigInt(input: BigInt): void {
-        let data = Utils.hexToUint8Array(input.toString(16));
+        let data = utils.hexToUint8Array(input.toString(16));
         this.value = new Value(ValueKind.UINT256, data);
     }
 
@@ -148,14 +148,14 @@ export class TypeValue {
 
     fromString(input: string): void {
         this.value = new Value(ValueKind.STRING)
-        this.value.data = Utils.stringToUint8Arrary(input);
+        this.value.data = utils.stringToUint8Array(input);
     }
 
     toString(): string {
         if (this.value.kind != ValueKind.STRING) {
             return "";
         }
-        return Utils.uint8ArrayToString(this.value.data);
+        return utils.uint8ArrayToString(this.value.data);
     }
 
     // little endian

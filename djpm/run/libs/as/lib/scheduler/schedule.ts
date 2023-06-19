@@ -1,7 +1,7 @@
 import { AspTransaction } from "../message";
 import { Context } from "../host/hostapi";
 import { ScheduleMsg, ScheduleMsgId, ScheduleStatus, Opts } from "./index";
-import { Utils } from "../utils";
+import { utils } from "../utils";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -114,7 +114,7 @@ export class AdHocSchedule implements Schedule {
 
 export class ScheduleTx {
     public New(input: string, msg: Opts): AspTransaction {
-        let inputBytes = Utils.stringToUint8Arrary(input);
+        let inputBytes = utils.stringToUint8Array(input);
 
         let tx = new AspTransaction();
         tx.chainId = "";

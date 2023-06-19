@@ -3,7 +3,7 @@
 import { Entry } from "./lib/lib";
 
 import aspect from "./aspect/my_first_aspect"
-import { Utils } from "./lib/utils";
+import { utils } from "./lib/utils";
 
 let firstAspect = new aspect();
 var entry = new Entry(firstAspect, firstAspect);
@@ -22,5 +22,5 @@ export function isTransactionLevel(): i32 {
 }
 
 export function allocate(size: i32): i32 {
-  return Utils.alloc(size);
+  return utils.alloc(size);
 }
