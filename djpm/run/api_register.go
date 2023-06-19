@@ -204,6 +204,14 @@ func (r *Register) apis() interface{} {
 			}
 			return data
 		},
+		"hash": func(hasher uint8, data []byte) []byte {
+			hashFunc, ok := hashers[Hasher(hasher)]
+			if !ok {
+				return nil
+			}
+
+			return hashFunc(data)
+		},
 	}
 }
 
