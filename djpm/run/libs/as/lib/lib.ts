@@ -1,7 +1,20 @@
-import {ABool, AspectInput, AspectOutput, AString, AUint8Array} from "./message";
+import { ABool, AspectInput, AspectOutput, AString, AUint8Array } from "./message";
 
-import {IAspectBlock, IAspectTransaction} from "./interfaces"
-import {Protobuf} from 'as-proto/assembly';
+import { IAspectBlock, IAspectTransaction } from "./interfaces"
+import { Protobuf } from 'as-proto/assembly';
+import {
+    onTxReceiveCtx,
+    onBlockInitializeCtx,
+    onTxVerifyCtx,
+    onAccountVerifyCtx,
+    onGasPaymentCtx,
+    preTxExecuteCtx,
+    preContractCallCtx,
+    postContractCallCtx,
+    postTxExecuteCtx,
+    onTxCommitCtx,
+    onBlockFinalizeCtx
+} from "../lib/context";
 
 export class Entry {
     private readonly blockAspect: IAspectBlock;
@@ -75,48 +88,58 @@ export class Entry {
         var out: AspectOutput;
         switch (true) {
             case (method == "onTxReceive" && this.transactionAspect != null):
-                out = this.transactionAspect.onTxReceive(arg);
+                let ctx = new onTxReceiveCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.onTxReceive(ctx);
                 break;
 
             case method == "onBlockInitialize" && this.blockAspect != null:
-                out = this.blockAspect.onBlockInitialize(arg);
+                let ctx = new onBlockInitializeCtx(arg.blockHeight, arg.tx);
+                out = this.blockAspect.onBlockInitialize(ctx);
                 break;
 
             case method == "onTxVerify" && this.transactionAspect != null:
-                out = this.transactionAspect.onTxVerify(arg);
+                let ctx = new onTxVerifyCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.onTxVerify(ctx);
                 break
 
             case method == "onAccountVerify" && this.transactionAspect != null:
-                out = this.transactionAspect.onAccountVerify(arg);
+                let ctx = new onAccountVerifyCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.onAccountVerify(ctx);
                 break;
 
             case method == "onGasPayment" && this.transactionAspect != null:
-                out = this.transactionAspect.onGasPayment(arg);
+                let ctx = new onGasPaymentCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.onGasPayment(ctx);
                 break;
 
             case method == "preTxExecute" && this.transactionAspect != null:
-                out = this.transactionAspect.preTxExecute(arg);
+                let ctx = new preTxExecuteCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.preTxExecute(ctx);
                 break;
 
             case method == "preContractCall" && this.transactionAspect != null:
-
-                out = this.transactionAspect.preContractCall(arg);
+                let ctx = new preContractCallCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.preContractCall(ctx);
                 break;
 
             case method == "postContractCall" && this.transactionAspect != null:
-                out = this.transactionAspect.postContractCall(arg);
+                let ctx = new postContractCallCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.postContractCall(ctx);
                 break;
 
             case method == "postTxExecute" && this.transactionAspect != null:
-                out = this.transactionAspect.postTxExecute(arg);
+                let ctx = new postTxExecuteCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.postTxExecute(ctx);
                 break;
 
             case method == "onTxCommit" && this.transactionAspect != null:
-                out = this.transactionAspect.onTxCommit(arg);
+                let ctx = new onTxCommitCtx(arg.blockHeight, arg.tx);
+                out = this.transactionAspect.onTxCommit(ctx);
                 break;
 
             case method == "onBlockFinalize" && this.blockAspect != null:
-                out = this.blockAspect.onBlockFinalize(arg);
+                let ctx = new onBlockFinalizeCtx(arg.blockHeight, arg.tx);
+                out = this.blockAspect.onBlockFinalize(ctx);
                 break;
 
             default:
