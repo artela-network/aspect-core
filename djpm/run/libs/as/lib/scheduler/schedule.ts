@@ -1,7 +1,7 @@
 import { AspTransaction } from "../message";
-import { Context } from "../host/hostapi";
 import { ScheduleMsg, ScheduleMsgId, ScheduleStatus, Opts } from "./index";
 import { utils } from "../utils";
+import { ScheduleCtx } from "../context";
 
 export interface Schedule {
     submit(tran: AspTransaction): bool
@@ -19,11 +19,11 @@ export class PeriodicSchedule implements Schedule {
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi
-        return Context.scheduleTx(sch);
+        return this._ctx.scheduleTx(sch);
     }
 
-    public static builder(name: string): PeriodicSchedule {
-        return new PeriodicSchedule(name);
+    public static new(ctx: ScheduleCtx, name: string): PeriodicSchedule {
+        return new PeriodicSchedule(ctx, name);
     }
 
     public startAfter(num: u64): PeriodicSchedule {
@@ -51,14 +51,17 @@ export class PeriodicSchedule implements Schedule {
     private _maxRetry: u32;
     private _count: u64;
     private _startBlock: u64;
+    private _ctx: ScheduleCtx;
 
     constructor(
+        ctx: ScheduleCtx,
         name: string = "",
         startAfter: u64 = 0,
         everyNBlocks: u32 = 0,
         count: u64 = 0,
         maxRetry: u32 = 0,
     ) {
+        this._ctx = ctx;
         // startBlock add current height in host api.
         this._startBlock = startAfter;
         this._name = name;
@@ -80,11 +83,11 @@ export class AdHocSchedule implements Schedule {
 
         sch.id = new ScheduleMsgId(this._name, "");
         // sch.id.aspectId, createHeight will be set in the hostapi
-        return Context.scheduleTx(sch);
+        return this._ctx.scheduleTx(sch);
     }
 
-    public static builder(name: string): AdHocSchedule {
-        return new AdHocSchedule(name);
+    public static new(ctx: ScheduleCtx, name: string): AdHocSchedule {
+        return new AdHocSchedule(ctx, name);
     }
 
     public maxRetry(num: u32): AdHocSchedule {
@@ -100,12 +103,15 @@ export class AdHocSchedule implements Schedule {
     private _name: string;
     private _maxRetry: u32;
     private _nextNBlocks: u64;
+    private _ctx: ScheduleCtx;
 
     constructor(
+        ctx: ScheduleCtx,
         name: string = "",
         maxRetry: u32 = 0,
         nextNBlocks: u64 = 0,
     ) {
+        this._ctx = ctx;
         this._name = name;
         this._nextNBlocks = nextNBlocks;
         this._maxRetry = maxRetry;

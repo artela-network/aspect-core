@@ -16,8 +16,8 @@ export namespace utils {
         let input = new AString();
         input.set(message);
         let inPtr = input.store();
-         __Util__.revert(inPtr);
-         throw new Error(message)
+        __Util__.revert(inPtr);
+        throw new Error(message)
     }
 
     export function stringToUint8Array(s: string): Uint8Array {
@@ -85,7 +85,7 @@ export namespace utils {
         return result;
     }
 
-    export function encodeStringUTF8(str: string) : ArrayBuffer {
+    export function encodeStringUTF8(str: string): ArrayBuffer {
         return String.UTF8.encode(str);
     }
 }

@@ -1,7 +1,21 @@
-import {ABool, AspectInput, AspectOutput, AString, AUint8Array} from "./message";
+import { ABool, AspectInput, AspectOutput, AString, AUint8Array } from "./message";
 
-import {IAspectBlock, IAspectTransaction} from "./interfaces"
-import {Protobuf} from 'as-proto/assembly';
+import { IAspectBlock, IAspectTransaction } from "./interfaces"
+import { Protobuf } from 'as-proto/assembly';
+import {
+    StateCtx,
+    OnTxReceiveCtx,
+    OnBlockInitializeCtx,
+    OnTxVerifyCtx,
+    OnAccountVerifyCtx,
+    OnGasPaymentCtx,
+    PreTxExecuteCtx,
+    PreContractCallCtx,
+    PostContractCallCtx,
+    PostTxExecuteCtx,
+    OnTxCommitCtx,
+    OnBlockFinalizeCtx
+} from "../lib/context";
 
 export class Entry {
     private readonly blockAspect: IAspectBlock;
@@ -54,73 +68,69 @@ export class Entry {
             throw new Error("invalid aspect code");
         }
 
-        switch (true) {
-            case method === "onContractBinding" && this.transactionAspect != null:
-                let arg = this.loadInputString(argPtr);
-                let out = this.transactionAspect.onContractBinding(arg);
+        if (method == "onContractBinding" && this.transactionAspect != null) {
+            let arg = this.loadInputString(argPtr);
+            let out = this.transactionAspect.onContractBinding(new StateCtx(), arg);
+            return this.storeOutputBool(out);
+        } else if (method == "isOwner") {
+            let arg = this.loadInputString(argPtr);
+            if (this.transactionAspect != null) {
+                let out = this.transactionAspect.isOwner(new StateCtx(), arg);
                 return this.storeOutputBool(out);
+            }
 
-            case method === "isOwner":
-                let arg = this.loadInputString(argPtr);
-                if (this.transactionAspect != null) {
-                    let out = this.transactionAspect.isOwner(arg);
-                    return this.storeOutputBool(out);
-                }
-
-                let out = this.blockAspect.isOwner(arg);
-                return this.storeOutputBool(out);
+            let out = this.blockAspect.isOwner(new StateCtx(), arg);
+            return this.storeOutputBool(out);
         }
 
         let arg = this.loadAspectInput(argPtr);
         var out: AspectOutput;
-        switch (true) {
-            case (method == "onTxReceive" && this.transactionAspect != null):
-                out = this.transactionAspect.onTxReceive(arg);
-                break;
+        if (method == "onTxReceive" && this.transactionAspect != null) {
+            let ctx = new OnTxReceiveCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.onTxReceive(ctx);
 
-            case method == "onBlockInitialize" && this.blockAspect != null:
-                out = this.blockAspect.onBlockInitialize(arg);
-                break;
+        } else if (method == "onBlockInitialize" && this.blockAspect != null) {
+            let ctx = new OnBlockInitializeCtx(arg.blockHeight, arg.tx);
+            out = this.blockAspect.onBlockInitialize(ctx);
 
-            case method == "onTxVerify" && this.transactionAspect != null:
-                out = this.transactionAspect.onTxVerify(arg);
-                break
+        } else if (method == "onTxVerify" && this.transactionAspect != null) {
+            let ctx = new OnTxVerifyCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.onTxVerify(ctx);
 
-            case method == "onAccountVerify" && this.transactionAspect != null:
-                out = this.transactionAspect.onAccountVerify(arg);
-                break;
+        } else if (method == "onAccountVerify" && this.transactionAspect != null) {
+            let ctx = new OnAccountVerifyCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.onAccountVerify(ctx);
 
-            case method == "onGasPayment" && this.transactionAspect != null:
-                out = this.transactionAspect.onGasPayment(arg);
-                break;
+        } else if (method == "onGasPayment" && this.transactionAspect != null) {
+            let ctx = new OnGasPaymentCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.onGasPayment(ctx);
 
-            case method == "preTxExecute" && this.transactionAspect != null:
-                out = this.transactionAspect.preTxExecute(arg);
-                break;
+        } else if (method == "preTxExecute" && this.transactionAspect != null) {
+            let ctx = new PreTxExecuteCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.preTxExecute(ctx);
 
-            case method == "preContractCall" && this.transactionAspect != null:
+        } else if (method == "preContractCall" && this.transactionAspect != null) {
+            let ctx = new PreContractCallCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.preContractCall(ctx);
 
-                out = this.transactionAspect.preContractCall(arg);
-                break;
+        } else if (method == "postContractCall" && this.transactionAspect != null) {
+            let ctx = new PostContractCallCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.postContractCall(ctx);
 
-            case method == "postContractCall" && this.transactionAspect != null:
-                out = this.transactionAspect.postContractCall(arg);
-                break;
+        } else if (method == "postTxExecute" && this.transactionAspect != null) {
+            let ctx = new PostTxExecuteCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.postTxExecute(ctx);
 
-            case method == "postTxExecute" && this.transactionAspect != null:
-                out = this.transactionAspect.postTxExecute(arg);
-                break;
+        } else if (method == "onTxCommit" && this.transactionAspect != null) {
+            let ctx = new OnTxCommitCtx(arg.blockHeight, arg.tx);
+            out = this.transactionAspect.onTxCommit(ctx);
 
-            case method == "onTxCommit" && this.transactionAspect != null:
-                out = this.transactionAspect.onTxCommit(arg);
-                break;
+        } else if (method == "onBlockFinalize" && this.blockAspect != null) {
+            let ctx = new OnBlockFinalizeCtx(arg.blockHeight, arg.tx);
+            out = this.blockAspect.onBlockFinalize(ctx);
 
-            case method == "onBlockFinalize" && this.blockAspect != null:
-                out = this.blockAspect.onBlockFinalize(arg);
-                break;
-
-            default:
-                throw new Error("method " + method + " not found");
+        } else {
+            throw new Error("method " + method + " not found or not implemented");
         }
         return this.storeAspectOutput(out);
     }
