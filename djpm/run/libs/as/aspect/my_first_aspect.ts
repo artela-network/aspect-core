@@ -8,22 +8,22 @@ import { ethereum } from "../lib/abi/ethereum/coders";
 import { debug } from "../lib/host/debug";
 import { ScheduleCtx } from "../lib/context";
 import {
-    stateCtx,
-    onTxReceiveCtx,
-    onBlockInitializeCtx,
-    onTxVerifyCtx,
-    onAccountVerifyCtx,
-    onGasPaymentCtx,
-    preTxExecuteCtx,
-    preContractCallCtx,
-    postContractCallCtx,
-    postTxExecuteCtx,
-    onTxCommitCtx,
-    onBlockFinalizeCtx
+    StateCtx,
+    OnTxReceiveCtx,
+    OnBlockInitializeCtx,
+    OnTxVerifyCtx,
+    OnAccountVerifyCtx,
+    OnGasPaymentCtx,
+    PreTxExecuteCtx,
+    PreContractCallCtx,
+    PostContractCallCtx,
+    PostTxExecuteCtx,
+    OnTxCommitCtx,
+    OnBlockFinalizeCtx
 } from "../lib/context";
 
 class MyFirstAspect implements IAspectTransaction, IAspectBlock {
-    isOwner(ctx: stateCtx, sender: string): bool {
+    isOwner(ctx: StateCtx, sender: string): bool {
         // let value = ctx.getProperty("owner");
         // let owners = value.split(",");
         // if (owners.includes(sender)) {
@@ -33,7 +33,7 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         return true;
     }
 
-    onContractBinding(ctx: stateCtx, contractAddr: string): bool {
+    onContractBinding(ctx: StateCtx, contractAddr: string): bool {
         // let value = ctx.getProperty("binding");
         // let owners = value.split(",");
         // if (owners.includes(contractAddr)) {
@@ -43,7 +43,7 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         return true;
     }
 
-    onTxReceive(ctx: onTxReceiveCtx): AspectOutput {
+    onTxReceive(ctx: OnTxReceiveCtx): AspectOutput {
         // call host api
         let block = ctx.lastBlock();
 
@@ -71,36 +71,36 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         return ret;
     }
 
-    onBlockInitialize(ctx: onBlockInitializeCtx): AspectOutput {
+    onBlockInitialize(ctx: OnBlockInitializeCtx): AspectOutput {
         this.scheduleTx(ctx, ctx.getProperty("ScheduleTo"), ctx.getProperty("Broker"));
         return new AspectOutput(true);
     }
 
-    onTxVerify(ctx: onTxVerifyCtx): AspectOutput {
+    onTxVerify(ctx: OnTxVerifyCtx): AspectOutput {
         return new AspectOutput(true);;
     }
 
-    onAccountVerify(ctx: onAccountVerifyCtx): AspectOutput {
+    onAccountVerify(ctx: OnAccountVerifyCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    onGasPayment(ctx: onGasPaymentCtx): AspectOutput {
+    onGasPayment(ctx: OnGasPaymentCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    preTxExecute(ctx: preTxExecuteCtx): AspectOutput {
+    preTxExecute(ctx: PreTxExecuteCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    preContractCall(ctx: preContractCallCtx): AspectOutput {
+    preContractCall(ctx: PreContractCallCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    postContractCall(ctx: postContractCallCtx): AspectOutput {
+    postContractCall(ctx: PostContractCallCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    postTxExecute(ctx: postTxExecuteCtx): AspectOutput {
+    postTxExecute(ctx: PostTxExecuteCtx): AspectOutput {
         let ret = new AspectOutput();
         if (ctx.tx != null) {
             let num1 = new Storage.number1(ctx, ctx.tx!.to);
@@ -136,11 +136,11 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         return ret;
     }
 
-    onTxCommit(ctx: onTxCommitCtx): AspectOutput {
+    onTxCommit(ctx: OnTxCommitCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
-    onBlockFinalize(ctx: onBlockFinalizeCtx): AspectOutput {
+    onBlockFinalize(ctx: OnBlockFinalizeCtx): AspectOutput {
         return new AspectOutput(true);
     }
 
@@ -161,7 +161,7 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
             new Opts(0, "200000000", "30000", broker))
 
         var periodicSch: Schedule = PeriodicSchedule
-            .builder(ctx, "myPeriodicSchedule")
+            .new(ctx, "myPeriodicSchedule")
             .startAfter(3)
             .count(1000)
             .everyNBlocks(5)

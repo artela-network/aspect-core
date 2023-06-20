@@ -22,7 +22,7 @@ export class PeriodicSchedule implements Schedule {
         return this._ctx.scheduleTx(sch);
     }
 
-    public static builder(ctx: ScheduleCtx, name: string): PeriodicSchedule {
+    public static new(ctx: ScheduleCtx, name: string): PeriodicSchedule {
         return new PeriodicSchedule(ctx, name);
     }
 
@@ -86,7 +86,7 @@ export class AdHocSchedule implements Schedule {
         return this._ctx.scheduleTx(sch);
     }
 
-    public static builder(ctx: ScheduleCtx, name: string): AdHocSchedule {
+    public static new(ctx: ScheduleCtx, name: string): AdHocSchedule {
         return new AdHocSchedule(ctx, name);
     }
 

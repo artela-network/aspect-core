@@ -1,36 +1,36 @@
 import { AspectOutput } from "./message";
 import {
-    stateCtx,
-    onTxReceiveCtx,
-    onBlockInitializeCtx,
-    onTxVerifyCtx,
-    onAccountVerifyCtx,
-    onGasPaymentCtx,
-    preTxExecuteCtx,
-    preContractCallCtx,
-    postContractCallCtx,
-    postTxExecuteCtx,
-    onTxCommitCtx,
-    onBlockFinalizeCtx
+    StateCtx,
+    OnTxReceiveCtx,
+    OnBlockInitializeCtx,
+    OnTxVerifyCtx,
+    OnAccountVerifyCtx,
+    OnGasPaymentCtx,
+    PreTxExecuteCtx,
+    PreContractCallCtx,
+    PostContractCallCtx,
+    PostTxExecuteCtx,
+    OnTxCommitCtx,
+    OnBlockFinalizeCtx
 } from "../lib/context";
 
 export interface IAspectBlock {
-    isOwner(ctx: stateCtx, sender: string): bool
-    onBlockInitialize(ctx: onBlockInitializeCtx): AspectOutput
-    onBlockFinalize(ctx: onBlockFinalizeCtx): AspectOutput
+    isOwner(ctx: StateCtx, sender: string): bool
+    onBlockInitialize(ctx: OnBlockInitializeCtx): AspectOutput
+    onBlockFinalize(ctx: OnBlockFinalizeCtx): AspectOutput
 }
 
 export interface IAspectTransaction {
-    isOwner(ctx: stateCtx, sender: string): bool
-    onContractBinding(ctx: stateCtx, contractAddr: string): bool
-    onTxReceive(ctx: onTxReceiveCtx): AspectOutput
-    onTxVerify(ctx: onTxVerifyCtx): AspectOutput
-    onAccountVerify(ctx: onAccountVerifyCtx): AspectOutput
-    onGasPayment(ctx: onGasPaymentCtx): AspectOutput
-    preTxExecute(ctx: preTxExecuteCtx): AspectOutput
-    preContractCall(ctx: preContractCallCtx): AspectOutput
-    postContractCall(ctx: postContractCallCtx): AspectOutput
-    postTxExecute(ctx: postTxExecuteCtx): AspectOutput
-    onTxCommit(ctx: onTxCommitCtx): AspectOutput
+    isOwner(ctx: StateCtx, sender: string): bool
+    onContractBinding(ctx: StateCtx, contractAddr: string): bool
+    onTxReceive(ctx: OnTxReceiveCtx): AspectOutput
+    onTxVerify(ctx: OnTxVerifyCtx): AspectOutput
+    onAccountVerify(ctx: OnAccountVerifyCtx): AspectOutput
+    onGasPayment(ctx: OnGasPaymentCtx): AspectOutput
+    preTxExecute(ctx: PreTxExecuteCtx): AspectOutput
+    preContractCall(ctx: PreContractCallCtx): AspectOutput
+    postContractCall(ctx: PostContractCallCtx): AspectOutput
+    postTxExecute(ctx: PostTxExecuteCtx): AspectOutput
+    onTxCommit(ctx: OnTxCommitCtx): AspectOutput
 }
 
