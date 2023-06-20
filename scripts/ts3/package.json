@@ -1,8 +1,8 @@
 {
-  "name": "ts3",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "name": "artela-gen",
+  "version": "0.0.2",
+  "description": "Dev tool for aspect to generate libs from solidity storage layout.",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
