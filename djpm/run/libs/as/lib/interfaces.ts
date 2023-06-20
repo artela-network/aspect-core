@@ -1,5 +1,6 @@
-import { AspectInput, AspectOutput } from "./message";
+import { AspectOutput } from "./message";
 import {
+    stateCtx,
     onTxReceiveCtx,
     onBlockInitializeCtx,
     onTxVerifyCtx,
@@ -14,14 +15,14 @@ import {
 } from "../lib/context";
 
 export interface IAspectBlock {
-    isOwner(sender: string): bool
+    isOwner(ctx: stateCtx, sender: string): bool
     onBlockInitialize(ctx: onBlockInitializeCtx): AspectOutput
     onBlockFinalize(ctx: onBlockFinalizeCtx): AspectOutput
 }
 
 export interface IAspectTransaction {
-    isOwner(sender: string): bool
-    onContractBinding(contractAddr: string): bool
+    isOwner(ctx: stateCtx, sender: string): bool
+    onContractBinding(ctx: stateCtx, contractAddr: string): bool
     onTxReceive(ctx: onTxReceiveCtx): AspectOutput
     onTxVerify(ctx: onTxVerifyCtx): AspectOutput
     onAccountVerify(ctx: onAccountVerifyCtx): AspectOutput

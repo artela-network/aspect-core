@@ -3,6 +3,7 @@ import { ABool, AspectInput, AspectOutput, AString, AUint8Array } from "./messag
 import { IAspectBlock, IAspectTransaction } from "./interfaces"
 import { Protobuf } from 'as-proto/assembly';
 import {
+    stateCtx,
     onTxReceiveCtx,
     onBlockInitializeCtx,
     onTxVerifyCtx,
@@ -70,17 +71,17 @@ export class Entry {
         switch (true) {
             case method === "onContractBinding" && this.transactionAspect != null:
                 let arg = this.loadInputString(argPtr);
-                let out = this.transactionAspect.onContractBinding(arg);
+                let out = this.transactionAspect.onContractBinding(new stateCtx(), arg);
                 return this.storeOutputBool(out);
 
             case method === "isOwner":
                 let arg = this.loadInputString(argPtr);
                 if (this.transactionAspect != null) {
-                    let out = this.transactionAspect.isOwner(arg);
+                    let out = this.transactionAspect.isOwner(new stateCtx(), arg);
                     return this.storeOutputBool(out);
                 }
 
-                let out = this.blockAspect.isOwner(arg);
+                let out = this.blockAspect.isOwner(new stateCtx(), arg);
                 return this.storeOutputBool(out);
         }
 

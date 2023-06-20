@@ -8,6 +8,7 @@ import { ethereum } from "../lib/abi/ethereum/coders";
 import { debug } from "../lib/host/debug";
 import { ScheduleCtx } from "../lib/context";
 import {
+    stateCtx,
     onTxReceiveCtx,
     onBlockInitializeCtx,
     onTxVerifyCtx,
@@ -22,7 +23,7 @@ import {
 } from "../lib/context";
 
 class MyFirstAspect implements IAspectTransaction, IAspectBlock {
-    isOwner(sender: string): bool {
+    isOwner(ctx: stateCtx, sender: string): bool {
         // let value = ctx.getProperty("owner");
         // let owners = value.split(",");
         // if (owners.includes(sender)) {
@@ -32,7 +33,7 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
         return true;
     }
 
-    onContractBinding(contractAddr: string): bool {
+    onContractBinding(ctx: stateCtx, contractAddr: string): bool {
         // let value = ctx.getProperty("binding");
         // let owners = value.split(",");
         // if (owners.includes(contractAddr)) {

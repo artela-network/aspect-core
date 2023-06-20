@@ -11,6 +11,18 @@ export interface TraceCtx {
     getStateChanges(addr: string, variable: string, key: Uint8Array): StateChanges;
 }
 
+export class stateCtx {
+    public getProperty(key: string): string {
+        return Context.getProperty(key);
+    }
+
+    public getAspectState(key: string): string {
+        return Context.getAspectState(key);
+    }
+
+    constructor() { };
+}
+
 export class onTxReceiveCtx {
     public lastBlock(): EthBlock | null {
         return Context.lastBlock();
