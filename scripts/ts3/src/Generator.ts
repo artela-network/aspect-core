@@ -27,7 +27,11 @@ export default class Generator {
     private tsPath: string;
 
     public refLib = `import { Protobuf } from 'as-proto/assembly';
-import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
+import { Abi } from "../lib/host";
+import { State } from "../lib/states"
+import { utils } from "../lib/utils"
+import { BigInt } from "../lib/message"
+import { TraceCtx } from '../lib/context'\n`;
 
     public endBracket  = "}\n";
     public argsTemplage = `addr: string;
@@ -36,12 +40,14 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
     variable: string;
     prefix: Uint8Array;\n`;
     public constructorTemplate = 
-    `constructor(addr: string, prefix: Uint8Array = new Uint8Array(0)) {
+    `constructor(ctx: TraceCtx, addr: string, prefix: Uint8Array = new Uint8Array(0)) {
+      this.ctx = ctx;
       this.addr = addr;
       this.prefix = prefix;
     }\n`;    
     public constructorTemplateStruct = 
-    `constructor(addr: string, varibale: string, prefix: Uint8Array = new Uint8Array(0)) {
+    `constructor(ctx: TraceCtx, addr: string, varibale: string, prefix: Uint8Array = new Uint8Array(0)) {
+      this.ctx = ctx;
       this.addr = addr;
       this.variable = varibale;
       this.prefix = prefix;
@@ -102,7 +108,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         }
         let message: string = 
     `public before(): State<${param1}> | null {
-      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      let changes = this.ctx.getStateChanges(this.addr, ${param2}, this.prefix);
       if (changes.all.length == 0) {
           return null;
       }
@@ -133,7 +139,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         }
         let message: string = 
     `public changes(): Array<State<${param1}>> | null {
-      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      let changes = this.ctx.getStateChanges(this.addr, ${param2}, this.prefix);
       if (changes.all.length == 0) {
           return null;
       }
@@ -168,7 +174,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         }
         let message: string = 
     `public latest(): State<${param1}> | null {
-      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      let changes = this.ctx.getStateChanges(this.addr, ${param2}, this.prefix);
       if (changes.all.length == 0) {
           return null;
       }
@@ -207,7 +213,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
         }
         let message: string = 
     `public diff(): ${param1}  | null {
-      let changes = Context.getStateChanges(this.addr, ${param2}, this.prefix);
+      let changes = this.ctx.getStateChanges(this.addr, ${param2}, this.prefix);
       if (changes.all.length < 2) {
           return null;
       }
@@ -236,7 +242,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       }
       let message: string = 
   `public before(key: string): State<${param1}> | null {
-    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
     if (changes.all.length == 0) {
         return null;
     }
@@ -264,7 +270,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       }
       let message: string = 
   `public changes(key: string): Array<State<${param1}>> | null {
-    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
     if (changes.all.length == 0) {
         return null;
     }
@@ -296,7 +302,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       }
       let message: string = 
   `public latest(key: string): State<${param1}> | null {
-    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
     if (changes.all.length == 0) {
         return null;
     }
@@ -332,7 +338,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       }
       let message: string = 
   `public diff(key: string): ${param1}  | null {
-    let changes = Context.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
     if (changes.all.length < 2) {
         return null;
     }
@@ -351,7 +357,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       let message: string =
       `public ${param1}(): ${param2} {
         let encoded = Abi.encodeString("${param1}");
-        return new ${param2}(this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+        return new ${param2}(this.ctx, this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
     }\n`;
       return message;
     }
@@ -363,7 +369,7 @@ import { Context, State, Abi, Utils, TypeValue } from "./lib/index";\n`;
       let message: string =
       `public ${param1}(key: string): ${param2} {
         let encoded = Abi.encodeString(key);
-        return new ${param2}(this.addr, "${param3}", Utils.concatUint8Arrays(this.prefix, encoded))
+        return new ${param2}(this.ctx, this.addr, "${param3}", Utils.concatUint8Arrays(this.prefix, encoded))
     }\n`;
       return message;
     }
