@@ -2,6 +2,7 @@ import { AspTransaction, EthBlock } from "./message";
 import { Context } from "./host";
 import { ScheduleMsg } from "./scheduler";
 import { StateChanges } from "./message";
+import { utils } from "./utils";
 
 export interface ScheduleCtx {
     scheduleTx(sch: ScheduleMsg): bool;
@@ -98,6 +99,10 @@ export class OnBlockInitializeCtx implements ScheduleCtx {
         return Context.scheduleTx(sch);
     }
 
+    public revert(message: string): void {
+        return utils.revert(message);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -138,6 +143,10 @@ export class OnTxVerifyCtx {
 
     public getAspectState(key: string): string {
         return Context.getAspectState(key);
+    }
+
+    public revert(message: string): void {
+        return utils.revert(message);
     }
 
     blockHeight: i64;
@@ -182,6 +191,10 @@ export class OnAccountVerifyCtx {
         return Context.getAspectState(key);
     }
 
+    public revert(message: string): void {
+        return utils.revert(message);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -222,6 +235,10 @@ export class OnGasPaymentCtx {
 
     public getAspectState(key: string): string {
         return Context.getAspectState(key);
+    }
+
+    public revert(message: string): void {
+        return utils.revert(message);
     }
 
     blockHeight: i64;
@@ -266,6 +283,10 @@ export class PreTxExecuteCtx {
         return Context.getAspectState(key);
     }
 
+    public revert(message: string): void {
+        return utils.revert(message);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -308,6 +329,10 @@ export class PreContractCallCtx implements TraceCtx {
         return Context.getStateChanges(addr, variable, key);
     }
 
+    public revert(message: string): void {
+        return utils.revert(message);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -348,6 +373,10 @@ export class PostContractCallCtx implements TraceCtx {
 
     public getStateChanges(addr: string, variable: string, key: Uint8Array): StateChanges {
         return Context.getStateChanges(addr, variable, key);
+    }
+
+    public revert(message: string): void {
+        return utils.revert(message);
     }
 
     blockHeight: i64;
@@ -394,6 +423,10 @@ export class PostTxExecuteCtx implements TraceCtx {
 
     public getStateChanges(addr: string, variable: string, key: Uint8Array): StateChanges {
         return Context.getStateChanges(addr, variable, key);
+    }
+
+    public revert(message: string): void {
+        return utils.revert(message);
     }
 
     blockHeight: i64;
