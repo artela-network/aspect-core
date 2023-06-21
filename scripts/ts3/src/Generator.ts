@@ -34,9 +34,11 @@ import { BigInt } from "../lib/message"
 import { TraceCtx } from '../lib/context'\n`;
 
     public endBracket  = "}\n";
-    public argsTemplage = `addr: string;
+    public argsTemplage = `ctx: TraceCtx;
+    addr: string;
     prefix: Uint8Array;\n`;
-    public argsTemplageStruct = `addr: string;
+    public argsTemplageStruct = `ctx: TraceCtx;
+    addr: string;
     variable: string;
     prefix: Uint8Array;\n`;
     public constructorTemplate = 
@@ -97,13 +99,13 @@ import { TraceCtx } from '../lib/context'\n`;
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
-        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+        let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[0].value);`;
         if (isNumber) {
           let param5 : string = "";
           if ("BigInt" != typeTag) {
             param5 = ".to"+valueFunc+"()";
           }
-          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
           let value = BigInt.fromString(valueHex, 16)${param5};`;
         }
         let message: string = 
@@ -163,13 +165,13 @@ import { TraceCtx } from '../lib/context'\n`;
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
-        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[index].value);`;
+        let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[index].value);`;
         if (isNumber) {
           let param5 : string = "";
           if ("BigInt" != typeTag) {
             param5 = ".to"+valueFunc+"()";
           }
-          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+          param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
           let value = BigInt.fromString(valueHex, 16)${param5};`;
         }
         let message: string = 
@@ -199,16 +201,16 @@ import { TraceCtx } from '../lib/context'\n`;
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
-        let param4 : string = `let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
-        let param5 : string = `let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
+        let param4 : string = `let before = utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+        let param5 : string = `let after = utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
         if (isNumber) {
           let param6 : string = "";
           if ("BigInt" != typeTag) {
             param6 = ".to"+valueFunc+"()";
           }
-          param4 = `let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          param4 = `let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
           let before = BigInt.fromString(beforeHex, 16)${param6};`;
-          param5 = `let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+          param5 = `let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
           let after = BigInt.fromString(afterHex, 16)${param6};`;
         }
         let message: string = 
@@ -231,18 +233,19 @@ import { TraceCtx } from '../lib/context'\n`;
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
-      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+      let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[0].value);`;
       if (isNumber) {
         let param5 : string = "";
         if ("BigInt" != typeTag) {
           param5 = ".to"+valueFunc+"()";
         }
-        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
   `public before(key: string): State<${param1}> | null {
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let encoded = Abi.encodeString(key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -259,18 +262,19 @@ import { TraceCtx } from '../lib/context'\n`;
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
-      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[i].value);`;
+      let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[i].value);`;
       if (isNumber) {
         let param5 : string = "";
         if ("BigInt" != typeTag) {
           param5 = ".to"+valueFunc+"()";
         }
-        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
   `public changes(key: string): Array<State<${param1}>> | null {
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let encoded = Abi.encodeString(key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -291,18 +295,19 @@ import { TraceCtx } from '../lib/context'\n`;
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
-      let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[index].value);`;
+      let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[index].value);`;
       if (isNumber) {
         let param5 : string = "";
         if ("BigInt" != typeTag) {
           param5 = ".to"+valueFunc+"()";
         }
-        param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[index].value);
+        param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
   `public latest(key: string): State<${param1}> | null {
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let encoded = Abi.encodeString(key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -320,8 +325,8 @@ import { TraceCtx } from '../lib/context'\n`;
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
       const param3 : string = valueFunc;
-      let param4 : string = `let before = Utils.uint8ArrayTo${param3}(changes.all[0].value);`;
-      let param5 : string = `let after = Utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
+      let param4 : string = `let before = utils.uint8ArrayTo${param3}(changes.all[0].value);`;
+      let param5 : string = `let after = utils.uint8ArrayTo${param3}(changes.all[changes.all.length - 1].value);`;
       let forNumber : string = "after - before";
       if ("BigInt" == typeTag) {
         forNumber = "after.sub(before)";
@@ -331,14 +336,15 @@ import { TraceCtx } from '../lib/context'\n`;
         if ("BigInt" != typeTag) {
           param6 = ".to"+valueFunc+"()";
         }
-        param4 = `let beforeHex = Utils.uint8ArrayToHex(changes.all[0].value);
+        param4 = `let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
         let before = BigInt.fromString(beforeHex, 16)${param6};`;
-        param5 = `let afterHex = Utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+        param5 = `let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
         let after = BigInt.fromString(afterHex, 16)${param6};`;
       }
       let message: string = 
   `public diff(key: string): ${param1}  | null {
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", this.prefix+key);
+    let encoded = Abi.encodeString(key);
+    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length < 2) {
         return null;
     }
@@ -357,7 +363,7 @@ import { TraceCtx } from '../lib/context'\n`;
       let message: string =
       `public ${param1}(): ${param2} {
         let encoded = Abi.encodeString("${param1}");
-        return new ${param2}(this.ctx, this.addr, this.variable, Utils.concatUint8Arrays(this.prefix, encoded));
+        return new ${param2}(this.ctx, this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
     }\n`;
       return message;
     }
@@ -369,7 +375,7 @@ import { TraceCtx } from '../lib/context'\n`;
       let message: string =
       `public ${param1}(key: string): ${param2} {
         let encoded = Abi.encodeString(key);
-        return new ${param2}(this.ctx, this.addr, "${param3}", Utils.concatUint8Arrays(this.prefix, encoded))
+        return new ${param2}(this.ctx, this.addr, "${param3}", utils.concatUint8Arrays(this.prefix, encoded))
     }\n`;
       return message;
     }
