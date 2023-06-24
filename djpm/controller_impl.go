@@ -1,6 +1,7 @@
 package djpm
 
 import (
+	"github.com/artela-network/artelasdk/chaincoreext/scheduler"
 	"github.com/artela-network/artelasdk/djpm/run"
 	"github.com/artela-network/artelasdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -132,7 +133,13 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	response := &types.ResponseAspect{
 		Success: true,
 	}
+
 	if req.To == nil || types.IsAspectContract(req.To) {
+		return response
+	}
+	//skip scheduleTx
+	hash := req.TxHash
+	if scheduler.TaskInstance() != nil && hash != nil && scheduler.TaskInstance().IsScheduleTx(*hash) {
 		return response
 	}
 	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, *req.To)
