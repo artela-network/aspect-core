@@ -30,7 +30,7 @@ export default class Generator {
 import { Abi } from "../lib/host";
 import { State } from "../lib/states"
 import { utils } from "../lib/utils"
-import { BigInt } from "../lib/message"
+import { BigInt } from "../lib/types"
 import { TraceCtx } from '../lib/context'\n`;
 
     public endBracket  = "}\n";
