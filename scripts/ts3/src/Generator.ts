@@ -130,13 +130,13 @@ import { TraceCtx } from '../lib/context'\n`;
           param2 = "this.variable";
         }
         const param3 : string = valueFunc;
-        let param4 : string = `let value = Utils.uint8ArrayTo${param3}(changes.all[i].value);`;
+        let param4 : string = `let value = utils.uint8ArrayTo${param3}(changes.all[i].value);`;
         if (isNumber) {
           let param5 : string = "";
           if ("BigInt" != typeTag) {
             param5 = ".to"+valueFunc+"()";
           }
-          param4 = `let valueHex = Utils.uint8ArrayToHex(changes.all[0].value);
+          param4 = `let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
           let value = BigInt.fromString(valueHex, 16)${param5};`;
         }
         let message: string = 

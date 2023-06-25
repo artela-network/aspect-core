@@ -57,6 +57,8 @@ export function getTypeTag(itemType: string): string {
             return "string";
         case "t_bool":
             return "bool";
+        case "t_address":
+            return "string";
         default:
             return "";
     }
@@ -100,6 +102,8 @@ export function getValueFunc(itemType: string): string {
             return "String";
         case "t_bool":
             return "Bool";
+        case "t_address":
+            return "String";
         default:
             return "";
     }
@@ -120,10 +124,6 @@ export function isNumber(itemType: string): boolean {
             return true;
         case "t_uint256":
             return true;
-        case "t_string_storage":
-            return false;
-        case "t_bool":
-            return false;
         default:
             return false;
     }
