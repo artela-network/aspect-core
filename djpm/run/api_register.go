@@ -3,8 +3,10 @@ package run
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
+	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -215,6 +217,23 @@ func (r *Register) apis() interface{} {
 			}
 
 			return hashFunc(data)
+		},
+		// receive account address, and return the balance of the account with hex format.
+		"currentBalance": func(addr string) string {
+			if types.GetHostApiHook == nil {
+				return ""
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return ""
+			}
+			acct := common.HexToAddress(addr)
+			balance, err := host.CurrentBalance(acct)
+			if err != nil {
+				return ""
+			}
+
+			return balance.Text(16)
 		},
 	}
 }

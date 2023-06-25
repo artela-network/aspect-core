@@ -3,6 +3,7 @@ import { Context } from "./host";
 import { ScheduleMsg } from "./scheduler";
 import { StateChanges } from "./message";
 import { utils } from "./utils";
+import { BigInt } from "./message";
 
 export interface ScheduleCtx {
     scheduleTx(sch: ScheduleMsg): bool;
@@ -51,6 +52,10 @@ export class OnTxReceiveCtx {
 
     public getAspectState(key: string): string {
         return Context.getAspectState(key);
+    }
+
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
     }
 
     blockHeight: i64;
@@ -103,6 +108,10 @@ export class OnBlockInitializeCtx implements ScheduleCtx {
         return utils.revert(message);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -147,6 +156,10 @@ export class OnTxVerifyCtx {
 
     public revert(message: string): void {
         return utils.revert(message);
+    }
+
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
     }
 
     blockHeight: i64;
@@ -195,6 +208,10 @@ export class OnAccountVerifyCtx {
         return utils.revert(message);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -239,6 +256,10 @@ export class OnGasPaymentCtx {
 
     public revert(message: string): void {
         return utils.revert(message);
+    }
+
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
     }
 
     blockHeight: i64;
@@ -287,6 +308,10 @@ export class PreTxExecuteCtx {
         return utils.revert(message);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -333,6 +358,10 @@ export class PreContractCallCtx implements TraceCtx {
         return utils.revert(message);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -377,6 +406,10 @@ export class PostContractCallCtx implements TraceCtx {
 
     public revert(message: string): void {
         return utils.revert(message);
+    }
+
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
     }
 
     blockHeight: i64;
@@ -429,6 +462,10 @@ export class PostTxExecuteCtx implements TraceCtx {
         return utils.revert(message);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -479,6 +516,10 @@ export class OnTxCommitCtx implements ScheduleCtx, TraceCtx {
         return Context.getStateChanges(addr, variable, key);
     }
 
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
+    }
+
     blockHeight: i64;
     tx: AspTransaction | null;
 
@@ -523,6 +564,10 @@ export class OnBlockFinalizeCtx implements ScheduleCtx {
 
     public scheduleTx(sch: ScheduleMsg): bool {
         return Context.scheduleTx(sch);
+    }
+
+    public currentBalance(acct: string): BigInt | null {
+        return Context.currentBlance(acct);
     }
 
     blockHeight: i64;
