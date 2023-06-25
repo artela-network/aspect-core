@@ -7,6 +7,8 @@ import { Storage } from "./contract_storage"
 import { ethereum } from "../lib/abi/ethereum/coders";
 import { debug } from "../lib/host/debug";
 import { ScheduleCtx } from "../lib/context";
+import { BigInt } from "../lib/message";
+
 import {
     StateCtx,
     OnTxReceiveCtx,
@@ -72,7 +74,7 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
     }
 
     onBlockInitialize(ctx: OnBlockInitializeCtx): AspectOutput {
-        this.scheduleTx(ctx, ctx.getProperty("ScheduleTo"), ctx.getProperty("Broker"));
+        // this.scheduleTx(ctx, ctx.getProperty("ScheduleTo"), ctx.getProperty("Broker"));
         return new AspectOutput(true);
     }
 
@@ -89,6 +91,20 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
     }
 
     preTxExecute(ctx: PreTxExecuteCtx): AspectOutput {
+        ///
+        /// example to get sender's balance
+        ///
+        if (ctx.tx != null) {
+            let balance = ctx.currentBalance(ctx.tx!.from);
+            if (balance) {
+                ctx.setContext("current-balance-pre", balance.toString(16));
+            } else {
+                ctx.setContext("current-balance-pre", "is null");
+            }
+        } else {
+            ctx.setContext("current-balance-pre", "ctx.tx is null");
+        }
+
         return new AspectOutput(true);
     }
 
@@ -101,6 +117,23 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
     }
 
     postTxExecute(ctx: PostTxExecuteCtx): AspectOutput {
+        ///
+        /// example to get sender's balance
+        ///
+        if (ctx.tx != null) {
+            let balance = ctx.currentBalance(ctx.tx!.from);
+            if (balance) {
+                let post_balance = balance;
+                let pre_balance_str = ctx.getContext("current-balance-pre");
+                let pre_balance = BigInt.fromString(pre_balance_str, 16);
+                let diff = post_balance.sub(pre_balance);
+            }
+        }
+
+
+        ///
+        /// example to trace states
+        ///
         let ret = new AspectOutput();
         if (ctx.tx != null) {
             let num1 = new Storage.number1(ctx, ctx.tx!.to);

@@ -1,5 +1,11 @@
 package types
 
+import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+)
+
 var GetHostApiHook func() (HostApi, error)
 
 type HostApi interface {
@@ -16,6 +22,9 @@ type HostApi interface {
 	// CurrentBlock returns ethereum block built by the packing block,
 	// this should only be called when a new block is generating
 	CurrentBlock() (*EthBlock, error)
+
+	// CurrentBalance return current blance of account address
+	CurrentBalance(addr common.Address) (*big.Int, error)
 
 	// GetProperty returns the configuration of aspect
 	GetProperty(aspectID string, key string) (string, error)

@@ -1,12 +1,15 @@
-import {ABool, AI32, AString, AUint8Array, BlockOutput, EthBlock, StateChanges} from "../message";
-import {Protobuf} from "as-proto/assembly";
-import {ScheduleMsg} from "../scheduler";
+import { ABool, AI32, AString, AUint8Array, BlockOutput, EthBlock, StateChanges } from "../message";
+import { Protobuf } from "as-proto/assembly";
+import { ScheduleMsg } from "../scheduler";
+import { BigInt } from "../message";
 
 
 declare namespace __HostApi__ {
     function lastBlock(): i32
 
     function currentBlock(): i32
+
+    function currentBalance(addr: i32): i32
 
     function localCall(ptr: i32): i32
 
@@ -29,7 +32,7 @@ declare namespace __HostApi__ {
 
 export namespace crypto {
     enum Hasher {
-        Keccak ,
+        Keccak,
     }
 
     export function keccak(data: Uint8Array): Uint8Array {
@@ -142,5 +145,19 @@ export class Context {
 
         const changes = Protobuf.decode<StateChanges>(data.get(), StateChanges.decode);
         return changes;
+    }
+
+    static currentBlance(acct: string): BigInt | null {
+        let input = (new AString(acct)).store();
+        let balancePtr = __HostApi__.currentBalance(input);
+        let balanceStr = new AString();
+        balanceStr.load(balancePtr);
+        if (balanceStr.get() == "") {
+            return null
+        }
+        this.getProperty(balanceStr.get());
+        let big = BigInt.fromString(balanceStr.get(), 16);
+        this.getProperty(big.toString());
+        return big;
     }
 }
