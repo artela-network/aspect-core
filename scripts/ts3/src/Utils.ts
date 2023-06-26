@@ -36,20 +36,35 @@ export function getStrBetLastCommaAndParen(input: string): string {
     }
     
     return input.slice(lastCommaIndex + 1, lastParenthesisIndex).trim();
-  } 
-  
-  export function getStrBetFirstParenAndComma(input: string): string {
+  }
+
+  export function getMapSecondParam(input: string): string {
     if (!input.startsWith("t_mapping")) {
         return input;
     }
-    const lastCommaIndex = input.lastIndexOf('(');
-    const lastParenthesisIndex = input.lastIndexOf(',');
+    const i = input.indexOf(',');
+    const j = input.lastIndexOf(')');
     
-    if (lastCommaIndex === -1 || lastParenthesisIndex === -1 || lastCommaIndex >= lastParenthesisIndex) {
+    if (i === -1 || j === -1 || i >= j) {
       return "";
     }
     
-    return input.slice(lastCommaIndex + 1, lastParenthesisIndex).trim();
+    return input.slice(i + 1, j).trim();
+  }
+
+  
+  export function getMapFirstParam(input: string): string {
+    if (!input.startsWith("t_mapping")) {
+        return input;
+    }
+    const i = input.lastIndexOf('(');
+    const j = input.lastIndexOf(',');
+    
+    if (i === -1 || j === -1 || i >= j) {
+      return "";
+    }
+    
+    return input.slice(i + 1, j).trim();
   }
 
 export function getTypeTag(itemType: string): string {
@@ -117,7 +132,7 @@ export function getValueFunc(itemType: string): string {
         case "t_bool":
             return "Bool";
         case "t_address":
-            return "ethereum.Address";
+            return "Address";
         default:
             return "";
     }
@@ -203,10 +218,15 @@ export function handleStruct(item: StorageItem, tracer: Generator,
 
 export function handleMapping(item: StorageItem, tracer: Generator, 
     structNameSet: Set<string>, obj: StorageLayout) {
-    let secondParamType = getStrBetLastCommaAndParen(item.type);
+    let firstParamType = getMapFirstParam(item.type);
+    let secondParamType = getMapSecondParam(item.type);
+    let ft = getTypeTag(firstParamType);
+    let ff = getValueFunc(firstParamType);
     if (secondParamType.startsWith("t_mapping")) {
-        let firstParamType = getStrBetFirstParenAndComma(secondParamType);
-        secondParamType = getStrBetLastCommaAndParen(secondParamType);
+        firstParamType = getMapFirstParam(secondParamType);
+        secondParamType = getMapSecondParam(secondParamType);
+        ft = getTypeTag(firstParamType);
+        ff = getValueFunc(firstParamType);
         
         let prefix = getStrAfterLastColon(item.contract) + "." + item.label;
         tracer.append(tracer.getClass(item.label), 1);
@@ -215,20 +235,20 @@ export function handleMapping(item: StorageItem, tracer: Generator,
         tracer.append(tracer.getNestedMappingValue(item.label, prefix), 2);
         tracer.append(tracer.endBracket, 1);
 
-        tracer.append(`export namespace ${item.label} {`, 1);
-        tracer.append(`export class Value {`, 2);
-        tracer.append(tracer.argsTemplageStruct ,3);
-        tracer.append(tracer.constructorTemplateStruct ,3);
+        tracer.append(`export namespace ${item.label} {\n`, 1);
+        tracer.append(`export class Value {\n`, 2);
+        tracer.append(tracer.argsTemplageStruct ,2);
+        tracer.append(tracer.constructorTemplateStruct ,2);
 
-        tracer.append(tracer.getBeforeFuncMap(getTypeTag(secondParamType), 
-        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,3);
-        tracer.append(tracer.getChangesFuncMap(getTypeTag(secondParamType), 
-        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,3);
-        tracer.append(tracer.getLatestFuncMap(getTypeTag(secondParamType), 
-        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,3);
+        tracer.append(tracer.getBeforeFuncMap(ft, ff, getTypeTag(secondParamType), 
+        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
+        tracer.append(tracer.getChangesFuncMap(ft, ff, getTypeTag(secondParamType), 
+        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
+        tracer.append(tracer.getLatestFuncMap(ft, ff, getTypeTag(secondParamType), 
+        "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         if (isNumber(secondParamType)) {
-            tracer.append(tracer.getDiffFuncMap(getTypeTag(secondParamType), 
-            "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,3);
+            tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), 
+            "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         }
 
         tracer.append(tracer.endBracket, 2);
@@ -258,17 +278,17 @@ export function handleMapping(item: StorageItem, tracer: Generator,
         }
     } else {
         // 4.1 append before func
-        tracer.append(tracer.getBeforeFuncMap(getTypeTag(secondParamType), 
+        tracer.append(tracer.getBeforeFuncMap(ft, ff, getTypeTag(secondParamType), 
         "\""+getParamPrefix(item)+"\"", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         // 4.2 append changes func
-        tracer.append(tracer.getChangesFuncMap(getTypeTag(secondParamType), 
+        tracer.append(tracer.getChangesFuncMap(ft, ff, getTypeTag(secondParamType), 
         "\""+getParamPrefix(item)+"\"", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         // 4.3 append lastest func
-        tracer.append(tracer.getLatestFuncMap(getTypeTag(secondParamType), 
+        tracer.append(tracer.getLatestFuncMap(ft, ff, getTypeTag(secondParamType), 
         "\""+getParamPrefix(item)+"\"", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         // 4.4 append diff func (only for number type)
         if (isNumber(secondParamType)) {
-            tracer.append(tracer.getDiffFuncMap(getTypeTag(secondParamType), 
+            tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), 
             "\""+getParamPrefix(item)+"\"", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         }
     }

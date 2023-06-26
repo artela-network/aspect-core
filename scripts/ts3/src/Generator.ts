@@ -229,7 +229,7 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
         return message;
     }
 
-    getBeforeFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+    getBeforeFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
       isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -244,8 +244,8 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public before(key: string): State<${param1}> | null {
-    let encoded = Abi.encodeString(key);
+  `public before(key: ${ft}): State<${param1}> | null {
+    let encoded = Abi.encode${ff}(key);
     let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
@@ -258,7 +258,7 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
       return message;
   }
 
-  getChangesFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getChangesFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -273,8 +273,8 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public changes(key: string): Array<State<${param1}>> | null {
-    let encoded = Abi.encodeString(key);
+  `public changes(key: ${ft}): Array<State<${param1}>> | null {
+    let encoded = Abi.encode${ff}(key);
     let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
@@ -291,7 +291,7 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
       return message;
   }
 
-  getLatestFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getLatestFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -306,8 +306,8 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public latest(key: string): State<${param1}> | null {
-    let encoded = Abi.encodeString(key);
+  `public latest(key: ${ft}): State<${param1}> | null {
+    let encoded = Abi.encode${ff}(key);
     let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
@@ -321,7 +321,7 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
       return message;
   }
 
-  getDiffFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getDiffFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -343,8 +343,8 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
         let after = BigInt.fromString(afterHex, 16)${param6};`;
       }
       let message: string = 
-  `public diff(key: string): ${param1}  | null {
-    let encoded = Abi.encodeString(key);
+  `public diff(key: ${ft}): ${param1}  | null {
+    let encoded = Abi.encode${ff}(key);
     let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length < 2) {
         return null;

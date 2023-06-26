@@ -116,7 +116,7 @@ var Generator = /** @class */ (function () {
         var message = "public diff(): ".concat(param1, "  | null {\n      let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", this.prefix);\n      if (changes.all.length < 2) {\n          return null;\n      }\n\n      ").concat(param4, "\n      ").concat(param5, "\n      \n      return ").concat(forNumber, ";\n    }\n");
         return message;
     };
-    Generator.prototype.getBeforeFuncMap = function (typeTag, paramPrefix, valueFunc, isNumber) {
+    Generator.prototype.getBeforeFuncMap = function (ft, ff, typeTag, paramPrefix, valueFunc, isNumber) {
         var param1 = typeTag;
         var param2 = paramPrefix;
         var param3 = valueFunc;
@@ -128,10 +128,10 @@ var Generator = /** @class */ (function () {
             }
             param4 = "let valueHex = utils.uint8ArrayToHex(changes.all[0].value);\n        let value = BigInt.fromString(valueHex, 16)".concat(param5, ";");
         }
-        var message = "public before(key: string): State<".concat(param1, "> | null {\n    let encoded = Abi.encodeString(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let account = changes.all[0].account;\n    ").concat(param4, "\n    return new State(account, value);\n  }\n");
+        var message = "public before(key: ".concat(ft, "): State<").concat(param1, "> | null {\n    let encoded = Abi.encode").concat(ff, "(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let account = changes.all[0].account;\n    ").concat(param4, "\n    return new State(account, value);\n  }\n");
         return message;
     };
-    Generator.prototype.getChangesFuncMap = function (typeTag, paramPrefix, valueFunc, isNumber) {
+    Generator.prototype.getChangesFuncMap = function (ft, ff, typeTag, paramPrefix, valueFunc, isNumber) {
         var param1 = typeTag;
         var param2 = paramPrefix;
         var param3 = valueFunc;
@@ -143,10 +143,10 @@ var Generator = /** @class */ (function () {
             }
             param4 = "let valueHex = utils.uint8ArrayToHex(changes.all[0].value);\n        let value = BigInt.fromString(valueHex, 16)".concat(param5, ";");
         }
-        var message = "public changes(key: string): Array<State<".concat(param1, ">> | null {\n    let encoded = Abi.encodeString(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let res = new Array<State<").concat(param1, ">>(changes.all.length);\n    for (let i = 0; i < changes.all.length; i++) {\n        let account = changes.all[i].account;\n        ").concat(param4, "\n        res[i] = new State(account, value)\n    }\n    return res;\n  }\n");
+        var message = "public changes(key: ".concat(ft, "): Array<State<").concat(param1, ">> | null {\n    let encoded = Abi.encode").concat(ff, "(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let res = new Array<State<").concat(param1, ">>(changes.all.length);\n    for (let i = 0; i < changes.all.length; i++) {\n        let account = changes.all[i].account;\n        ").concat(param4, "\n        res[i] = new State(account, value)\n    }\n    return res;\n  }\n");
         return message;
     };
-    Generator.prototype.getLatestFuncMap = function (typeTag, paramPrefix, valueFunc, isNumber) {
+    Generator.prototype.getLatestFuncMap = function (ft, ff, typeTag, paramPrefix, valueFunc, isNumber) {
         var param1 = typeTag;
         var param2 = paramPrefix;
         var param3 = valueFunc;
@@ -158,10 +158,10 @@ var Generator = /** @class */ (function () {
             }
             param4 = "let valueHex = utils.uint8ArrayToHex(changes.all[index].value);\n        let value = BigInt.fromString(valueHex, 16)".concat(param5, ";");
         }
-        var message = "public latest(key: string): State<".concat(param1, "> | null {\n    let encoded = Abi.encodeString(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let index = changes.all.length - 1;\n    let account = changes.all[index].account;\n    ").concat(param4, "\n    return new State(account, value);\n  }\n");
+        var message = "public latest(key: ".concat(ft, "): State<").concat(param1, "> | null {\n    let encoded = Abi.encode").concat(ff, "(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length == 0) {\n        return null;\n    }\n\n    let index = changes.all.length - 1;\n    let account = changes.all[index].account;\n    ").concat(param4, "\n    return new State(account, value);\n  }\n");
         return message;
     };
-    Generator.prototype.getDiffFuncMap = function (typeTag, paramPrefix, valueFunc, isNumber) {
+    Generator.prototype.getDiffFuncMap = function (ft, ff, typeTag, paramPrefix, valueFunc, isNumber) {
         var param1 = typeTag;
         var param2 = paramPrefix;
         var param3 = valueFunc;
@@ -179,7 +179,7 @@ var Generator = /** @class */ (function () {
             param4 = "let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);\n        let before = BigInt.fromString(beforeHex, 16)".concat(param6, ";");
             param5 = "let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);\n        let after = BigInt.fromString(afterHex, 16)".concat(param6, ";");
         }
-        var message = "public diff(key: string): ".concat(param1, "  | null {\n    let encoded = Abi.encodeString(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length < 2) {\n        return null;\n    }\n\n    ").concat(param4, "\n    ").concat(param5, "\n\n    return ").concat(forNumber, ";\n  }\n");
+        var message = "public diff(key: ".concat(ft, "): ").concat(param1, "  | null {\n    let encoded = Abi.encode").concat(ff, "(key);\n    let changes = this.ctx.getStateChanges(this.addr, ").concat(param2, ", utils.concatUint8Arrays(this.prefix, encoded));\n    if (changes.all.length < 2) {\n        return null;\n    }\n\n    ").concat(param4, "\n    ").concat(param5, "\n\n    return ").concat(forNumber, ";\n  }\n");
         return message;
     };
     Generator.prototype.getStructParam = function (name, wrapName) {

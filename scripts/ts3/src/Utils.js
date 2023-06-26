@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleMapping = exports.handleStruct = exports.handleBasic = exports.isNumber = exports.getValueFunc = exports.getStructName = exports.getParamPrefix = exports.getTypeTag = exports.getStrBetFirstParenAndComma = exports.getStrBetLastCommaAndParen = exports.getStrAfterLastColon = exports.getStrBetweenColon = exports.isStringEmpty = void 0;
+exports.handleMapping = exports.handleStruct = exports.handleBasic = exports.isNumber = exports.getValueFunc = exports.getStructName = exports.getParamPrefix = exports.getTypeTag = exports.getMapFirstParam = exports.getMapSecondParam = exports.getStrBetLastCommaAndParen = exports.getStrAfterLastColon = exports.getStrBetweenColon = exports.isStringEmpty = void 0;
 function isStringEmpty(str) {
     return !str.trim();
 }
@@ -34,18 +34,30 @@ function getStrBetLastCommaAndParen(input) {
     return input.slice(lastCommaIndex + 1, lastParenthesisIndex).trim();
 }
 exports.getStrBetLastCommaAndParen = getStrBetLastCommaAndParen;
-function getStrBetFirstParenAndComma(input) {
+function getMapSecondParam(input) {
     if (!input.startsWith("t_mapping")) {
         return input;
     }
-    var lastCommaIndex = input.lastIndexOf('(');
-    var lastParenthesisIndex = input.lastIndexOf(',');
-    if (lastCommaIndex === -1 || lastParenthesisIndex === -1 || lastCommaIndex >= lastParenthesisIndex) {
+    var i = input.indexOf(',');
+    var j = input.lastIndexOf(')');
+    if (i === -1 || j === -1 || i >= j) {
         return "";
     }
-    return input.slice(lastCommaIndex + 1, lastParenthesisIndex).trim();
+    return input.slice(i + 1, j).trim();
 }
-exports.getStrBetFirstParenAndComma = getStrBetFirstParenAndComma;
+exports.getMapSecondParam = getMapSecondParam;
+function getMapFirstParam(input) {
+    if (!input.startsWith("t_mapping")) {
+        return input;
+    }
+    var i = input.lastIndexOf('(');
+    var j = input.lastIndexOf(',');
+    if (i === -1 || j === -1 || i >= j) {
+        return "";
+    }
+    return input.slice(i + 1, j).trim();
+}
+exports.getMapFirstParam = getMapFirstParam;
 function getTypeTag(itemType) {
     var paramType = getStrBetLastCommaAndParen(itemType);
     switch (paramType) {
@@ -111,7 +123,7 @@ function getValueFunc(itemType) {
         case "t_bool":
             return "Bool";
         case "t_address":
-            return "ethereum.Address";
+            return "Address";
         default:
             return "";
     }
@@ -190,25 +202,30 @@ function handleStruct(item, tracer, structName, members) {
 }
 exports.handleStruct = handleStruct;
 function handleMapping(item, tracer, structNameSet, obj) {
-    var secondParamType = getStrBetLastCommaAndParen(item.type);
+    var firstParamType = getMapFirstParam(item.type);
+    var secondParamType = getMapSecondParam(item.type);
+    var ft = getTypeTag(firstParamType);
+    var ff = getValueFunc(firstParamType);
     if (secondParamType.startsWith("t_mapping")) {
-        var firstParamType = getStrBetFirstParenAndComma(secondParamType);
-        secondParamType = getStrBetLastCommaAndParen(secondParamType);
+        firstParamType = getMapFirstParam(secondParamType);
+        secondParamType = getMapSecondParam(secondParamType);
+        ft = getTypeTag(firstParamType);
+        ff = getValueFunc(firstParamType);
         var prefix = getStrAfterLastColon(item.contract) + "." + item.label;
         tracer.append(tracer.getClass(item.label), 1);
         tracer.append(tracer.argsTemplage, 2);
         tracer.append(tracer.constructorTemplate, 2);
         tracer.append(tracer.getNestedMappingValue(item.label, prefix), 2);
         tracer.append(tracer.endBracket, 1);
-        tracer.append("export namespace ".concat(item.label, " {"), 1);
-        tracer.append("export class Value {", 2);
-        tracer.append(tracer.argsTemplageStruct, 3);
-        tracer.append(tracer.constructorTemplateStruct, 3);
-        tracer.append(tracer.getBeforeFuncMap(getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 3);
-        tracer.append(tracer.getChangesFuncMap(getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 3);
-        tracer.append(tracer.getLatestFuncMap(getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 3);
+        tracer.append("export namespace ".concat(item.label, " {\n"), 1);
+        tracer.append("export class Value {\n", 2);
+        tracer.append(tracer.argsTemplageStruct, 2);
+        tracer.append(tracer.constructorTemplateStruct, 2);
+        tracer.append(tracer.getBeforeFuncMap(ft, ff, getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+        tracer.append(tracer.getChangesFuncMap(ft, ff, getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+        tracer.append(tracer.getLatestFuncMap(ft, ff, getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         if (isNumber(secondParamType)) {
-            tracer.append(tracer.getDiffFuncMap(getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 3);
+            tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), "this.variable", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         }
         tracer.append(tracer.endBracket, 2);
         tracer.append(tracer.endBracket, 1);
@@ -238,14 +255,14 @@ function handleMapping(item, tracer, structNameSet, obj) {
     }
     else {
         // 4.1 append before func
-        tracer.append(tracer.getBeforeFuncMap(getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+        tracer.append(tracer.getBeforeFuncMap(ft, ff, getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         // 4.2 append changes func
-        tracer.append(tracer.getChangesFuncMap(getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+        tracer.append(tracer.getChangesFuncMap(ft, ff, getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         // 4.3 append lastest func
-        tracer.append(tracer.getLatestFuncMap(getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+        tracer.append(tracer.getLatestFuncMap(ft, ff, getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         // 4.4 append diff func (only for number type)
         if (isNumber(secondParamType)) {
-            tracer.append(tracer.getDiffFuncMap(getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
+            tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         }
     }
     // 1' append class end

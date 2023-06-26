@@ -12,7 +12,7 @@ const rl = readline.createInterface({
 });
 
 rl.question('Input your storage layout json file path:', (sourcePath) => {
-    rl.question('Input your target generated ts file path:', (targetPath) => {
+   rl.question('Input your target generated ts file path:', (targetPath) => {
         sourceFilePath = sourcePath;
         targetFilePath = targetPath;
         rl.close();
