@@ -47,7 +47,7 @@ rl.question('Input your storage layout json file path:', (sourcePath) => {
                     util.handleStruct(item, tracer, structName, members);
                 }
             } else {
-                util.handleBasic(item.label ,item, tracer, false);
+                util.handleBasic(item.label ,item, tracer, false, 0);
             }
         });
         // ----- 3.2 Loop to handle multi params end ------
