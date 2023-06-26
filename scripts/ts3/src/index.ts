@@ -12,7 +12,7 @@ const rl = readline.createInterface({
 });
 
 rl.question('Input your storage layout json file path:', (sourcePath) => {
-    rl.question('Input your target generated ts file path:', (targetPath) => {
+   rl.question('Input your target generated ts file path:', (targetPath) => {
         sourceFilePath = sourcePath;
         targetFilePath = targetPath;
         rl.close();
@@ -47,7 +47,7 @@ rl.question('Input your storage layout json file path:', (sourcePath) => {
                     util.handleStruct(item, tracer, structName, members);
                 }
             } else {
-                util.handleBasic(item.label ,item, tracer, false);
+                util.handleBasic(item.label ,item, tracer, false, 0);
             }
         });
         // ----- 3.2 Loop to handle multi params end ------

@@ -28,10 +28,11 @@ export default class Generator {
 
     public refLib = `import { Protobuf } from 'as-proto/assembly';
 import { Abi } from "../lib/host";
-import { State } from "../lib/states"
-import { utils } from "../lib/utils"
-import { BigInt } from "../lib/types"
-import { TraceCtx } from '../lib/context'\n`;
+import { State } from "../lib/states";
+import { utils } from "../lib/utils";
+import { BigInt } from "../lib/types";
+import { TraceCtx } from "../lib/context";
+import { ethereum } from "../lib/abi/ethereum/coders";\n`;
 
     public endBracket  = "}\n";
     public argsTemplage = `ctx: TraceCtx;
@@ -228,7 +229,7 @@ import { TraceCtx } from '../lib/context'\n`;
         return message;
     }
 
-    getBeforeFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+    getBeforeFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
       isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -243,9 +244,9 @@ import { TraceCtx } from '../lib/context'\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public before(key: string): State<${param1}> | null {
-    let encoded = Abi.encodeString(key);
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
+  `public before(key: ${ft}): State<${param1}> | null {
+    let encoded = Abi.encode${ff}(key);
+    let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -257,7 +258,7 @@ import { TraceCtx } from '../lib/context'\n`;
       return message;
   }
 
-  getChangesFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getChangesFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -272,9 +273,9 @@ import { TraceCtx } from '../lib/context'\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public changes(key: string): Array<State<${param1}>> | null {
-    let encoded = Abi.encodeString(key);
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
+  `public changes(key: ${ft}): Array<State<${param1}>> | null {
+    let encoded = Abi.encode${ff}(key);
+    let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -290,7 +291,7 @@ import { TraceCtx } from '../lib/context'\n`;
       return message;
   }
 
-  getLatestFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getLatestFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -305,9 +306,9 @@ import { TraceCtx } from '../lib/context'\n`;
         let value = BigInt.fromString(valueHex, 16)${param5};`;
       }
       let message: string = 
-  `public latest(key: string): State<${param1}> | null {
-    let encoded = Abi.encodeString(key);
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
+  `public latest(key: ${ft}): State<${param1}> | null {
+    let encoded = Abi.encode${ff}(key);
+    let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length == 0) {
         return null;
     }
@@ -320,7 +321,7 @@ import { TraceCtx } from '../lib/context'\n`;
       return message;
   }
 
-  getDiffFuncMap(typeTag: string, paramPrefix: string, valueFunc: string, 
+  getDiffFuncMap(ft: string, ff: string, typeTag: string, paramPrefix: string, valueFunc: string, 
     isNumber: boolean): string {
       const param1 : string = typeTag;
       const param2 : string = paramPrefix;
@@ -342,9 +343,9 @@ import { TraceCtx } from '../lib/context'\n`;
         let after = BigInt.fromString(afterHex, 16)${param6};`;
       }
       let message: string = 
-  `public diff(key: string): ${param1}  | null {
-    let encoded = Abi.encodeString(key);
-    let changes = this.ctx.getStateChanges(this.addr, "${param2}", utils.concatUint8Arrays(this.prefix, encoded));
+  `public diff(key: ${ft}): ${param1}  | null {
+    let encoded = Abi.encode${ff}(key);
+    let changes = this.ctx.getStateChanges(this.addr, ${param2}, utils.concatUint8Arrays(this.prefix, encoded));
     if (changes.all.length < 2) {
         return null;
     }
@@ -376,6 +377,17 @@ import { TraceCtx } from '../lib/context'\n`;
       `public ${param1}(key: string): ${param2} {
         let encoded = Abi.encodeString(key);
         return new ${param2}(this.ctx, this.addr, "${param3}", utils.concatUint8Arrays(this.prefix, encoded))
+    }\n`;
+      return message;
+    }
+
+    getNestedMappingValue(npStr: string, prefix: string): string {
+      const param2 : string = npStr;
+      const param3 : string = prefix; //ContractName.ParamNameInContract
+      let message: string = 
+      `public value(key: string): ${param2}.Value {
+        let encoded = Abi.encodeAddress(key);
+        return new ${param2}.Value(this.ctx, this.addr, "${param3}", utils.concatUint8Arrays(this.prefix, encoded));
     }\n`;
       return message;
     }
