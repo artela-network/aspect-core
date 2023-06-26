@@ -3,6 +3,7 @@ package run
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
@@ -291,6 +292,7 @@ func (r *Register) debug() interface{} {
 func (r *Register) utils() interface{} {
 	return map[string]interface{}{
 		"fromHexString": func(s string) []byte {
+			s = strings.TrimPrefix(s, "0x")
 			data, err := hex.DecodeString(s)
 			if err != nil {
 				return []byte{}

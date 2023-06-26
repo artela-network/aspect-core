@@ -164,6 +164,17 @@ class MyFirstAspect implements IAspectTransaction, IAspectBlock {
                 ctx.setContext("account_person_tome_account_latest_acct", tom_balance_latest.account);
                 ctx.setContext("account_person_tome_balance_latest_change", tom_balance_latest.change.toString());
             }
+
+            let allowance = new Storage.allowances(ctx, ctx.tx!.to);
+            let addr1 = ethereum.Address.fromHexString('0xA32576Bd17b4e9dDfFaD917068F80A4ff7b7409a');
+            let addr2 = ethereum.Address.fromHexString('0xBC0E48f5d2A48350B74c81ECed3A42b35b532ef8');
+            let value = allowance.value(addr1).latest(addr2);
+            if (value) {
+                ctx.setContext("allowance_value_latest_change", value.change.toString());
+                ctx.setContext("allowance_value_latest_acct", value.account);
+            } else {
+                ctx.setContext("allowance_value_latest_acct", "is null");
+            }
         }
         ret.success = true;
         return ret;
