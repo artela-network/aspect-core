@@ -348,14 +348,14 @@ export namespace Storage {
     }
 
     export class Person {
-        public id(): Person_id {
+        public id(): Person.id {
             let encoded = Abi.encodeString("id");
-            return new Person_id(this.ctx, this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
+            return new Person.id(this.ctx, this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
         }
 
-        public balance(): Person_balance {
+        public balance(): Person.balance {
             let encoded = Abi.encodeString("balance");
-            return new Person_balance(this.ctx, this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
+            return new Person.balance(this.ctx, this.addr, this.variable, utils.concatUint8Arrays(this.prefix, encoded));
         }
 
         addr: string;
@@ -372,144 +372,146 @@ export namespace Storage {
     }
 
     // uint64 id;
-    export class Person_id {
-        public before(): State<u64> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
-            }
+    export namespace Person {
+        export class id {
+            public before(): State<u64> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
 
-            let account = changes.all[0].account;
-            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
-            let value = BigInt.fromString(valueHex, 16).toUInt64();
-            return new State(account, value);
-        }
-
-        public changes(): Array<State<u64>> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
-            }
-
-            let res = new Array<State<u64>>(changes.all.length);
-            for (let i = 0; i < changes.all.length; i++) {
-                let account = changes.all[i].account;
+                let account = changes.all[0].account;
                 let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toUInt64();
-                res[i] = new State(account, value)
-            }
-            return res;
-        }
-
-        public latest(): State<u64> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
+                return new State(account, value);
             }
 
-            let index = changes.all.length - 1;
-            let account = changes.all[index].account;
-            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
-            let value = BigInt.fromString(valueHex, 16).toUInt64();
-            return new State(account, value);
-        }
+            public changes(): Array<State<u64>> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
 
-        public diff(): u64 {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length < 2) {
-                return 0;
+                let res = new Array<State<u64>>(changes.all.length);
+                for (let i = 0; i < changes.all.length; i++) {
+                    let account = changes.all[i].account;
+                    let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
+                    let value = BigInt.fromString(valueHex, 16).toUInt64();
+                    res[i] = new State(account, value)
+                }
+                return res;
             }
 
-            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
-            let before = BigInt.fromString(beforeHex, 16).toUInt64();
+            public latest(): State<u64> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
 
-            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
-            let after = BigInt.fromString(beforeHex, 16).toUInt64();
-
-            return after - before;
-        }
-
-        variable: string;
-        addr: string;
-        prefix: Uint8Array;
-        ctx: TraceCtx;
-
-        constructor(ctx: TraceCtx, addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
-            this.ctx = ctx;
-            this.addr = addr;
-            this.variable = variable;
-            this.prefix = prefix;
-        }
-    }
-
-    // uint32 balance;
-    export class Person_balance {
-        public before(): State<u32> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
+                let index = changes.all.length - 1;
+                let account = changes.all[index].account;
+                let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
+                let value = BigInt.fromString(valueHex, 16).toUInt64();
+                return new State(account, value);
             }
 
-            let account = changes.all[0].account;
-            let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
-            let value = BigInt.fromString(valueHex, 16).toUInt32();
-            return new State(account, value);
-        }
+            public diff(): u64 {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length < 2) {
+                    return 0;
+                }
 
-        public changes(): Array<State<u32>> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
+                let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
+                let before = BigInt.fromString(beforeHex, 16).toUInt64();
+
+                let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+                let after = BigInt.fromString(beforeHex, 16).toUInt64();
+
+                return after - before;
             }
 
-            let res = new Array<State<u32>>(changes.all.length);
-            for (let i = 0; i < changes.all.length; i++) {
-                let account = changes.all[i].account;
+            variable: string;
+            addr: string;
+            prefix: Uint8Array;
+            ctx: TraceCtx;
+
+            constructor(ctx: TraceCtx, addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
+                this.ctx = ctx;
+                this.addr = addr;
+                this.variable = variable;
+                this.prefix = prefix;
+            }
+        }
+
+        // uint32 balance;
+        export class balance {
+            public before(): State<u32> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
+
+                let account = changes.all[0].account;
                 let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
                 let value = BigInt.fromString(valueHex, 16).toUInt32();
-                res[i] = new State(account, value)
-            }
-            return res;
-        }
-
-        public latest(): State<u32> | null {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length == 0) {
-                return null;
+                return new State(account, value);
             }
 
-            let index = changes.all.length - 1;
-            let account = changes.all[index].account;
-            let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
-            let value = BigInt.fromString(valueHex, 16).toUInt32();
-            return new State(account, value);
-        }
+            public changes(): Array<State<u32>> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
 
-        public diff(): u32 {
-            let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
-            if (changes.all.length < 2) {
-                return 0;
+                let res = new Array<State<u32>>(changes.all.length);
+                for (let i = 0; i < changes.all.length; i++) {
+                    let account = changes.all[i].account;
+                    let valueHex = utils.uint8ArrayToHex(changes.all[0].value);
+                    let value = BigInt.fromString(valueHex, 16).toUInt32();
+                    res[i] = new State(account, value)
+                }
+                return res;
             }
 
-            let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
-            let before = BigInt.fromString(beforeHex, 16).toUInt32();
+            public latest(): State<u32> | null {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length == 0) {
+                    return null;
+                }
 
-            let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
-            let after = BigInt.fromString(beforeHex, 16).toUInt32();
+                let index = changes.all.length - 1;
+                let account = changes.all[index].account;
+                let valueHex = utils.uint8ArrayToHex(changes.all[index].value);
+                let value = BigInt.fromString(valueHex, 16).toUInt32();
+                return new State(account, value);
+            }
 
-            return after - before;
-        }
+            public diff(): u32 {
+                let changes = this.ctx.getStateChanges(this.addr, this.variable, this.prefix);
+                if (changes.all.length < 2) {
+                    return 0;
+                }
 
-        addr: string;
-        variable: string;
-        prefix: Uint8Array;
-        ctx: TraceCtx;
+                let beforeHex = utils.uint8ArrayToHex(changes.all[0].value);
+                let before = BigInt.fromString(beforeHex, 16).toUInt32();
 
-        constructor(ctx: TraceCtx, addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
-            this.addr = addr;
-            this.variable = variable;
-            this.prefix = prefix;
-            this.ctx = ctx;
+                let afterHex = utils.uint8ArrayToHex(changes.all[changes.all.length - 1].value);
+                let after = BigInt.fromString(beforeHex, 16).toUInt32();
+
+                return after - before;
+            }
+
+            addr: string;
+            variable: string;
+            prefix: Uint8Array;
+            ctx: TraceCtx;
+
+            constructor(ctx: TraceCtx, addr: string, variable: string = "", prefix: Uint8Array = new Uint8Array(0)) {
+                this.addr = addr;
+                this.variable = variable;
+                this.prefix = prefix;
+                this.ctx = ctx;
+            }
         }
     }
 }
