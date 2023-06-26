@@ -1,12 +1,12 @@
 package run
 
 import (
-	"github.com/artela-network/runtime"
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
 	"strings"
 
 	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/runtime"
+	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 var vmPool *runtime.RuntimePool
@@ -19,6 +19,7 @@ func RuntimePool() *runtime.RuntimePool {
 }
 
 type Runner struct {
+	vmKey    string
 	vm       runtime.AspectRuntime
 	fns      *runtime.HostAPIRegistry
 	register *Register
@@ -27,15 +28,20 @@ type Runner struct {
 
 func NewRunner(aspID string, code []byte) (*Runner, error) {
 	register := NewRegister(aspID)
-	vm, err := RuntimePool().Runtime(runtime.WASM, code, register.HostApis(), false)
+	key, vm, err := RuntimePool().Runtime(runtime.WASM, code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
 	return &Runner{
+		vmKey:    key,
 		vm:       vm,
 		register: register,
 		code:     code,
 	}, nil
+}
+
+func (r *Runner) Return() {
+	RuntimePool().Return(r.vmKey, r.vm)
 }
 
 func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.AspectOutput, error) {

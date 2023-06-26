@@ -49,8 +49,9 @@ func TestJoinPoint(t *testing.T) {
 	require.Equal(t, nil, err)
 	output, err := runner.JoinPoint(name, input)
 	require.Equal(t, nil, err)
-	require.Equal(t, true, output.Success)
+	defer runner.Return()
 
+	require.Equal(t, true, output.Success)
 }
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
@@ -66,6 +67,8 @@ func TestIsOwner(t *testing.T) {
 	require.Equal(t, nil, err)
 	ret, err := runner.IsOwner("hello")
 	require.Equal(t, nil, err)
+	defer runner.Return()
+
 	require.Equal(t, true, ret)
 }
 
@@ -82,5 +85,7 @@ func TestOnContractBinding(t *testing.T) {
 	require.Equal(t, nil, err)
 	ret, err := runner.OnContractBinding("0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
+	defer runner.Return()
+
 	require.Equal(t, true, ret)
 }

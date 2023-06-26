@@ -115,9 +115,10 @@ func (aspect Aspect) execAspectBlock(methodName string, req *types.RequestBlockA
 		if err != nil {
 			response.WithErr(err)
 		} else {
+			defer runner.Return()
+
 			res, err = runner.JoinPoint(methodName, aspectInput)
 			response.WithErr(err).WithAspectOutput(res)
-
 		}
 		id := aspect.AspectId
 		response.WithAspectId(id)
@@ -170,6 +171,8 @@ func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput 
 		if err != nil {
 			response.WithErr(err)
 		} else {
+			defer runner.Return()
+
 			res, err = runner.JoinPoint(methodName, aspectInput)
 			response.WithErr(err).WithAspectOutput(res)
 		}
