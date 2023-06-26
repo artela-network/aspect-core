@@ -1,6 +1,7 @@
 import { AString, AUint8Array, ValueKind, Values, Value, BigInt } from "../message";
 import { utils } from "../utils"
 import { Protobuf } from 'as-proto/assembly';
+import { ethereum } from "../abi/ethereum/coders";
 
 
 declare namespace __Abi__ {
@@ -71,6 +72,11 @@ export class Abi {
         let values = new Values(new Array<Value>(1));
         values.all[0] = typeValue.value;
         return this.encode(types, values);
+    }
+
+    static encodeAddress(val: ethereum.Address): Uint8Array {
+        let s = ethereum.abiEncode("", [val])
+        return utils.hexToUint8Array(s);
     }
 
     // encode receives the types and values, return the hex of abi codes
