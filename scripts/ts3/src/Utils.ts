@@ -232,7 +232,7 @@ export function handleMapping(item: StorageItem, tracer: Generator,
         tracer.append(tracer.getClass(item.label), 1);
         tracer.append(tracer.argsTemplage ,2);
         tracer.append(tracer.constructorTemplate ,2);
-        tracer.append(tracer.getNestedMappingValue(item.label, prefix), 2);
+        tracer.append(tracer.getNestedMappingValue(ft, ff, item.label, prefix), 2);
         tracer.append(tracer.endBracket, 1);
 
         tracer.append(`export namespace ${item.label} {\n`, 1);

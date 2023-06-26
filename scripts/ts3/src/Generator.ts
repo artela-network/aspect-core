@@ -381,12 +381,12 @@ import { ethereum } from "../lib/abi/ethereum/coders";\n`;
       return message;
     }
 
-    getNestedMappingValue(npStr: string, prefix: string): string {
+    getNestedMappingValue(ft: string, ff: string, npStr: string, prefix: string): string {
       const param2 : string = npStr;
       const param3 : string = prefix; //ContractName.ParamNameInContract
       let message: string = 
-      `public value(key: string): ${param2}.Value {
-        let encoded = Abi.encodeAddress(key);
+      `public value(key: ${ft}): ${param2}.Value {
+        let encoded = Abi.encode${ff}(key);
         return new ${param2}.Value(this.ctx, this.addr, "${param3}", utils.concatUint8Arrays(this.prefix, encoded));
     }\n`;
       return message;
