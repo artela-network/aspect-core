@@ -1,6 +1,6 @@
 {
   "name": "artela-gen",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Dev tool for aspect to generate libs from solidity storage layout.",
   "main": "index.js",
   "scripts": {

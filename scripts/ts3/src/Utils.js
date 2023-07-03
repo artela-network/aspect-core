@@ -194,7 +194,7 @@ function handleStruct(item, tracer, structName, members) {
     // 1' append class end
     tracer.append(tracer.endBracket, 1);
     // 5 handle struct params to class
-    tracer.append("export namespace ".concat(structName, " {"), 1);
+    tracer.append("export namespace ".concat(structName, " {\n"), 1);
     members.forEach(function (item) {
         handleBasic(item.label, item, tracer, true, 1);
     });
@@ -246,6 +246,7 @@ function handleMapping(item, tracer, structNameSet, obj) {
         var structName = getStructName(secondParamType);
         var prefix = getStrAfterLastColon(item.contract) + "." + item.label;
         tracer.append(tracer.getMappintSecondParam(structName.toLowerCase(), structName, prefix), 2);
+        tracer.append(tracer.endBracket, 1);
         // if struct has not been hadle
         if (!structNameSet.has(structName)) {
             var members = obj.types[getStrBetLastCommaAndParen(item.type)].members;
@@ -264,8 +265,8 @@ function handleMapping(item, tracer, structNameSet, obj) {
         if (isNumber(secondParamType)) {
             tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), "\"" + getParamPrefix(item) + "\"", getValueFunc(secondParamType), isNumber(secondParamType)), 2);
         }
+        // 1' append class end
+        tracer.append(tracer.endBracket, 1);
     }
-    // 1' append class end
-    tracer.append(tracer.endBracket, 1);
 }
 exports.handleMapping = handleMapping;
