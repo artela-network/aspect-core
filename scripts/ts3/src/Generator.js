@@ -195,10 +195,10 @@ var Generator = /** @class */ (function () {
         var message = "public ".concat(param1, "(key: string): ").concat(param2, " {\n        let encoded = Abi.encodeString(key);\n        return new ").concat(param2, "(this.ctx, this.addr, \"").concat(param3, "\", utils.concatUint8Arrays(this.prefix, encoded))\n    }\n");
         return message;
     };
-    Generator.prototype.getNestedMappingValue = function (npStr, prefix) {
+    Generator.prototype.getNestedMappingValue = function (ft, ff, npStr, prefix) {
         var param2 = npStr;
         var param3 = prefix; //ContractName.ParamNameInContract
-        var message = "public value(key: string): ".concat(param2, ".Value {\n        let encoded = Abi.encodeAddress(key);\n        return new ").concat(param2, ".Value(this.ctx, this.addr, \"").concat(param3, "\", utils.concatUint8Arrays(this.prefix, encoded));\n    }\n");
+        var message = "public value(key: ".concat(ft, "): ").concat(param2, ".Value {\n        let encoded = Abi.encode").concat(ff, "(key);\n        return new ").concat(param2, ".Value(this.ctx, this.addr, \"").concat(param3, "\", utils.concatUint8Arrays(this.prefix, encoded));\n    }\n");
         return message;
     };
     return Generator;

@@ -209,7 +209,7 @@ export function handleStruct(item: StorageItem, tracer: Generator,
     tracer.append(tracer.endBracket, 1);
 
     // 5 handle struct params to class
-    tracer.append(`export namespace ${structName} {`, 1);
+    tracer.append(`export namespace ${structName} {\n`, 1);
     members.forEach(function (item) {
         handleBasic(item.label, item, tracer, true, 1);
     });
@@ -232,7 +232,7 @@ export function handleMapping(item: StorageItem, tracer: Generator,
         tracer.append(tracer.getClass(item.label), 1);
         tracer.append(tracer.argsTemplage ,2);
         tracer.append(tracer.constructorTemplate ,2);
-        tracer.append(tracer.getNestedMappingValue(item.label, prefix), 2);
+        tracer.append(tracer.getNestedMappingValue(ft, ff, item.label, prefix), 2);
         tracer.append(tracer.endBracket, 1);
 
         tracer.append(`export namespace ${item.label} {\n`, 1);
@@ -270,6 +270,7 @@ export function handleMapping(item: StorageItem, tracer: Generator,
         let structName = getStructName(secondParamType);
         let prefix = getStrAfterLastColon(item.contract) + "." + item.label;
         tracer.append(tracer.getMappintSecondParam(structName.toLowerCase(), structName, prefix), 2);
+        tracer.append(tracer.endBracket, 1);
         // if struct has not been hadle
         if (!structNameSet.has(structName)) {
             let members = obj.types[getStrBetLastCommaAndParen(item.type)].members as StorageItem[];
@@ -291,8 +292,7 @@ export function handleMapping(item: StorageItem, tracer: Generator,
             tracer.append(tracer.getDiffFuncMap(ft, ff, getTypeTag(secondParamType), 
             "\""+getParamPrefix(item)+"\"", getValueFunc(secondParamType), isNumber(secondParamType)) ,2);
         }
-    }
-    
-    // 1' append class end
-    tracer.append(tracer.endBracket, 1);        
+        // 1' append class end
+        tracer.append(tracer.endBracket, 1);
+    }      
 }
