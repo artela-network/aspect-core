@@ -1,9 +1,11 @@
 version: v1
+deps:
+build:
+  roots:
+    - proto
 breaking:
   use:
     - FILE
 lint:
   use:
     - DEFAULT
-  ignore:
-    - aspect/v1/hostapi_message.proto

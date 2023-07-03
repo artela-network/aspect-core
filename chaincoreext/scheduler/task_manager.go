@@ -128,6 +128,9 @@ func (task *TaskManager) GetFromAddr(hash common.Hash) string {
 // Confirm return left tx
 func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 	// confirm all the tansactions that in block
+	if task == nil || task.scheduleTasks == nil || len(task.scheduleTasks) == 0 {
+		return nil, nil
+	}
 	for _, tx := range txs {
 		key := getTxKey(tx)
 
