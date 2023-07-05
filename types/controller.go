@@ -56,7 +56,7 @@ type RequestEthMsgAspect struct {
 	TxData      []byte
 	AccessList  ethtypes.AccessList
 	ChainId     string
-	CurrInnerTx InnerMessage
+	CurrInnerTx *InnerMessage
 }
 
 func (msg *RequestEthMsgAspect) ToAspTx() *AspTransaction {
