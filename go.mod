@@ -103,3 +103,7 @@ require (
 )
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.10.26
+
+replace (
+    github.com/artela-network/runtime => ../runtime
+)

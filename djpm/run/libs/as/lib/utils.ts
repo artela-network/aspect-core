@@ -1,3 +1,4 @@
+import { ethereum } from "./abi/ethereum/coders";
 import { AString, AUint8Array } from "./message";
 
 declare namespace __Util__ {
@@ -38,6 +39,11 @@ export namespace utils {
         let out = new AString();
         out.load(outPtr);
         return out.get();
+    }
+
+    export function uint8ArrayToAddress(data: Uint8Array): ethereum.Address {
+        let hex = String.UTF8.decode(data.buffer, false);
+        return ethereum.Address.fromHexString(hex);
     }
 
     export function hexToUint8Array(s: string): Uint8Array {
