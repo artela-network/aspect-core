@@ -148,11 +148,22 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	if err != nil || len(boundAspects) == 0 {
 		return response
 	}
-
+	var innerTransaction types.InnerTransaction
+	if req.CurrInnerTx != nil {
+		innerTransaction = types.InnerTransaction{
+			From:  req.CurrInnerTx.From.Hex(),
+			To:    req.CurrInnerTx.To.Hex(),
+			Data:  req.CurrInnerTx.Data,
+			Value: req.CurrInnerTx.Value.String(),
+			Gas:   req.CurrInnerTx.Gas.String(),
+			Index: req.CurrInnerTx.Index,
+		}
+	}
 	transaction := req.ToAspTx()
 	aspectInput := &types.AspectInput{
 		BlockHeight: req.BlockHeight,
 		Tx:          transaction,
+		CurrInnerTx: &innerTransaction,
 	}
 
 	return runAspect(methodName, boundAspects, aspectInput)
