@@ -23,6 +23,15 @@ func IsAspectContract(to *common.Address) bool {
 	return false
 }
 
+type InnerMessage struct {
+	To    *common.Address
+	From  common.Address
+	Data  []byte
+	Value *big.Int
+	Gas   *big.Int
+	Index uint64
+}
+
 type RequestEthTxAspect struct {
 	Tx          *ethtypes.Transaction
 	BlockHeight int64
@@ -47,6 +56,7 @@ type RequestEthMsgAspect struct {
 	TxData      []byte
 	AccessList  ethtypes.AccessList
 	ChainId     string
+	currentTx   InnerMessage
 }
 
 func (msg *RequestEthMsgAspect) ToAspTx() *AspTransaction {

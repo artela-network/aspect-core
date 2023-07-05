@@ -6,6 +6,7 @@ option go_package = "github.com/artela-network/artelasdk/types";
 message AspectInput {
   int64 blockHeight = 1;
   AspTransaction tx = 2;
+  InnerTransaction currInnerTx=3;
 }
 
 message AspectOutput {
@@ -63,6 +64,16 @@ message AspTransaction {
   // s define the signature value
   bytes s = 19;
 }
+
+message InnerTransaction {
+  string from = 1;
+  string to = 2;
+  bytes data=3;
+  string value = 4;
+  string gas = 5;
+  uint64 index = 6;
+}
+
 
 message AspectCode {
   string aspectId = 1;
