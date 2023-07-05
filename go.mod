@@ -3,7 +3,7 @@ module github.com/artela-network/artelasdk
 go 1.19
 
 require (
-	github.com/artela-network/runtime v0.0.0
+	github.com/artela-network/runtime v0.3.0-alpha
 	github.com/cosmos/cosmos-sdk v0.47.2
 	github.com/ethereum/go-ethereum v1.11.6
 	github.com/pkg/errors v0.9.1
@@ -102,7 +102,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace (
-	github.com/artela-network/runtime => ../runtime
-	github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.10.26
-)
+replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.10.26
