@@ -115,10 +115,9 @@ func (aspect Aspect) execAspectBlock(methodName string, req *types.RequestBlockA
 		if err != nil {
 			response.WithErr(err)
 		} else {
-			defer runner.Return()
-
 			res, err = runner.JoinPoint(methodName, aspectInput)
 			response.WithErr(err).WithAspectOutput(res)
+			runner.Return()
 		}
 		id := aspect.AspectId
 		response.WithAspectId(id)
@@ -143,13 +142,10 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	if scheduler.TaskInstance() != nil && hash != nil && scheduler.TaskInstance().IsScheduleTx(*hash) {
 		return response
 	}
-	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, *req.To)
-	// load aspects
-	if err != nil || len(boundAspects) == 0 {
-		return response
-	}
+
+	contractAddr := req.To
 	var innerTransaction types.InnerTransaction
-	if req.CurrInnerTx != nil {
+	if req.CurrInnerTx != nil && req.CurrInnerTx.To != nil {
 		innerTransaction = types.InnerTransaction{
 			From:  req.CurrInnerTx.From.Hex(),
 			To:    req.CurrInnerTx.To.Hex(),
@@ -158,6 +154,8 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 			Gas:   req.CurrInnerTx.Gas.String(),
 			Index: req.CurrInnerTx.Index,
 		}
+		// If you have an inner tx, use inner tx to as the Aspect binding target
+		contractAddr = req.CurrInnerTx.To
 	}
 	transaction := req.ToAspTx()
 	aspectInput := &types.AspectInput{
@@ -165,7 +163,11 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 		Tx:          transaction,
 		CurrInnerTx: &innerTransaction,
 	}
-
+	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, *contractAddr)
+	// load aspects
+	if err != nil || len(boundAspects) == 0 {
+		return response
+	}
 	return runAspect(methodName, boundAspects, aspectInput)
 }
 
@@ -182,10 +184,9 @@ func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput 
 		if err != nil {
 			response.WithErr(err)
 		} else {
-			defer runner.Return()
-
 			res, err = runner.JoinPoint(methodName, aspectInput)
 			response.WithErr(err).WithAspectOutput(res)
+			runner.Return()
 		}
 		if response.HasErr() {
 			// short-circuit Aspect call
