@@ -3,7 +3,7 @@ module github.com/artela-network/artelasdk
 go 1.19
 
 require (
-	github.com/artela-network/runtime v0.3.0-alpha
+	github.com/artela-network/runtime v0.3.1-alpha
 	github.com/cosmos/cosmos-sdk v0.47.2
 	github.com/ethereum/go-ethereum v1.11.6
 	github.com/pkg/errors v0.9.1
@@ -18,7 +18,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.6.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
-	github.com/bytecodealliance/wasmtime-go/v7 v7.0.0 // indirect
+	github.com/bytecodealliance/wasmtime-go/v9 v9.0.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cometbft/cometbft v0.37.1 // indirect
