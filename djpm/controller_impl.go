@@ -144,9 +144,9 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	}
 
 	contractAddr := req.To
-	var innerTransaction types.InnerTransaction
+	var innerTransaction *types.InnerTransaction
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != nil {
-		innerTransaction = types.InnerTransaction{
+		innerTransaction = &types.InnerTransaction{
 			From:  req.CurrInnerTx.From.Hex(),
 			To:    req.CurrInnerTx.To.Hex(),
 			Data:  req.CurrInnerTx.Data,
@@ -161,7 +161,7 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	aspectInput := &types.AspectInput{
 		BlockHeight: req.BlockHeight,
 		Tx:          transaction,
-		CurrInnerTx: &innerTransaction,
+		CurrInnerTx: innerTransaction,
 	}
 	boundAspects, err := aspect.GetBondAspects(req.BlockHeight, *contractAddr)
 	// load aspects
