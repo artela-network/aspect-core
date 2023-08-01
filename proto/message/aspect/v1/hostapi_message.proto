@@ -6,7 +6,7 @@ option go_package = "github.com/artela-network/artelasdk/types";
 message AspectInput {
   int64 blockHeight = 1;
   AspTransaction tx = 2;
-  InnerTransaction currInnerTx=3;
+  InnerTransaction currInnerTx = 3;
 }
 
 message AspectOutput {
@@ -68,12 +68,12 @@ message AspTransaction {
 message InnerTransaction {
   string from = 1;
   string to = 2;
-  bytes data=3;
+  bytes data = 3;
   string value = 4;
   string gas = 5;
   uint64 index = 6;
+  InnerTransaction parent = 7;
 }
-
 
 message AspectCode {
   string aspectId = 1;
@@ -146,3 +146,5 @@ message Value {
 }
 
 message Values { repeated Value all = 1; }
+
+message InnerTransactions { repeated InnerTransaction txs = 1; }
