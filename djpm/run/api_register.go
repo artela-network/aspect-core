@@ -210,8 +210,27 @@ func (r *Register) apis() interface{} {
 			}
 			return data
 		},
+		"getCallStack": func() []byte {
+			if types.GetHostApiHook == nil {
+				return nil
+			}
+			host, err := types.GetHostApiHook()
+			if err != nil {
+				return nil
+			}
+			txs := host.GetCallStack()
+			if txs == nil {
+				return nil
+			}
+
+			data, err := proto.Marshal(txs)
+			if err != nil {
+				return nil
+			}
+			return data
+		},
 		"hash": func(hasher int32, data []byte) []byte {
-			fmt.Println(string(data))
+			// fmt.Println(string(data))
 			hashFunc, ok := hashers[Hasher(hasher)]
 			if !ok {
 				return nil

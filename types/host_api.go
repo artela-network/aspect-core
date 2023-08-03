@@ -31,6 +31,7 @@ type HostApi interface {
 
 	// GetStateChanges returns the state changes of fields
 	GetStateChanges(addr string, variable string, key []byte) *StateChanges
+	GetCallStack() *InnerTransactions
 
 	SetContext(aspectID string, key, value string) error
 	GetContext(aspectID string, key string) (string, error)
