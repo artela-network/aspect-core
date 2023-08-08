@@ -44,7 +44,7 @@ func (r *Runner) Return() {
 	RuntimePool().Return(r.vmKey, r.vm)
 }
 
-func (r *Runner) JoinPoint(name string, input *types.AspectInput) (*types.AspectOutput, error) {
+func (r *Runner) JoinPoint(name types.PointCut, input *types.AspectInput) (*types.AspectOutput, error) {
 	if r.vm == nil {
 		return nil, errors.New("not init")
 	}

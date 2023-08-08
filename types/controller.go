@@ -172,20 +172,36 @@ func (c ResponseBlockAspect) With(aspectId string, output *AspectOutput) Respons
 	return c
 }
 
+type PointCut string
+
 const (
-	ON_TX_RECEIVE_METHOD       = "onTxReceive"
-	ON_BLOCK_INITIALIZE_METHOD = "onBlockInitialize"
-	ON_TX_VERIFY_METHOD        = "onTxVerify"
-	ON_ACCOUNT_VERIFY_METHOD   = "onAccountVerify"
-	ON_GAS_PAYMENT_METHOD      = "onGasPayment"
-	PRE_TX_EXECUTE_METHOD      = "preTxExecute"
-	PRE_CONTRACT_CALL_METHOD   = "preContractCall"
-	POST_CONTRACT_CALL_METHOD  = "postContractCall"
-	POST_TX_EXECUTE_METHOD     = "postTxExecute"
-	ON_TX_COMMIT_METHOD        = "onTxCommit"
-	ON_BLOCK_FINALIZE_METHOD   = "onBlockFinalize"
+	ON_TX_RECEIVE_METHOD       PointCut = "onTxReceive"
+	ON_BLOCK_INITIALIZE_METHOD PointCut = "onBlockInitialize"
+	ON_TX_VERIFY_METHOD        PointCut = "onTxVerify"
+	ON_ACCOUNT_VERIFY_METHOD   PointCut = "onAccountVerify"
+	ON_GAS_PAYMENT_METHOD      PointCut = "onGasPayment"
+	PRE_TX_EXECUTE_METHOD      PointCut = "preTxExecute"
+	PRE_CONTRACT_CALL_METHOD   PointCut = "preContractCall"
+	POST_CONTRACT_CALL_METHOD  PointCut = "postContractCall"
+	POST_TX_EXECUTE_METHOD     PointCut = "postTxExecute"
+	ON_TX_COMMIT_METHOD        PointCut = "onTxCommit"
+	ON_BLOCK_FINALIZE_METHOD   PointCut = "onBlockFinalize"
 )
 
-type (
-	Pointcut uint8
+type AspectDataAccess string
+
+const (
+	BLOCK_HEIGHT_ACCESS             AspectDataAccess = "$.block.height"
+	BLOCK_HEADER_ACCESS             AspectDataAccess = "$.block.header"
+	BLOCK_VOTEINFO_ACCESS           AspectDataAccess = "$.block.voteInfo"
+	CURRENT_TX_TRANSACTION_ACCESS   AspectDataAccess = "$.current_tx.transaction"
+	CURRENT_TX_STATE_CHANGES_ACCESS AspectDataAccess = "$.current_tx.state_changes"
+	CURRENT_TX_CALL_STACKS_ACCESS   AspectDataAccess = "$.current_tx.call_stacks"
+	CURRENT_TX_RECEIPT_ACCESS       AspectDataAccess = "$.current_tx.receipt"
+	CURRENT_TX_CONTEXT_ACCESS       AspectDataAccess = "$.current_tx.context"
+	ASPECT_STATE_ACCESS             AspectDataAccess = "$.aspect.state"
+	ASPECT_PROPERTIES_ACCESS        AspectDataAccess = "$.aspect.properties"
+	EVM_INTERMEDIATE_STATE_ACCESS   AspectDataAccess = "$.evm.intermediate_state"
+	EVM_BLOCK_STATE_ACCESS          AspectDataAccess = "$.evm.block_state"
+	EVM_ENVCONFIG_ACCESS            AspectDataAccess = "$.evm.envconfig"
 )

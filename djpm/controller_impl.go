@@ -39,7 +39,7 @@ func AspectInstance() *Aspect {
 	return globalAspect
 }
 
-func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkTxAspect) *types.ResponseAspect {
+func (aspect Aspect) execAspectBySdkTx(methodName types.PointCut, req *types.RequestSdkTxAspect) *types.ResponseAspect {
 	result := &types.ResponseAspect{
 		Success: true,
 	}
@@ -92,7 +92,7 @@ func (aspect Aspect) execAspectBySdkTx(methodName string, req *types.RequestSdkT
 
 }
 
-func (aspect Aspect) execAspectBlock(methodName string, req *types.RequestBlockAspect) *types.ResponseAspect {
+func (aspect Aspect) execAspectBlock(methodName types.PointCut, req *types.RequestBlockAspect) *types.ResponseAspect {
 	response := &types.ResponseAspect{Success: true}
 
 	if req == nil {
@@ -129,7 +129,7 @@ func (aspect Aspect) execAspectBlock(methodName string, req *types.RequestBlockA
 	return response
 }
 
-func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEthMsgAspect) *types.ResponseAspect {
+func (aspect Aspect) execAspectByEthMsg(methodName types.PointCut, req *types.RequestEthMsgAspect) *types.ResponseAspect {
 	response := &types.ResponseAspect{
 		Success: true,
 	}
@@ -171,7 +171,7 @@ func (aspect Aspect) execAspectByEthMsg(methodName string, req *types.RequestEth
 	return runAspect(methodName, boundAspects, aspectInput)
 }
 
-func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput *types.AspectInput) *types.ResponseAspect {
+func runAspect(methodName types.PointCut, boundAspects []*types.AspectCode, aspectInput *types.AspectInput) *types.ResponseAspect {
 	response := &types.ResponseAspect{
 		Success: true,
 	}
@@ -185,6 +185,14 @@ func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput 
 			response.WithErr(err)
 		} else {
 			res, err = runner.JoinPoint(methodName, aspectInput)
+			if res.GetResultData() != nil {
+				data := res.GetResultData()
+
+				filter := types.FilterTxResult{}
+				data.UnmarshalTo(&filter)
+
+			}
+
 			response.WithErr(err).WithAspectOutput(res)
 			runner.Return()
 		}
@@ -198,6 +206,7 @@ func runAspect(methodName string, boundAspects []*types.AspectCode, aspectInput 
 
 func (aspect Aspect) OnTxReceive(req *types.RequestSdkTxAspect) *types.ResponseAspect {
 	tx := aspect.execAspectBySdkTx(types.ON_TX_RECEIVE_METHOD, req)
+
 	return tx
 }
 
@@ -205,6 +214,7 @@ func (aspect Aspect) OnBlockInitialize(req *types.RequestBlockAspect) *types.Res
 	return aspect.execAspectBlock(types.ON_BLOCK_INITIALIZE_METHOD, req)
 }
 func (aspect Aspect) OnTxVerify(req *types.RequestEthMsgAspect) *types.ResponseAspect {
+
 	return aspect.execAspectByEthMsg(types.ON_TX_VERIFY_METHOD, req)
 
 }

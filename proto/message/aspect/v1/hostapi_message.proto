@@ -1,5 +1,6 @@
 syntax = "proto3";
 package aspect.v1;
+import "google/protobuf/any.proto";
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
@@ -12,7 +13,21 @@ message AspectInput {
 message AspectOutput {
   bool success = 1;
   string message = 2;
+  optional google.protobuf.Any resultData=3;
 }
+
+message FilterTxResult {
+  bool isFilter = 1;
+}
+
+message VerifyTxResult {
+  bool isVerified = 1;
+}
+
+message GetPayMasterResult {
+  string payMaster = 1;
+}
+
 
 // AccessTuple is the element type of an access list.
 message AspAccessTuple {
@@ -21,6 +36,15 @@ message AspAccessTuple {
   string address = 1;
   // storage_keys are hex formatted hashes of the storage keys
   repeated string storage_keys = 2;
+}
+message  CallMessage{
+  string to = 7;
+  // data is the data payload bytes of the transaction.
+  bytes input = 9;
+  // gas defines the gas limit defined for the transaction.
+  uint64 gas_limit = 5;
+
+  string from = 13;
 }
 
 message AspTransaction {
@@ -127,6 +151,10 @@ message StateChange {
 
 message StateChanges { repeated StateChange all = 1; }
 
+message AspCallStacks{
+  map<string,InnerTransaction> calls=1;
+}
+
 enum ValueKind {
   INT16 = 0;
   INT32 = 1;
@@ -148,3 +176,80 @@ message Value {
 message Values { repeated Value all = 1; }
 
 message InnerTransactions { repeated InnerTransaction txs = 1; }
+message AspLog {
+  // address of the contract that generated the event
+  string address = 1;
+  // topics is a list of topics provided by the contract.
+  repeated string topics = 2;
+  // data which is supplied by the contract, usually ABI-encoded
+  bytes data = 3;
+
+  // block_number of the block in which the transaction was included
+  uint64 block_number = 4 ;
+  // tx_hash is the transaction hash
+  string tx_hash = 5 ;
+  // tx_index of the transaction in the block
+  uint64 tx_index = 6;
+  // block_hash of the block in which the transaction was included
+  string block_hash = 7 ;
+  // index of the log in the block
+  uint64 index = 8 ;
+
+  // removed is true if this log was reverted due to a chain
+  // reorganisation. You must pay attention to this field if you receive logs
+  // through a filter query.
+  bool removed = 9;
+}
+
+
+// MsgEthereumTxResponse defines the Msg/EthereumTx response type.
+message AspTxResponse {
+
+  // hash of the ethereum transaction in hex format. This hash differs from the
+  // Tendermint sha256 hash of the transaction bytes. See
+  // https://github.com/tendermint/tendermint/issues/6539 for reference
+  string hash = 1;
+  // logs contains the transaction hash and the proto-compatible ethereum
+  // logs.
+  repeated AspLog logs = 2;
+  // ret is the returned data from evm function (result or data supplied with revert
+  // opcode)
+  bytes ret = 3;
+  // vm_error is the error returned by vm execution
+  string vm_error = 4;
+  // gas_used specifies how much gas was consumed by the transaction
+  uint64 gas_used = 5;
+}
+// Validator
+message AspValidator {
+  bytes address = 1;  // The first 20 bytes of SHA256(public key)
+  // PubKey pub_key = 2 [(gogoproto.nullable)=false];
+  int64 power = 3;  // The voting power
+}
+// VoteInfo
+message AspVoteInfo {
+  AspValidator validator         = 1;
+  bool      signed_last_block = 2;
+}
+
+message AspReceipt {
+  // Consensus fields: These fields are defined by the Yellow Paper
+  uint32    type = 1;
+  bytes   postState = 2;
+  uint64   status = 3;
+  uint64   cumulativeGasUsed = 4;
+  bytes  logsBloom = 5;
+  repeated AspLog logs = 6;
+
+  // Implementation fields: These fields are added by geth when processing a transaction.
+  // They are stored in the chain database.
+  string txHash = 7;
+  string contractAddress = 8;
+  uint64 gasUsed = 9;
+
+  // Inclusion information: These fields provide information about the inclusion of the
+  // transaction corresponding to this receipt.
+  string blockHash = 10;
+  string blockNumber = 11;
+  uint32  transactionIndex = 12;
+}
