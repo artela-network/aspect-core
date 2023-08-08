@@ -1,0 +1,84 @@
+syntax = "proto3";
+package aspect.v1;
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+message Block {
+  uint32 maxBytes = 1;
+  int32 maxGas = 2;
+}
+
+message Evidence {
+  uint32 maxAgeNumBlocks = 1;
+  string maxAgeDuration = 2;
+  uint32 maxBytes = 3;
+}
+
+message Validator {
+  repeated string pubKeyTypes = 1;
+}
+
+message Version {
+  uint32 appVersion = 1;
+}
+
+message ConsParams {
+  Block block = 1;
+  Evidence evidence = 2;
+  Validator validator = 3;
+  Version version = 4;
+}
+
+message EvmParams {
+  string evmDenom = 1;
+  bool enableCreate = 2;
+  bool enableCall = 3;
+  repeated uint32 extraEips = 4;
+  bool allowUnprotectedTxs = 5;
+}
+
+message Ethash {
+  uint32 epoch = 1;
+  string fullForkThreshold = 2;
+  string blockReward = 3;
+  repeated string difficultyBombDelays = 4;
+  string inception = 5;
+}
+
+message Clique {
+  uint32 period = 1;
+  uint32 epoch = 2;
+}
+
+message ChainConfig {
+  string chainId = 1;
+  string homesteadBlock = 2;
+  string daoForkBlock = 3;
+  bool daoForkSupport = 4;
+  string eip150Block = 5;
+  string eip150Hash = 6;
+  string eip155Block = 7;
+  string eip158Block = 8;
+  string byzantiumBlock = 9;
+  string constantinopleBlock = 10;
+  string petersburgBlock = 11;
+  string istanbulBlock = 12;
+  string muirGlacierBlock = 13;
+  string berlinBlock = 14;
+  string londonBlock = 15;
+  string arrowGlacierBlock = 16;
+  string grayGlacierBlock = 17;
+  string mergeNetsplitBlock = 18;
+  string shanghaiBlock = 19;
+  string cancunBlock = 20;
+  string terminalTotalDifficulty = 21;
+  bool terminalTotalDifficultyPassed = 22;
+  Ethash ethash = 23;
+  Clique clique = 24;
+}
+
+message EnvContent {
+  string coinBase = 4;
+  uint32 baseFee = 5;
+}
