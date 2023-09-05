@@ -1,4 +1,4 @@
-[submodule "account_abstraction"]
-	path = account_abstraction
+[submodule "chaincoreext/account_abstraction/contract"]
+	path = chaincoreext/account_abstraction/contract
 	url = https://github.com/artela-network/account-abstraction.git
 	branch = feat/aspect-enabled-wallet
