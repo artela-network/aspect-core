@@ -1,0 +1,4 @@
+[submodule "account_abstraction"]
+	path = account_abstraction
+	url = https://github.com/artela-network/account-abstraction.git
+	branch = feat/aspect-enabled-wallet
