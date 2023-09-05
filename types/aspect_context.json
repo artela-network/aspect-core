@@ -1,6 +1,6 @@
 {
   "blockContext": {
-    //添加Cosmos Block 下面的所有信息  proto/tendermint/types/block.proto:10
+    //eth block header
     "header": {
       "parentHash": "string",
       "uncleHash": "string",
@@ -14,7 +14,7 @@
       "nonce": "uint64",
       "baseFeePerGas": "uint64"
     },
-    //   Aspect Tx to 相同的所有交易
+    //filter by  AspectId and tx.To()
     "txs":[
       {
         "type": "0x0",
@@ -49,34 +49,6 @@
       }
     ],
     "bftInfo": {
-      "blockId": {
-        "hash": "hex_bytes",
-        "partSetHeader": {
-          "total": 0,
-          "hash": "hex_bytes"
-        }
-      },
-      "lastCommit":{
-        "height": 0,
-        "round": 0,
-        "votes": [
-          {
-            "validator": {
-              "address": "0xe04e15d39fff80cc2474b4fd78c0255ef3d022e1ee607f5bdcc0c0a7e",
-              "power": "int64"
-            },
-            "signedLastBlock": "bool"
-          }
-        ],
-        "blockId": {
-          "hash": "",
-          "partSetHeader": {
-            "total": 0,
-            "hash": ""
-          }
-        },
-      },
-
       "blockGasMeter": {
         "gasConsumed": 10,
         "gasConsumedToLimit": 10,
@@ -93,27 +65,31 @@
           "amount": "string"
         }
       ],
-      "commit": {
-        "height": 0,
+      "blockId": {
+        "hash": "hex_bytes",
+        "partSetHeader": {
+          "total": 0,
+          "hash": "hex_bytes"
+        }
+      },
+      "lastCommit":{
         "round": 0,
+        "votes": [
+          {
+            "validator": {
+              "address": "0xe04e15d39fff80cc2474b4fd78c0255ef3d022e1ee607f5bdcc0c0a7e",
+              "power": "int64"
+            },
+            "signedLastBlock": "bool"
+          }
+        ],
         "blockId": {
           "hash": "",
           "partSetHeader": {
             "total": 0,
             "hash": ""
           }
-        },
-        "signatures": [
-          {
-            "blockIdFlag": 0,
-            "validatorAddress": "",
-            "timestamp": {
-              "seconds": 0,
-              "nanos": 0
-            },
-            "signature": ""
-          }
-        ]
+        }
       },
       "evidence": [
         {
@@ -138,13 +114,7 @@
           }
         }
       ]
-
     }
-
-
-
-
-
   },
   "transactionContext": {
     "aspectContext": {
