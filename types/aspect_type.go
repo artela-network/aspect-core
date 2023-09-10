@@ -24,7 +24,11 @@ const (
 	POST_TX_EXECUTE_METHOD     PointCut = "postTxExecute"
 	ON_TX_COMMIT_METHOD        PointCut = "onTxCommit"
 	ON_BLOCK_FINALIZE_METHOD   PointCut = "onBlockFinalize"
+	OPERATION_METHOD           PointCut = "operation"
+	IS_OWNER_METHOD            PointCut = "isOwner"
+	ON_CONTRACT_BINDING_METHOD PointCut = "onContractBinding"
 )
+
 const DefaultKey = "-"
 
 func ErrJoinPointResult(message string) *JoinPointResult {

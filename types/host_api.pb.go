@@ -1110,7 +1110,7 @@ type StringData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data string `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Data string `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *StringData) Reset() {
@@ -1157,7 +1157,7 @@ type IntData struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data int64 `protobuf:"varint,2,opt,name=data,proto3" json:"data,omitempty"`
+	Data int64 `protobuf:"varint,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *IntData) Reset() {
@@ -1197,6 +1197,53 @@ func (x *IntData) GetData() int64 {
 		return x.Data
 	}
 	return 0
+}
+
+type BoolData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data bool `protobuf:"varint,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *BoolData) Reset() {
+	*x = BoolData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aspect_v2_host_api_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BoolData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BoolData) ProtoMessage() {}
+
+func (x *BoolData) ProtoReflect() protoreflect.Message {
+	mi := &file_aspect_v2_host_api_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BoolData.ProtoReflect.Descriptor instead.
+func (*BoolData) Descriptor() ([]byte, []int) {
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *BoolData) GetData() bool {
+	if x != nil {
+		return x.Data
+	}
+	return false
 }
 
 var File_aspect_v2_host_api_proto protoreflect.FileDescriptor
@@ -1323,9 +1370,11 @@ var file_aspect_v2_host_api_proto_rawDesc = []byte{
 	0x1f, 0x0a, 0x0b, 0x68, 0x61, 0x73, 0x68, 0x5f, 0x65, 0x71, 0x75, 0x61, 0x6c, 0x73, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x68, 0x61, 0x73, 0x68, 0x45, 0x71, 0x75, 0x61, 0x6c, 0x73,
 	0x22, 0x20, 0x0a, 0x0a, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12,
-	0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x64, 0x61,
+	0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x64, 0x61,
 	0x74, 0x61, 0x22, 0x1d, 0x0a, 0x07, 0x49, 0x6e, 0x74, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a,
-	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x64, 0x61, 0x74,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x64, 0x61, 0x74,
+	0x61, 0x22, 0x1e, 0x0a, 0x08, 0x42, 0x6f, 0x6f, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x64, 0x61, 0x74,
 	0x61, 0x2a, 0xf7, 0x02, 0x0a, 0x0d, 0x44, 0x61, 0x74, 0x61, 0x53, 0x70, 0x61, 0x63, 0x65, 0x54,
 	0x79, 0x70, 0x65, 0x12, 0x15, 0x0a, 0x11, 0x54, 0x58, 0x5f, 0x41, 0x53, 0x50, 0x45, 0x43, 0x54,
 	0x5f, 0x43, 0x4f, 0x4e, 0x54, 0x45, 0x58, 0x54, 0x10, 0x00, 0x12, 0x15, 0x0a, 0x11, 0x54, 0x58,
@@ -1375,7 +1424,7 @@ func file_aspect_v2_host_api_proto_rawDescGZIP() []byte {
 }
 
 var file_aspect_v2_host_api_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_aspect_v2_host_api_proto_goTypes = []interface{}{
 	(DataSpaceType)(0),            // 0: aspect.v2.DataSpaceType
 	(*ContextQueryRequest)(nil),   // 1: aspect.v2.ContextQueryRequest
@@ -1396,25 +1445,26 @@ var file_aspect_v2_host_api_proto_goTypes = []interface{}{
 	(*StateQueryRequest)(nil),     // 16: aspect.v2.StateQueryRequest
 	(*StringData)(nil),            // 17: aspect.v2.StringData
 	(*IntData)(nil),               // 18: aspect.v2.IntData
-	(*RunResult)(nil),             // 19: aspect.v2.RunResult
-	(*anypb.Any)(nil),             // 20: google.protobuf.Any
-	(*EthLog)(nil),                // 21: aspect.v2.EthLog
+	(*BoolData)(nil),              // 19: aspect.v2.BoolData
+	(*RunResult)(nil),             // 20: aspect.v2.RunResult
+	(*anypb.Any)(nil),             // 21: google.protobuf.Any
+	(*EthLog)(nil),                // 22: aspect.v2.EthLog
 }
 var file_aspect_v2_host_api_proto_depIdxs = []int32{
 	0,  // 0: aspect.v2.ContextQueryRequest.data_space:type_name -> aspect.v2.DataSpaceType
-	19, // 1: aspect.v2.ContextQueryResponse.result:type_name -> aspect.v2.RunResult
-	20, // 2: aspect.v2.ContextQueryResponse.data:type_name -> google.protobuf.Any
+	20, // 1: aspect.v2.ContextQueryResponse.result:type_name -> aspect.v2.RunResult
+	21, // 2: aspect.v2.ContextQueryResponse.data:type_name -> google.protobuf.Any
 	6,  // 3: aspect.v2.CallMessageRequest.message:type_name -> aspect.v2.EthMessage
-	19, // 4: aspect.v2.CallMessageResponse.result:type_name -> aspect.v2.RunResult
+	20, // 4: aspect.v2.CallMessageResponse.result:type_name -> aspect.v2.RunResult
 	5,  // 5: aspect.v2.CallMessageResponse.data:type_name -> aspect.v2.EthMessageCallResult
-	21, // 6: aspect.v2.EthMessageCallResult.logs:type_name -> aspect.v2.EthLog
-	19, // 7: aspect.v2.StateLogQueryResponse.result:type_name -> aspect.v2.RunResult
-	21, // 8: aspect.v2.StateLogQueryResponse.logs:type_name -> aspect.v2.EthLog
-	20, // 9: aspect.v2.CryptoRequest.data:type_name -> google.protobuf.Any
-	19, // 10: aspect.v2.CryptoResponse.result:type_name -> aspect.v2.RunResult
-	20, // 11: aspect.v2.CryptoResponse.data:type_name -> google.protobuf.Any
-	19, // 12: aspect.v2.StringDataResponse.result:type_name -> aspect.v2.RunResult
-	19, // 13: aspect.v2.IntDataResponse.result:type_name -> aspect.v2.RunResult
+	22, // 6: aspect.v2.EthMessageCallResult.logs:type_name -> aspect.v2.EthLog
+	20, // 7: aspect.v2.StateLogQueryResponse.result:type_name -> aspect.v2.RunResult
+	22, // 8: aspect.v2.StateLogQueryResponse.logs:type_name -> aspect.v2.EthLog
+	21, // 9: aspect.v2.CryptoRequest.data:type_name -> google.protobuf.Any
+	20, // 10: aspect.v2.CryptoResponse.result:type_name -> aspect.v2.RunResult
+	21, // 11: aspect.v2.CryptoResponse.data:type_name -> google.protobuf.Any
+	20, // 12: aspect.v2.StringDataResponse.result:type_name -> aspect.v2.RunResult
+	20, // 13: aspect.v2.IntDataResponse.result:type_name -> aspect.v2.RunResult
 	14, // [14:14] is the sub-list for method output_type
 	14, // [14:14] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
@@ -1645,6 +1695,18 @@ func file_aspect_v2_host_api_proto_init() {
 				return nil
 			}
 		}
+		file_aspect_v2_host_api_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BoolData); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1652,7 +1714,7 @@ func file_aspect_v2_host_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_aspect_v2_host_api_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   18,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

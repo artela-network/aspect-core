@@ -159,3 +159,22 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	}
 	return res.(bool), nil
 }
+
+func (r *Runner) ExecFunc(funcName string, args ...interface{}) (interface{}, error) {
+	if r.vm == nil {
+		return false, errors.New("run not init")
+	}
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
+	res, err := r.vm.Call(funcName, args...)
+	if err != nil {
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
+		}
+		return nil, err
+	}
+	return res, nil
+}

@@ -18,19 +18,19 @@ type AspectRuntimeHostApiI interface {
 	// ContextQuery(string query ) *ContextQueryResponse
 	Get(ctx *RunnerContext, key *ContextQueryRequest) *ContextQueryResponse
 	// SetAspectContext(string key,string value) string
-	SetAspectContext(ctx *RunnerContext, request *KeyValueSetRequest) *StringDataResponse
+	SetAspectContext(ctx *RunnerContext, request *KeyValueSetRequest) bool
 }
 
 type AspectStateHostApiI interface {
 	//	GetAspectState( key string) string
-	GetAspectState(ctx *RunnerContext, request *KeyGetRequest) *StringDataResponse
+	GetAspectState(ctx *RunnerContext, key string) string
 	// SetAspectState( key string, value string) bool
-	SetAspectState(ctx *RunnerContext, request *KeyValueSetRequest) *RunResult
+	SetAspectState(ctx *RunnerContext, key, value string) bool
 
 	//	RemoveAspectState( key string) bool
-	RemoveAspectState(ctx *RunnerContext, request *KeyGetRequest) *RunResult
+	RemoveAspectState(ctx *RunnerContext, key string) bool
 	//GetProperty( key string) string
-	GetProperty(ctx *RunnerContext, request *KeyGetRequest) *StringDataResponse
+	GetProperty(ctx *RunnerContext, key string) string
 }
 
 type EvmHostApiI interface {
@@ -44,16 +44,17 @@ type ScheduleHostApiI interface {
 	SubmitSchedule(ctx *RunnerContext, sch *Schedule) *RunResult
 }
 type StateDbHostApiI interface {
+
 	//	GetBalance(request AddressQueryRequest) StringDataResponse
-	GetBalance(ctx *RunnerContext, request *AddressQueryRequest) *StringDataResponse
+	GetBalance(ctx *RunnerContext, addressEquals string) string
 	//GetState(request StateQueryRequest) StringDataResponse
-	GetState(ctx *RunnerContext, request *StateQueryRequest) *StringDataResponse
+	GetState(ctx *RunnerContext, addressEquals, hashEquals string) string
 	//GetRefund() IntDataResponse
-	GetRefund(ctx *RunnerContext) *IntDataResponse
+	GetRefund(ctx *RunnerContext) int64
 	//GetCodeHash(request AddressQueryRequest) StringDataResponse
-	GetCodeHash(ctx *RunnerContext, request *AddressQueryRequest) *StringDataResponse
+	GetCodeHash(ctx *RunnerContext, addressEquals string) string
 	//GetNonce(request AddressQueryRequest) IntDataResponse
-	GetNonce(ctx *RunnerContext, request *AddressQueryRequest) *IntDataResponse
+	GetNonce(ctx *RunnerContext, addressEquals string) uint64
 }
 
 type CryptoHostApiI interface {

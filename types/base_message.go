@@ -149,3 +149,35 @@ func ConvertTuples(tuples []ethtypes.AccessTuple) []*EthAccessTuple {
 	}
 	return store
 }
+
+func ConvertEthLogs(logs []*ethtypes.Log) []*EthLog {
+	if logs == nil {
+		return nil
+	}
+	ethLogs := make([]*EthLog, len(logs))
+	for i, log := range logs {
+		ethLogs[i] = ConvertEthLog(log)
+	}
+	return ethLogs
+}
+func ConvertEthLog(logs *ethtypes.Log) *EthLog {
+	if logs == nil {
+		return nil
+	}
+	topicStrArray := make([]string, len(logs.Topics))
+	for i, topic := range logs.Topics {
+		topicStrArray[i] = topic.String()
+	}
+	return &EthLog{
+		Address:     logs.Address.String(),
+		Topics:      topicStrArray,
+		Data:        logs.Data,
+		BlockNumber: logs.BlockNumber,
+		TxHash:      logs.TxHash.String(),
+		TxIndex:     uint64(logs.TxIndex),
+		BlockHash:   logs.BlockHash.String(),
+		Index:       uint64(logs.Index),
+		Removed:     logs.Removed,
+	}
+
+}

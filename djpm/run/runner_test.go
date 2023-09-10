@@ -14,7 +14,7 @@ import (
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestJoinPoint(t *testing.T) {
 
-	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs/build/index.wasm")
+	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs-test/build/release.wasm")
 
 	name := aspectType.ON_TX_RECEIVE_METHOD
 	input := &aspectType.EthTxAspect{
