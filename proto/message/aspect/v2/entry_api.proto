@@ -33,11 +33,10 @@ message EthBlock {
   bytes dataHash = 6;
 }
 
-
-
 message EthStateChange {
   string account = 1; // hex string of account
   bytes value = 2;
+  uint32 call_index=3;
 }
 
 message EthStateChanges { repeated EthStateChange all = 1; }
