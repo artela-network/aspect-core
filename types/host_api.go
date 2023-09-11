@@ -1,46 +1,59 @@
 package types
 
 import (
-	"math/big"
-
-	"github.com/ethereum/go-ethereum/common"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"reflect"
 )
 
-var GetHostApiHook func() (HostApi, error)
+func NewStringResponse(condition bool, data string, errMsg string) *StringDataResponse {
+	message := "success"
+	if !condition {
+		message = errMsg
+	}
+	return &StringDataResponse{
+		Result: &RunResult{
+			Success: condition,
+			Message: message,
+		},
+		Data: data,
+	}
+}
 
-type HostApi interface {
-	// LocalCall calls EthCall
-	//	LocalCall(req *evmtypes.EthCallRequest) (*evmtypes.MsgEthereumTxResponse, error)
+func NewIntDataResponse(condition bool, data int64, errMsg string) *IntDataResponse {
+	message := "success"
+	if condition {
+		message = errMsg
+	}
+	return &IntDataResponse{
+		Result: &RunResult{
+			Success: condition,
+			Message: message,
+		},
+		Data: data,
+	}
+}
 
-	// TBD, if we need to return the artelamint blocks
-	// LastBlock() (*coretypes.ResultBlock, error)
-	// CurrentBlock() (*coretypes.ResultBlock, error)
-
-	// LastBlock returns last ethereum block
-	LastBlock() (*EthBlock, error)
-
-	// CurrentBlock returns ethereum block built by the packing block,
-	// this should only be called when a new block is generating
-	CurrentBlock() (*EthBlock, error)
-
-	// CurrentBalance return current blance of account address
-	CurrentBalance(addr common.Address) (*big.Int, error)
-
-	// GetProperty returns the configuration of aspect
-	GetProperty(aspectID string, key string) (string, error)
-
-	// GetStateChanges returns the state changes of fields
-	GetStateChanges(addr string, variable string, key []byte) *StateChanges
-	GetCallStack() *InnerTransactions
-
-	SetContext(aspectID string, key, value string) error
-	GetContext(aspectID string, key string) (string, error)
-
-	SetAspectState(aspectID string, key, value string) error
-	GetAspectState(aspectID string, key string) (string, error)
-
-	AddInherent()
-	ScheduleTx(sch *Schedule) bool
+func NewContextQueryResponse(condition bool, errMsg string) *ContextQueryResponse {
+	message := "success"
+	if condition {
+		message = errMsg
+	}
+	return &ContextQueryResponse{
+		Result: &RunResult{
+			Success: condition,
+			Message: message,
+		},
+	}
+}
+func (c *ContextQueryResponse) SetData(message proto.Message) {
+	if message == nil {
+		return
+	}
+	anyData, _ := anypb.New(message)
+	c.Data = anyData
+	messageType := reflect.TypeOf(message)
+	c.DataMessageType = messageType.Name()
 }
 
 type SetDataType string
