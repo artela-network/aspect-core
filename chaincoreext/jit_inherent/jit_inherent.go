@@ -95,37 +95,14 @@ func (m *Manager) Submit(aspect common.Address,
 func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherentRequest) (
 	verificationGasLimit, callGasLimit *uint256.Int, err error) {
 	// get vm with canonical state
-	cvm, err := m.protocol.VMFromCanonicalState()
+	cvm, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	userOp := types.NewUserOperation(inherent)
-	balance := m.protocol.BalanceOf(userOp.Sender)
+	gas := uint256.NewInt(cvm.Msg().Gas())
 
-	// call simulateHandleOp method of entry point estimate gas cost
-	// FIXME: fix the gas estimation logic later, we need to do a binary search on this,
-	//        currently we just use fixed amount - a quarter of the account balance on this.
-	abiUserOperation := userOp.ToEstimateGasABIStruct(balance)
-	calldata, err := m.entrypointABI.Pack("simulateHandleOp", abiUserOperation, common.Address{}, []byte{})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// FIXME: pay gas with Aspect's settlement account
-	ret, _, err := cvm.Call(vm.AccountRef(aspect), EntryPointContract,
-		calldata, userOp.CallGasLimit.Uint64(), big.NewInt(0))
-	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
-		return nil, nil, err
-	}
-
-	res, err := aa.DecodeExecutionResult(ret)
-	if err != nil {
-		// return fail reason
-		return nil, nil, aa.DecodeFailedOpError(ret)
-	}
-
-	return res.PreOpGas, res.Paid, nil
+	return gas, gas, nil
 }
 
 // ClearLookup clears the user operation sender lookup. When current block finished, the lookup table should be cleared.

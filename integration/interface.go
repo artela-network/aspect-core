@@ -1,6 +1,7 @@
 package integration
 
 import (
+	artevm "github.com/artela-network/evm/vm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"math/big"
@@ -78,6 +79,9 @@ type AspectProtocol interface {
 
 // VM defines the interface to interact with VM.
 type VM interface {
+	// Msg returns the current vm message
+	Msg() artevm.Message
+
 	// Call executes the contract call using the given input.
 	Call(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
 }

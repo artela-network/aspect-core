@@ -3,8 +3,10 @@ module github.com/artela-network/artelasdk
 go 1.19
 
 require (
+	github.com/artela-network/evm v0.3.1-alpha
 	github.com/artela-network/runtime v0.3.1-alpha
 	github.com/ethereum/go-ethereum v1.11.6
+	github.com/holiman/uint256 v1.2.2
 	github.com/json-iterator/go v1.1.12
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
@@ -20,18 +22,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-kit/kit v0.12.0 // indirect
-	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
-	github.com/holiman/uint256 v1.2.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -55,4 +52,7 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.10.26
 
-replace github.com/artela-network/runtime => ../runtime
+replace (
+	github.com/artela-network/evm => ../evm
+	github.com/artela-network/runtime => ../runtime
+)
