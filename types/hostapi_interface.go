@@ -50,7 +50,7 @@ type StateDbHostApiI interface {
 	//GetState(request StateQueryRequest) StringDataResponse
 	GetState(ctx *RunnerContext, addressEquals, hashEquals string) string
 	//GetRefund() IntDataResponse
-	GetRefund(ctx *RunnerContext) int64
+	GetRefund(ctx *RunnerContext) uint64
 	//GetCodeHash(request AddressQueryRequest) StringDataResponse
 	GetCodeHash(ctx *RunnerContext, addressEquals string) string
 	//GetNonce(request AddressQueryRequest) IntDataResponse
