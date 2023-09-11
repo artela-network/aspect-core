@@ -1,0 +1,9 @@
+{
+  "params": {
+    "test-project-path": "/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs-test"
+  },
+  "target": {
+    "aspect-test": "${test-project-path}/build/aspect-test.wasm",
+    "utilapi-test": "${test-project-path}/build/utilapi-test.wasm"
+  }
+}

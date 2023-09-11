@@ -11,7 +11,7 @@ type ScheduleManager struct {
 	Store types.AspectStore
 	// cache schedule
 	Pool   []*types.Schedule
-	WrapTx func(tx *types.AspTransaction) (common.Hash, []byte, error)
+	WrapTx func(tx *types.EthTransaction) (common.Hash, []byte, error)
 }
 
 /**
@@ -28,7 +28,7 @@ func ScheduleManagerInstance() *ScheduleManager {
 	return globalManager
 }
 
-func NewScheduleManager(store types.AspectStore, wrapTx func(tx *types.AspTransaction) (common.Hash, []byte, error)) error {
+func NewScheduleManager(store types.AspectStore, wrapTx func(tx *types.EthTransaction) (common.Hash, []byte, error)) error {
 	manager := ScheduleManager{
 		Store:  store,
 		Pool:   nil,
@@ -142,6 +142,6 @@ func (manager *ScheduleManager) rmPool(id *types.ScheduleId) {
 		}
 	}
 }
-func (manager *ScheduleManager) WrapTransition(tx *types.AspTransaction) (common.Hash, []byte, error) {
+func (manager *ScheduleManager) WrapTransition(tx *types.EthTransaction) (common.Hash, []byte, error) {
 	return manager.WrapTx(tx)
 }
