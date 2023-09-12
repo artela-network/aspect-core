@@ -21,4 +21,5 @@ message JitInherentResponse {
     bytes tx_hash = 2;
     bool success = 3;
     bytes ret = 4;
+    uint64 leftover_gas = 5;
 }

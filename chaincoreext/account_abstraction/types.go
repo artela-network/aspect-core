@@ -41,9 +41,9 @@ type ValidationResult struct {
 }
 
 func DecodeValidationResult(data []byte) (*ValidationResult, error) {
-	// failed to decode as ValidationResult, try to decode as FailedOp
+	// failed to DecodeError as ValidationResult, try to DecodeError as FailedOp
 	validationResultABI := entrypointABI.Errors["ValidationResult"]
-	return decode[ValidationResult](&validationResultABI, data)
+	return DecodeError[ValidationResult](&validationResultABI, data)
 }
 
 // FailedOp is the failed operation error returned by aa entrypoint.
@@ -53,11 +53,11 @@ type FailedOp struct {
 }
 
 func DecodeFailedOpError(data []byte) error {
-	// failed to decode as ValidationResult, try to decode as FailedOp
+	// failed to DecodeError as ValidationResult, try to DecodeError as FailedOp
 	failedOpABI := entrypointABI.Errors["FailedOp"]
-	failedOp, err := decode[FailedOp](&failedOpABI, data)
+	failedOp, err := DecodeError[FailedOp](&failedOpABI, data)
 	if err != nil {
-		// decode fail means it's not a FailedOp error
+		// DecodeError fail means it's not a FailedOp error
 		return errors.New("unknown error")
 	}
 
@@ -76,27 +76,40 @@ type ExecutionResult struct {
 }
 
 func DecodeExecutionResult(data []byte) (*ExecutionResult, error) {
-	// failed to decode as ValidationResult, try to decode as FailedOp
+	// failed to DecodeError as ValidationResult, try to DecodeError as FailedOp
 	executionResultABI := entrypointABI.Errors["ExecutionResult"]
-	return decode[ExecutionResult](&executionResultABI, data)
+	return DecodeError[ExecutionResult](&executionResultABI, data)
 }
 
 func (i *UserOperation) Hash() common.Hash {
 	return common.Hash{}
 }
 
-func decode[V any](decodeErrorABI *abi.Error, data []byte) (*V, error) {
+func DecodeResponse(methodName string, data []byte) ([]interface{}, error) {
+	method, ok := entrypointABI.Methods[methodName]
+	if !ok {
+		return nil, errors.New("method not found")
+	}
+
+	return method.Outputs.Unpack(data)
+}
+
+func DecodeError[V any](decodeErrorABI *abi.Error, data []byte) (*V, error) {
 	res, err := decodeErrorABI.Unpack(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return interfaceToStruct[V](res)
+	if casted, ok := res.(*V); ok {
+		return casted, nil
+	}
+
+	return InterfaceToStruct[V](res)
 }
 
-// interfaceToStruct converts interface to struct,
+// InterfaceToStruct converts interface to struct,
 // use json here for convenience, optimize later
-func interfaceToStruct[T any](input interface{}) (*T, error) {
+func InterfaceToStruct[T any](input interface{}) (*T, error) {
 	raw, _ := json.Marshal(input)
 	var output T
 	err := json.Unmarshal(raw, &output)

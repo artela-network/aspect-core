@@ -18,12 +18,12 @@ const (
 type JoinPointStage int
 
 const (
-	BlockInitialization JoinPointStage = iota
+	Unknown JoinPointStage = iota
+	BlockInitialization
 	PreTransactionExecution
 	TransactionExecution
 	PostTransactionExecution
 	BlockFinalization
-	UNKNOW
 )
 
 // TxData defines the interface of a transaction data.

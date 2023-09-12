@@ -94,7 +94,7 @@ func (m *Manager) Submit(aspect common.Address,
 
 func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherentRequest) (
 	verificationGasLimit, callGasLimit *uint256.Int, err error) {
-	// get vm with canonical state
+	// get vm with snapshot state
 	cvm, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
 		return nil, nil, err
@@ -103,6 +103,14 @@ func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherent
 	gas := uint256.NewInt(cvm.Msg().Gas())
 
 	return gas, gas, nil
+}
+
+func (m *Manager) Nonce(account common.Address, key *big.Int) (nonce *big.Int, err error) {
+	if key.BitLen() > 192 {
+		return nil, errors.New("key is too large")
+	}
+
+	return m.getNonce(account, key)
 }
 
 // ClearLookup clears the user operation sender lookup. When current block finished, the lookup table should be cleared.
@@ -260,6 +268,34 @@ func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperati
 	}
 
 	return nil
+}
+
+func (m *Manager) getNonce(address common.Address, key *big.Int) (*big.Int, error) {
+	// FIXME: get vm with canonical state, this is just a temporary solution
+	cvm, err := m.protocol.VMFromSnapshotState()
+	if err != nil {
+		return nil, err
+	}
+
+	// call simulateValidation method of entry point contract to validate the operation
+	calldata, err := m.entrypointABI.Pack("getNonce", address, key)
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: use a fixed gas limit for now
+	ret, _, err := cvm.Call(vm.AccountRef(address), EntryPointContract,
+		calldata, 100000, big.NewInt(0))
+	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
+		return nil, err
+	}
+
+	decoded, err := aa.DecodeResponse("getNonce", ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return decoded[0].(*big.Int), nil
 }
 
 func NewUserOperation(protoMsg *types.JitInherentRequest) *aa.UserOperation {
