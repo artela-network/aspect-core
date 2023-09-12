@@ -9,7 +9,7 @@ type RunnerContext struct {
 
 var GetAspectRuntimeHook func() (AspectRuntimeHostApiI, error)
 var GetAspectStateHook func() (AspectStateHostApiI, error)
-var GetEvmHostHook func() (EvmHostApiI, error)
+var GetEvmHostHook func() (EvmHostApi, error)
 var GetScheduleHook func() (ScheduleHostApiI, error)
 var GetStateDbHook func() (StateDbHostApiI, error)
 var GetCryptoHook func() (CryptoHostApiI, error)
@@ -33,11 +33,11 @@ type AspectStateHostApiI interface {
 	GetProperty(ctx *RunnerContext, key string) string
 }
 
-type EvmHostApiI interface {
+type EvmHostApi interface {
 	//	StaticCall( request CallMessageRequest) CallMessageResponse
 	StaticCall(ctx *RunnerContext, request *EthTransaction) *CallMessageResponse
 	// JITCall(request CallMessageRequest) *CallMessageResponse
-	JITCall(ctx *RunnerContext, request *EthMessage) *CallMessageResponse
+	JITCall(ctx *RunnerContext, request *JitInherentRequest) *JitInherentResponse
 }
 type ScheduleHostApiI interface {
 	// SubmitSchedule(sch Schedule) bool
