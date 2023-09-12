@@ -5,6 +5,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+var GetAspectContext func(key string) (string, error)
+
 type PointCut string
 
 type AspectProvider interface {
