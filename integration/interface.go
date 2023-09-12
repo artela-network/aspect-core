@@ -23,6 +23,7 @@ const (
 	TransactionExecution
 	PostTransactionExecution
 	BlockFinalization
+	UNKNOW
 )
 
 // TxData defines the interface of a transaction data.

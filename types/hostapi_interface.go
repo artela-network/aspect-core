@@ -35,9 +35,9 @@ type AspectStateHostApiI interface {
 
 type EvmHostApiI interface {
 	//	StaticCall( request CallMessageRequest) CallMessageResponse
-	StaticCall(ctx *RunnerContext, request *CallMessageRequest) *CallMessageResponse
+	StaticCall(ctx *RunnerContext, request *EthTransaction) *CallMessageResponse
 	// JITCall(request CallMessageRequest) *CallMessageResponse
-	JITCall(ctx *RunnerContext, request *CallMessageRequest) *CallMessageResponse
+	JITCall(ctx *RunnerContext, request *EthMessage) *CallMessageResponse
 }
 type ScheduleHostApiI interface {
 	// SubmitSchedule(sch Schedule) bool

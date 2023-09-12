@@ -31,6 +31,26 @@ const (
 
 const DefaultKey = "-"
 
+func ErrCallMessageResponse(err error) *CallMessageResponse {
+	return &CallMessageResponse{
+		Result: ErrRunResult(err.Error()),
+		Data:   nil,
+	}
+}
+
+func ErrRunResult(message string) *RunResult {
+	return &RunResult{
+		Success: false,
+		Message: message,
+	}
+}
+func DefRunResult() *RunResult {
+	return &RunResult{
+		Success: true,
+		Message: "success",
+	}
+}
+
 func ErrJoinPointResult(message string) *JoinPointResult {
 	response := &AspectResponse{
 		Result: &RunResult{
