@@ -15,9 +15,13 @@ type Aspect struct {
 }
 
 func NewAspect(provider types.AspectProvider) *Aspect {
+
 	globalAspect = &Aspect{
 		provider: provider,
 	}
+	scheduler.NewScheduleHost()
+	types.GetScheduleHook = scheduler.GetScheduleHostApi
+
 	return globalAspect
 }
 func AspectInstance() *Aspect {
@@ -81,7 +85,7 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 		return types.DefJoinPointResult("not bond aspects.")
 	}
 	// run aspects on received transaction
-	return aspect.runAspect(method, int64(req.GetHeader().Number), req, aspectCodes)
+	return aspect.runAspect(method, req.GasInfo.Gas, int64(req.GetHeader().Number), req, aspectCodes)
 
 }
 
@@ -107,11 +111,11 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	}
 
 	// run aspects on received transaction
-	return aspect.runAspect(method, req.GetTx().BlockNumber, req, aspectCodes)
+	return aspect.runAspect(method, req.GasInfo.Gas, req.GetTx().BlockNumber, req, aspectCodes)
 
 }
 
-func (aspect Aspect) runAspect(method types.PointCut, blockNumber int64, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
+func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
 	response := types.DefJoinPointResult("success.")
 	//todo gas
 	response.WithGas(10000, 10000)
@@ -122,7 +126,7 @@ func (aspect Aspect) runAspect(method types.PointCut, blockNumber int64, reqData
 		if err != nil {
 			return response.WithErr(aspectId, err)
 		} else {
-			res, runErr := runner.JoinPoint(method, blockNumber, reqData)
+			res, runErr := runner.JoinPoint(method, gas, blockNumber, reqData)
 			response.WithErr(aspectId, runErr).WithResponse(aspectId, res)
 			runner.Return()
 		}

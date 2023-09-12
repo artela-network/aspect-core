@@ -45,7 +45,7 @@ func (r *Runner) Return() {
 	RuntimePool().Return(r.vmKey, r.vm)
 }
 
-func (r *Runner) JoinPoint(name types.PointCut, blockNumber int64, txRequest proto.Message) (*types.AspectResponse, error) {
+func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, txRequest proto.Message) (*types.AspectResponse, error) {
 	if r.vm == nil {
 		return nil, errors.New("runner not init")
 	}
@@ -60,7 +60,7 @@ func (r *Runner) JoinPoint(name types.PointCut, blockNumber int64, txRequest pro
 	}
 	//for get aspect Error message
 	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext(name, blockNumber)
+	r.register.SetRunnerContext(name, blockNumber, gas)
 
 	res, err := r.vm.Call(api.ApiEntrance, string(name), reqData)
 	if err != nil {

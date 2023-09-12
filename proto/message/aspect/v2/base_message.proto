@@ -11,6 +11,10 @@ message GasInfo {
 
   // GasUsed is the amount of gas actually consumed.
   uint64 gas_used = 2;
+
+  // current call Gas
+  uint64 gas=3;
+
 }
 
 message JoinPointResult  {
@@ -20,11 +24,14 @@ message JoinPointResult  {
 }
 
 message EthTxAspect {
+
   EthTransaction tx = 1;
   EthStackTransaction curr_inner_tx = 2;
+  GasInfo gas_info=3;
 }
 message EthBlockAspect {
   EthBlockHeader header=1;
+  GasInfo gas_info=2;
 }
 
 message AspectResponse {

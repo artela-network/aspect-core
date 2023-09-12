@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	globalHostApi types.ScheduleHostApiI = (*scheduleHost)(nil)
+	globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
 )
 
-func GetScheduleHostApi() (types.ScheduleHostApiI, error) {
+func GetScheduleHostApi() (types.ScheduleHostApi, error) {
 	if globalHostApi == nil {
 		return nil, errors.New("scheduleHost is not init")
 	}
@@ -20,8 +20,9 @@ func GetScheduleHostApi() (types.ScheduleHostApiI, error) {
 type scheduleHost struct {
 }
 
-func NewScheduleHost() types.ScheduleHostApiI {
-	return &scheduleHost{}
+func NewScheduleHost() types.ScheduleHostApi {
+	globalHostApi = &scheduleHost{}
+	return globalHostApi
 }
 
 func (base *scheduleHost) SubmitSchedule(ctx *types.RunnerContext, sch *types.Schedule) *types.RunResult {

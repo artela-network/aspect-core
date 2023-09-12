@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/artela-network/evm v0.3.1-alpha
 	github.com/artela-network/runtime v0.3.1-alpha
+	github.com/cosmos/btcutil v1.0.5
 	github.com/ethereum/go-ethereum v1.11.6
 	github.com/holiman/uint256 v1.2.2
 	github.com/json-iterator/go v1.1.12

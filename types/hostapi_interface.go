@@ -5,23 +5,24 @@ type RunnerContext struct {
 	BlockNumber  int64
 	Point        PointCut
 	ContractAddr string
+	Gas          uint64
 }
 
-var GetAspectRuntimeHook func() (AspectRuntimeHostApiI, error)
-var GetAspectStateHook func() (AspectStateHostApiI, error)
+var GetAspectRuntimeHook func() (AspectRuntimeHostApi, error)
+var GetAspectStateHook func() (AspectStateHostApi, error)
 var GetEvmHostHook func() (EvmHostApi, error)
-var GetScheduleHook func() (ScheduleHostApiI, error)
-var GetStateDbHook func() (StateDbHostApiI, error)
-var GetCryptoHook func() (CryptoHostApiI, error)
+var GetScheduleHook func() (ScheduleHostApi, error)
+var GetStateDbHook func() (StateDbHostApi, error)
+var GetCryptoHook func() (CryptoHostApi, error)
 
-type AspectRuntimeHostApiI interface {
+type AspectRuntimeHostApi interface {
 	// ContextQuery(string query ) *ContextQueryResponse
 	Get(ctx *RunnerContext, key *ContextQueryRequest) *ContextQueryResponse
 	// SetAspectContext(string key,string value) string
 	SetAspectContext(ctx *RunnerContext, request *KeyValueSetRequest) bool
 }
 
-type AspectStateHostApiI interface {
+type AspectStateHostApi interface {
 	//	GetAspectState( key string) string
 	GetAspectState(ctx *RunnerContext, key string) string
 	// SetAspectState( key string, value string) bool
@@ -39,11 +40,11 @@ type EvmHostApi interface {
 	// JITCall(request CallMessageRequest) *CallMessageResponse
 	JITCall(ctx *RunnerContext, request *JitInherentRequest) *JitInherentResponse
 }
-type ScheduleHostApiI interface {
+type ScheduleHostApi interface {
 	// SubmitSchedule(sch Schedule) bool
 	SubmitSchedule(ctx *RunnerContext, sch *Schedule) *RunResult
 }
-type StateDbHostApiI interface {
+type StateDbHostApi interface {
 
 	//	GetBalance(request AddressQueryRequest) StringDataResponse
 	GetBalance(ctx *RunnerContext, addressEquals string) string
@@ -57,7 +58,5 @@ type StateDbHostApiI interface {
 	GetNonce(ctx *RunnerContext, addressEquals string) uint64
 }
 
-type CryptoHostApiI interface {
-	//DoCrypto(request CryptoRequest) CryptoResponse
-	DoCrypto(request *CryptoRequest) *CryptoResponse
+type CryptoHostApi interface {
 }
