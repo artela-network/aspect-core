@@ -63,51 +63,6 @@ message EthMessage{
 
   bool is_fake = 10;
 }
-message StateLogQueryRequest{
-  string topic_equals=1;
-  string address_equals=2;
-  string tx_hash_equals=3;
-}
-message StateLogQueryResponse{
-  RunResult result=1;
-  repeated EthLog logs=2;
-}
-
-message CryptoRequest{
-  string funcName=1;
-  string data_message_type=2;
-  google.protobuf.Any data=3;
-}
-
-message CryptoResponse{
-  RunResult result=1;
-  string data_message_type=2;
-  google.protobuf.Any data=3;
-}
-
-message KeyValueSetRequest{
-  string key=1;
-  string value=2;
-}
-message KeyGetRequest{
-  string key=1;
-}
-
-message StringDataResponse{
-  RunResult result=1;
-  string data=2;
-}
-message IntDataResponse{
-  RunResult result=1;
-  int64 data=2;
-}
-message AddressQueryRequest{
-  string address_equals=1;
-}
-message StateQueryRequest{
-  string address_equals=1;
-  string hash_equals=2;
-}
 
 message StringData{
   string data=1;
@@ -118,11 +73,6 @@ message IntData{
 message BoolData{
   bool data=1;
 }
-
-
-
-
-
 enum DataSpaceType{
   TX_ASPECT_CONTEXT = 0;
   TX_EXT_PROPERTIES = 1;

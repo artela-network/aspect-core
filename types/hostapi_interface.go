@@ -19,7 +19,7 @@ type AspectRuntimeHostApi interface {
 	// ContextQuery(string query ) *ContextQueryResponse
 	Get(ctx *RunnerContext, key *ContextQueryRequest) *ContextQueryResponse
 	// SetAspectContext(string key,string value) string
-	SetAspectContext(ctx *RunnerContext, request *KeyValueSetRequest) bool
+	SetAspectContext(ctx *RunnerContext, key, value string) bool
 }
 
 type AspectStateHostApi interface {

@@ -6,34 +6,6 @@ import (
 	"reflect"
 )
 
-func NewStringResponse(condition bool, data string, errMsg string) *StringDataResponse {
-	message := "success"
-	if !condition {
-		message = errMsg
-	}
-	return &StringDataResponse{
-		Result: &RunResult{
-			Success: condition,
-			Message: message,
-		},
-		Data: data,
-	}
-}
-
-func NewIntDataResponse(condition bool, data int64, errMsg string) *IntDataResponse {
-	message := "success"
-	if condition {
-		message = errMsg
-	}
-	return &IntDataResponse{
-		Result: &RunResult{
-			Success: condition,
-			Message: message,
-		},
-		Data: data,
-	}
-}
-
 func NewContextQueryResponse(condition bool, errMsg string) *ContextQueryResponse {
 	message := "success"
 	if condition {

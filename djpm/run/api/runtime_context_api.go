@@ -29,11 +29,8 @@ func (r *Register) contextCallApis() interface{} {
 			if err != nil || hook == nil {
 				return false
 			}
-			request := &types.KeyValueSetRequest{
-				Key:   key,
-				Value: value,
-			}
-			return hook.SetAspectContext(r.runnerContext, request)
+
+			return hook.SetAspectContext(r.runnerContext, key, value)
 		},
 	}
 }

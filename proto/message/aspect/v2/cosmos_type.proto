@@ -1,7 +1,6 @@
 
 syntax = "proto3";
 package aspect.v2;
-import "google/protobuf/timestamp.proto";
 option go_package = "github.com/artela-network/artelasdk/types";
 
 
