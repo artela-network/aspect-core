@@ -57,7 +57,7 @@ func TestAspect(t *testing.T) {
 
 	for _, point := range pointcuts {
 
-		output, err := runner.JoinPoint(point, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
@@ -76,7 +76,7 @@ func TestAspect(t *testing.T) {
 
 	for _, point := range pointcuts {
 
-		output, err := runner.JoinPoint(point, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
@@ -99,7 +99,7 @@ func TestAspect(t *testing.T) {
 	}
 
 	for _, point := range pointcuts {
-		output, err := runner.JoinPoint(point, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 

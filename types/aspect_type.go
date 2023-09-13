@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var GetAspectContext func(key string) (string, error)
+var GetAspectContext func(contractAddr string, aspectId string, key string) string
 
 type PointCut string
 
