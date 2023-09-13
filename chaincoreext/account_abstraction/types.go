@@ -4,12 +4,19 @@ import (
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 var (
 	entrypointABI, _ = IEntryPointMetaData.GetAbi()
+)
+
+var (
+	userOperationPackedJJSONABI = "[{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hashInitCode\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"hashCallData\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hashPaymasterAndData\",\"type\":\"bytes32\"}],\"internalType\":\"struct AccountAbstraction.UserOperationPacked\",\"name\":\"userOpPacked\",\"type\":\"tuple\"}],\"name\":\"pack\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+	userOperationPackedABI      = parseABI(userOperationPackedJJSONABI)
 )
 
 type ABIItem interface {
@@ -82,7 +89,23 @@ func DecodeExecutionResult(data []byte) (*ExecutionResult, error) {
 }
 
 func (i *UserOperation) Hash() common.Hash {
-	return common.Hash{}
+	initCodeHash := crypto.Keccak256Hash(i.InitCode)
+	callDataHash := crypto.Keccak256Hash(i.CallData)
+	paymasterAndDataHash := crypto.Keccak256Hash(i.PaymasterAndData)
+
+	packed, _ := userOperationPackedABI.Methods["pack"].Inputs.Pack(
+		i.Sender,
+		i.Nonce,
+		initCodeHash,
+		callDataHash,
+		i.CallGasLimit,
+		i.VerificationGasLimit,
+		i.PreVerificationGas,
+		i.MaxFeePerGas,
+		i.MaxPriorityFeePerGas,
+		paymasterAndDataHash)
+
+	return crypto.Keccak256Hash(packed)
 }
 
 func DecodeResponse(methodName string, data []byte) ([]interface{}, error) {
@@ -118,4 +141,9 @@ func InterfaceToStruct[T any](input interface{}) (*T, error) {
 
 func PackCallData(ops []*UserOperation, beneficiary common.Address) ([]byte, error) {
 	return entrypointABI.Pack("handleOps", ops, beneficiary)
+}
+
+func parseABI(json string) *abi.ABI {
+	parsedABI, _ := abi.JSON(strings.NewReader(json))
+	return &parsedABI
 }
