@@ -126,8 +126,11 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 		if err != nil {
 			return response.WithErr(aspectId, err)
 		} else {
-			res, runErr := runner.JoinPoint(method, gas, blockNumber, reqData)
-			response.WithErr(aspectId, runErr).WithResponse(aspectId, res)
+			if res, err := runner.JoinPoint(method, gas, blockNumber, reqData); err != nil {
+				response.WithErr(aspectId, err)
+			} else {
+				response.WithResponse(aspectId, res)
+			}
 			runner.Return()
 		}
 		if hasErr, _ := response.HasErr(); hasErr {
