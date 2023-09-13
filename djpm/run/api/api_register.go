@@ -72,9 +72,15 @@ func (r *Register) registerApis(module, namespace string, apis interface{}) {
 }
 
 func (r *Register) SetRunnerContext(name types.PointCut, blockNum int64, gas uint64) {
-	r.runnerContext.Point = name
-	r.runnerContext.BlockNumber = blockNum
-	r.runnerContext.Gas = gas
+	if name != "" {
+		r.runnerContext.Point = name
+	}
+	if blockNum > 0 {
+		r.runnerContext.BlockNumber = blockNum
+	}
+	if gas > 0 {
+		r.runnerContext.Gas = gas
+	}
 }
 func (r *Register) SetErrCallback(errfunc func(message string)) {
 	r.errCallback = errfunc

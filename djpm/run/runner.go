@@ -80,7 +80,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, t
 	return output, nil
 }
 
-func (r *Runner) IsOwner(sender string) (bool, error) {
+func (r *Runner) IsOwner(blockNumber int64, sender string) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("vm not init")
 	}
@@ -89,6 +89,8 @@ func (r *Runner) IsOwner(sender string) (bool, error) {
 		revertMsg = msg
 	}
 	r.register.SetErrCallback(callback)
+	r.register.SetRunnerContext("", blockNumber, 0)
+
 	res, err := r.vm.Call(api.ApiEntrance, "isOwner", sender)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
@@ -121,7 +123,7 @@ func (r *Runner) IsBlockLevel() (bool, error) {
 	return res.(bool), nil
 }
 
-func (r *Runner) OnContractBinding(sender string) (bool, error) {
+func (r *Runner) OnContractBinding(blockNumber int64, sender string) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("run not init")
 	}
@@ -130,6 +132,8 @@ func (r *Runner) OnContractBinding(sender string) (bool, error) {
 		revertMsg = msg
 	}
 	r.register.SetErrCallback(callback)
+	r.register.SetRunnerContext("", blockNumber, 0)
+
 	res, err := r.vm.Call(api.ApiEntrance, "onContractBinding", sender)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
@@ -160,7 +164,7 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	return res.(bool), nil
 }
 
-func (r *Runner) ExecFunc(funcName string, args ...interface{}) (interface{}, error) {
+func (r *Runner) ExecFunc(funcName string, blockNumber int64, args ...interface{}) (interface{}, error) {
 	if r.vm == nil {
 		return false, errors.New("run not init")
 	}
@@ -169,6 +173,7 @@ func (r *Runner) ExecFunc(funcName string, args ...interface{}) (interface{}, er
 		revertMsg = msg
 	}
 	r.register.SetErrCallback(callback)
+	r.register.SetRunnerContext("", blockNumber, 0)
 	res, err := r.vm.Call(funcName, args...)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {

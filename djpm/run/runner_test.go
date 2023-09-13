@@ -68,7 +68,7 @@ func TestIsOwner(t *testing.T) {
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.IsOwner("hello")
+	ret, err := runner.IsOwner(99, "hello")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
@@ -83,7 +83,7 @@ func TestOnContractBinding(t *testing.T) {
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.OnContractBinding("0x0000000000000000000000000000000000000001")
+	ret, err := runner.OnContractBinding(99, "0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
