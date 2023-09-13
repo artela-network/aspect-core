@@ -1,7 +1,6 @@
 package integration
 
 import (
-	artevm "github.com/artela-network/evm/vm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"math/big"
@@ -25,6 +24,22 @@ const (
 	PostTransactionExecution
 	BlockFinalization
 )
+
+// Message represents a message sent to a contract.
+type Message interface {
+	From() common.Address
+	To() *common.Address
+
+	GasPrice() *big.Int
+	GasFeeCap() *big.Int
+	GasTipCap() *big.Int
+	Gas() uint64
+	Value() *big.Int
+
+	Nonce() uint64
+	IsFake() bool
+	Data() []byte
+}
 
 // TxData defines the interface of a transaction data.
 type TxData interface {
@@ -81,7 +96,7 @@ type AspectProtocol interface {
 // VM defines the interface to interact with VM.
 type VM interface {
 	// Msg returns the current vm message
-	Msg() artevm.Message
+	Msg() Message
 
 	// Call executes the contract call using the given input.
 	Call(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
