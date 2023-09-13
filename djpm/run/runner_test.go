@@ -42,7 +42,7 @@ func TestJoinPoint(t *testing.T) {
 	}
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	output, err := runner.JoinPoint(name, 999, input)
+	output, err := runner.JoinPoint(name, 99, 999, input)
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
