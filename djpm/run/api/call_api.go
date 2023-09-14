@@ -1,26 +1,43 @@
 package api
 
+import "github.com/artela-network/artelasdk/types"
+
 func (r *Register) stateDbApis() interface{} {
 	return map[string]interface{}{
 		"getBalance": func(addr string) string {
-			//getBalance(key: string): string
-			return ""
+			hook, err := types.GetStateDbHook()
+			if err != nil || hook == nil {
+				return ""
+			}
+			return hook.GetBalance(r.runnerContext, addr)
 		},
 		"getState": func(addr string, hash string) string {
-			//getState(addr: string, hash: string): string
-			return ""
+			hook, err := types.GetStateDbHook()
+			if err != nil || hook == nil {
+				return ""
+			}
+			return hook.GetState(r.runnerContext, addr, hash)
 		},
 		"getRefund": func() int64 {
-			//getRefund(): i64
-			return 0
+			hook, err := types.GetStateDbHook()
+			if err != nil || hook == nil {
+				return 0
+			}
+			return int64(hook.GetRefund(r.runnerContext))
 		},
 		"getCodeHash": func(addr string) string {
-			//getCodeHash(addr: string): string
-			return ""
+			hook, err := types.GetStateDbHook()
+			if err != nil || hook == nil {
+				return ""
+			}
+			return hook.GetCodeHash(r.runnerContext, addr)
 		},
 		"getNonce": func(addr string) int64 {
-			//getNonce(addr: string): i64
-			return 0
+			hook, err := types.GetStateDbHook()
+			if err != nil || hook == nil {
+				return 0
+			}
+			return int64(hook.GetNonce(r.runnerContext, addr))
 		},
 	}
 }
