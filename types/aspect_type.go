@@ -96,7 +96,9 @@ func (c *JoinPointResult) WithResponse(aspectId string, output *AspectResponse) 
 	if c.ExecResultMap == nil {
 		c.ExecResultMap = make(map[string]*AspectResponse)
 	}
-	c.ExecResultMap[aspectId] = output
+	if aspectId != "" && output != nil {
+		c.ExecResultMap[aspectId] = output
+	}
 	return c
 }
 func (c *JoinPointResult) WithGas(gasWanted, gasUsed uint64) *JoinPointResult {
@@ -110,12 +112,13 @@ func (c *JoinPointResult) WithGas(gasWanted, gasUsed uint64) *JoinPointResult {
 	return c
 }
 func (c *JoinPointResult) WithErr(aspectId string, err error) *JoinPointResult {
-	if err == nil {
-		return c
+	errMsg := "fail"
+	if err != nil {
+		errMsg = err.Error()
 	}
 	result := &RunResult{
 		Success: false,
-		Message: err.Error(),
+		Message: errMsg,
 	}
 	response := &AspectResponse{
 		Result: result,

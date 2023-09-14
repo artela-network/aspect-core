@@ -51,13 +51,11 @@ func TestAspect(t *testing.T) {
 	}
 	runner, err := run.NewRunner("", raw)
 	require.Equal(t, nil, err)
-	pointcuts := []aspectType.PointCut{aspectType.ON_TX_RECEIVE_METHOD,
-		aspectType.ON_ACCOUNT_VERIFY_METHOD,
-		aspectType.ON_TX_VERIFY_METHOD}
+	pointcuts := []aspectType.PointCut{aspectType.ON_TX_RECEIVE_METHOD}
 
 	for _, point := range pointcuts {
 
-		output, err := runner.JoinPoint(point, 1000, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, nil, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
@@ -76,7 +74,7 @@ func TestAspect(t *testing.T) {
 
 	for _, point := range pointcuts {
 
-		output, err := runner.JoinPoint(point, 1000, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, nil, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
@@ -99,7 +97,7 @@ func TestAspect(t *testing.T) {
 	}
 
 	for _, point := range pointcuts {
-		output, err := runner.JoinPoint(point, 1000, 999, input)
+		output, err := runner.JoinPoint(point, 1000, 999, nil, input)
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 
@@ -122,7 +120,7 @@ func TestIsOwner(t *testing.T) {
 
 	runner, err := run.NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.IsOwner(99, "hello")
+	ret, err := runner.IsOwner(99, 99, nil, "hello")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
@@ -135,7 +133,7 @@ func TestOnContractBinding(t *testing.T) {
 	raw, _ := GetTestTarget("aspect-test")
 	runner, err := run.NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.OnContractBinding(99, "0x0000000000000000000000000000000000000001")
+	ret, err := runner.OnContractBinding(99, 999, nil, "0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 

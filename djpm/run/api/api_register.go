@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -41,7 +42,7 @@ type Register struct {
 	errCallback   func(message string)
 }
 
-func NewRegister(aspectID string) *Register {
+func NewRegister(aspectID *common.Address) *Register {
 	return &Register{
 		runnerContext: &types.RunnerContext{
 			AspectId: aspectID,
@@ -71,7 +72,7 @@ func (r *Register) registerApis(module, namespace string, apis interface{}) {
 	}
 }
 
-func (r *Register) SetRunnerContext(name types.PointCut, blockNum int64, gas uint64) {
+func (r *Register) SetRunnerContext(name string, blockNum int64, gas uint64, contractAddr *common.Address) {
 	if name != "" {
 		r.runnerContext.Point = name
 	}
@@ -81,6 +82,10 @@ func (r *Register) SetRunnerContext(name types.PointCut, blockNum int64, gas uin
 	if gas > 0 {
 		r.runnerContext.Gas = gas
 	}
+	if contractAddr != nil {
+		r.runnerContext.ContractAddr = contractAddr
+	}
+
 }
 func (r *Register) SetErrCallback(errfunc func(message string)) {
 	r.errCallback = errfunc

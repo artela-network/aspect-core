@@ -1,10 +1,12 @@
 package types
 
+import "github.com/ethereum/go-ethereum/common"
+
 type RunnerContext struct {
-	AspectId     string
+	AspectId     *common.Address
 	BlockNumber  int64
-	Point        PointCut
-	ContractAddr string
+	Point        string
+	ContractAddr *common.Address
 	Gas          uint64
 }
 

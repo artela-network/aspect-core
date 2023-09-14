@@ -33,18 +33,21 @@ func AspectInstance() *Aspect {
 func (aspect Aspect) FilterTx(request *types.EthTxAspect) *types.JoinPointResult {
 	return aspect.transactionAdvice(types.ON_TX_RECEIVE_METHOD, request)
 }
-func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(types.ON_TX_VERIFY_METHOD, request)
 
-}
-func (aspect Aspect) VerifyAccount(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(types.ON_ACCOUNT_VERIFY_METHOD, request)
-
-}
-func (aspect Aspect) GetPayMaster(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(types.ON_GAS_PAYMENT_METHOD, request)
-
-}
+//	func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult {
+//		return aspect.transactionAdvice(types.ON_TX_VERIFY_METHOD, request)
+//
+// }
+//
+//	func (aspect Aspect) VerifyAccount(request *types.EthTxAspect) *types.JoinPointResult {
+//		return aspect.transactionAdvice(types.ON_ACCOUNT_VERIFY_METHOD, request)
+//
+// }
+//
+//	func (aspect Aspect) GetPayMaster(request *types.EthTxAspect) *types.JoinPointResult {
+//		return aspect.transactionAdvice(types.ON_GAS_PAYMENT_METHOD, request)
+//
+// }
 func (aspect Aspect) PreTxExecute(request *types.EthTxAspect) *types.JoinPointResult {
 	return aspect.transactionAdvice(types.PRE_TX_EXECUTE_METHOD, request)
 
@@ -76,7 +79,7 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 	if req == nil || method == "" {
 		return types.DefJoinPointResult("blockAdvice input is empty.")
 	}
-	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.GetHeader().Number))
+	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.Header.Number))
 	if err != nil {
 		return types.DefJoinPointResult("blockAdvice GetBlockBondAspects error." + err.Error())
 	}
@@ -85,7 +88,8 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 		return types.DefJoinPointResult("not bond aspects.")
 	}
 	// run aspects on received transaction
-	return aspect.runAspect(method, req.GasInfo.Gas, int64(req.GetHeader().Number), req, aspectCodes)
+
+	return aspect.runAspect(method, req.GasInfo.Gas, int64(req.Header.Number), nil, req, aspectCodes)
 
 }
 
@@ -111,12 +115,15 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	}
 
 	// run aspects on received transaction
-	return aspect.runAspect(method, req.GasInfo.Gas, req.GetTx().BlockNumber, req, aspectCodes)
-
+	toAddress := common.HexToAddress(req.GetTx().To)
+	txHash := req.GetTx().Hash
+	runAspect := aspect.runAspect(method, req.GasInfo.Gas, req.GetTx().BlockNumber, &toAddress, req, aspectCodes)
+	runAspect.TxHash = common.Bytes2Hex(txHash)
+	return runAspect
 }
 
-func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
-	response := types.DefJoinPointResult("success.")
+func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
+	response := &types.JoinPointResult{}
 	//todo gas
 	response.WithGas(10000, 10000)
 	for _, aspect := range req {
@@ -126,8 +133,8 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 		if err != nil {
 			return response.WithErr(aspectId, err)
 		} else {
-			if res, err := runner.JoinPoint(method, gas, blockNumber, reqData); err != nil {
-				response.WithErr(aspectId, err)
+			if res, callErr := runner.JoinPoint(method, gas, blockNumber, contractAddr, reqData); callErr != nil {
+				response.WithErr(aspectId, callErr)
 			} else {
 				response.WithResponse(aspectId, res)
 			}
