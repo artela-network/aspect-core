@@ -79,7 +79,7 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 	if req == nil || method == "" {
 		return types.DefJoinPointResult("blockAdvice input is empty.")
 	}
-	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.Header.Number))
+	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.Header.Number) - 1)
 	if err != nil {
 		return types.DefJoinPointResult("blockAdvice GetBlockBondAspects error." + err.Error())
 	}
@@ -99,6 +99,9 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	}
 	if req.Tx.To == "" {
 		return types.DefJoinPointResult("it is create tx.")
+	}
+	if scheduler.TaskInstance().IsScheduleTx(common.BytesToHash(req.Tx.Hash)) {
+		return types.DefJoinPointResult("it is schedule tx.")
 	}
 	//skip scheduleTx
 	hash := req.Tx.Hash

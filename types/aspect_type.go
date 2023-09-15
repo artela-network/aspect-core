@@ -5,7 +5,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// for jit-inherent
 var GetAspectContext func(contractAddr string, aspectId string, key string) string
+var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
 
 type PointCut string
 
