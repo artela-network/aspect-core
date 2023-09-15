@@ -112,7 +112,7 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, contractAddr)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr)
 	if err != nil {
 		return types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 	}
