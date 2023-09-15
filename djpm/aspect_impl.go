@@ -94,22 +94,25 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 }
 
 func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAspect) *types.JoinPointResult {
-	if req == nil || req.Tx == nil || len(req.Tx.Hash) == 0 || types.IsAspectContract(req.Tx.To) {
+	if req == nil || req.Tx == nil || types.IsAspectContract(req.Tx.To) {
 		return types.DefJoinPointResult("transactionAdvice invalid input.")
 	}
 	if req.Tx.To == "" {
 		return types.DefJoinPointResult("it is create tx.")
 	}
-	if scheduler.TaskInstance().IsScheduleTx(common.BytesToHash(req.Tx.Hash)) {
-		return types.DefJoinPointResult("it is schedule tx.")
+	if len(req.Tx.Hash) != 0 {
+		//skip scheduleTx
+		txHash := common.BytesToHash(req.Tx.Hash)
+		if nil != scheduler.TaskInstance() && scheduler.TaskInstance().IsScheduleTx(txHash) {
+			return types.DefJoinPointResult("it is schedule tx.")
+		}
 	}
-	//skip scheduleTx
-	hash := req.Tx.Hash
-	if scheduler.TaskInstance() != nil && hash != nil && scheduler.TaskInstance().IsScheduleTx(common.BytesToHash(hash)) {
-		return types.DefJoinPointResult("it is task tx.")
+	// get binding contract address
+	contractAddr := common.HexToAddress(req.Tx.To)
+	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
+		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, common.HexToAddress(req.GetTx().To))
+	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, contractAddr)
 	if err != nil {
 		return types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 	}
@@ -118,10 +121,10 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	}
 
 	// run aspects on received transaction
-	toAddress := common.HexToAddress(req.GetTx().To)
-	txHash := req.GetTx().Hash
-	runAspect := aspect.runAspect(method, req.GasInfo.Gas, req.GetTx().BlockNumber, &toAddress, req, aspectCodes)
-	runAspect.TxHash = common.Bytes2Hex(txHash)
+	runAspect := aspect.runAspect(method, req.GasInfo.Gas, req.GetTx().BlockNumber, &contractAddr, req, aspectCodes)
+	if len(req.Tx.Hash) != 0 {
+		runAspect.TxHash = common.Bytes2Hex(req.Tx.Hash)
+	}
 	return runAspect
 }
 
