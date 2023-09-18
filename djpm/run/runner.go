@@ -166,6 +166,10 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	return res.(bool), nil
 }
 
+func (r *Runner) Gas() uint64 {
+	return r.register.RunnerContext().Gas
+}
+
 func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, error) {
 	if r.vm == nil {
 		return false, errors.New("run not init")

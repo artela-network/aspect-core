@@ -80,6 +80,7 @@ type BaseLayerTx interface {
 
 // AspectProtocol is the core interface for integrating Aspect Programming into an existing protocol
 type AspectProtocol interface {
+	ChainId() *big.Int
 	VMFromSnapshotState() (VM, error)
 	VMFromCanonicalState() (VM, error)
 	ConvertProtocolTx(txData TxData) (BaseLayerTx, error)

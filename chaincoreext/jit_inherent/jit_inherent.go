@@ -15,11 +15,6 @@ import (
 )
 
 var (
-	// EntryPointContract defines the address of the built-in AA entry point contract.
-	EntryPointContract = common.HexToAddress("0x000000000000000000000000000000000000AAEC")
-)
-
-var (
 	// global jit inherent instance
 	instance *Manager
 
@@ -86,7 +81,7 @@ func (m *Manager) Submit(aspect common.Address,
 		if len(inherents) != 1 {
 			return nil, errors.New("only one user operation is allowed in current join point")
 		}
-		return m.submitJITCall(aspect, gas, userOps[0])
+		return m.submitJITCall(aspect, gas, userOps[0], userOps[0].Hash(m.protocol.ChainId()))
 	default:
 		return nil, errors.New("cannot submit jit inherent in current join point")
 	}
@@ -121,6 +116,14 @@ func (m *Manager) ClearLookup() {
 	m.userOpSenderLookup = make(map[common.Hash]common.Address)
 }
 
+// ClearUserOp clears the user operation sender lookup. When current call finished, the lookup table should be cleared.
+func (m *Manager) ClearUserOp(userOpHash common.Hash) {
+	m.lookupMutex.Lock()
+	defer m.lookupMutex.Unlock()
+
+	delete(m.userOpSenderLookup, userOpHash)
+}
+
 // SenderAspect returns the sender Aspect address of the user operation.
 func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 	m.lookupMutex.RLock()
@@ -130,24 +133,29 @@ func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 }
 
 // submitJITCall submits a JIT call to the current EVM callstack.
-func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.UserOperation) (
+func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.UserOperation, userOpHash common.Hash) (
 	*types.JitInherentResponse, error) {
+	defer m.ClearUserOp(userOpHash)
+
 	// get current evm instance with snapshot state
 	evm, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
 		return nil, err
 	}
 
-	hash := userOp.Hash()
 	resp := &types.JitInherentResponse{
-		JitInherentHashes: [][]byte{hash.Bytes()},
+		JitInherentHashes: [][]byte{userOpHash.Bytes()},
+		Success:           false,
 	}
 
 	// FIXME: pay gas with Aspect's settlement account
-	ret, _, err := evm.Call(vm.AccountRef(aspect), EntryPointContract,
-		userOp.CallData, gas, big.NewInt(0))
-
+	callData, err := m.entrypointABI.Pack("handleOps", []aa.UserOperation{*userOp}, userOp.Sender)
+	if err != nil {
+		return resp, err
+	}
+	ret, leftoverGas, err := evm.Call(vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
+	resp.LeftoverGas = leftoverGas
 	if err == nil || errors.Is(err, vm.ErrExecutionReverted) {
 		resp.Ret = ret
 		err = nil
@@ -161,7 +169,7 @@ func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperatio
 	defer m.lookupMutex.Unlock()
 
 	for _, userOp := range userOps {
-		m.userOpSenderLookup[userOp.Hash()] = aspect
+		m.userOpSenderLookup[userOp.Hash(m.protocol.ChainId())] = aspect
 	}
 }
 
@@ -170,7 +178,7 @@ func (m *Manager) submitJITTx(aspect common.Address, userOps ...*aa.UserOperatio
 	// one fails all
 	userOpHashes := make([][]byte, len(userOps))
 	for i, userOp := range userOps {
-		userOpHashes[i] = userOp.Hash().Bytes()
+		userOpHashes[i] = userOp.Hash(m.protocol.ChainId()).Bytes()
 		// simulate the user op validation, drop the jit tx if any of the user op failed the validation
 		if err := m.simulateValidate(aspect, userOp); err != nil {
 			return nil, errors.Errorf("user operation #%d validation failed, reason: %s", i, err)
@@ -250,7 +258,7 @@ func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperati
 		return err
 	}
 
-	ret, _, err := cvm.Call(vm.AccountRef(aspect), EntryPointContract,
+	ret, _, err := cvm.Call(vm.AccountRef(aspect), aa.EntryPointContract,
 		calldata, userOp.CallGasLimit.Uint64(), big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return err
@@ -284,7 +292,7 @@ func (m *Manager) getNonce(address common.Address, key *big.Int) (*big.Int, erro
 	}
 
 	// FIXME: use a fixed gas limit for now
-	ret, _, err := cvm.Call(vm.AccountRef(address), EntryPointContract,
+	ret, _, err := cvm.Call(vm.AccountRef(address), aa.EntryPointContract,
 		calldata, 100000, big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return nil, err
@@ -341,7 +349,7 @@ func (t *aaBundleTx) From() common.Address {
 }
 
 func (t *aaBundleTx) To() common.Address {
-	return EntryPointContract
+	return aa.EntryPointContract
 }
 
 func (t *aaBundleTx) Data() []byte {

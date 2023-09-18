@@ -87,6 +87,11 @@ func (r *Register) SetRunnerContext(name string, blockNum int64, gas uint64, con
 	}
 
 }
+
+func (r *Register) RunnerContext() *types.RunnerContext {
+	return r.runnerContext
+}
+
 func (r *Register) SetErrCallback(errfunc func(message string)) {
 	r.errCallback = errfunc
 }

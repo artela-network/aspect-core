@@ -130,26 +130,33 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 
 func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
 	response := &types.JoinPointResult{}
-	//todo gas
-	response.WithGas(10000, 10000)
+
+	gasLeft := gas
 	for _, aspect := range req {
 		aspectId := aspect.AspectId
 		runner, err := run.NewRunner(aspectId, aspect.Code)
-
 		if err != nil {
 			return response.WithErr(aspectId, err)
-		} else {
-			if res, callErr := runner.JoinPoint(method, gas, blockNumber, contractAddr, reqData); callErr != nil {
-				response.WithErr(aspectId, callErr)
-			} else {
-				response.WithResponse(aspectId, res)
-			}
-			runner.Return()
 		}
+
+		if res, callErr := runner.JoinPoint(method, gasLeft, blockNumber, contractAddr, reqData); callErr != nil {
+			response.WithErr(aspectId, callErr)
+		} else {
+			response.WithResponse(aspectId, res)
+		}
+
+		gasLeft = runner.Gas()
+
+		runner.Return()
+
 		if hasErr, _ := response.HasErr(); hasErr {
 			// short-circuit Aspect call
 			return response
 		}
 	}
+
+	totalGasUsed := gas - gasLeft
+	response.WithGas(totalGasUsed, totalGasUsed, gasLeft)
+
 	return response
 }

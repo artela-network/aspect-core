@@ -103,13 +103,11 @@ func (c *JoinPointResult) WithResponse(aspectId string, output *AspectResponse) 
 	}
 	return c
 }
-func (c *JoinPointResult) WithGas(gasWanted, gasUsed uint64) *JoinPointResult {
-	if gasUsed > 0 && gasWanted > 0 {
-		info := &GasInfo{
-			GasWanted: gasWanted,
-			GasUsed:   gasUsed,
-		}
-		c.GasInfo = info
+func (c *JoinPointResult) WithGas(gasWanted, gasUsed, gasLeft uint64) *JoinPointResult {
+	c.GasInfo = &GasInfo{
+		GasWanted: gasWanted,
+		GasUsed:   gasUsed,
+		Gas:       gasLeft,
 	}
 	return c
 }
