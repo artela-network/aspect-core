@@ -1,8 +1,6 @@
-
 syntax = "proto3";
 package aspect.v2;
 option go_package = "github.com/artela-network/artelasdk/types";
-
 
 message GasMeter {
   uint64 gas_consumed = 1;
@@ -10,10 +8,12 @@ message GasMeter {
   uint64 gas_remaining = 3;
   uint64 limit = 4;
 }
+
 message DecCoin {
   string denom  = 1;
   string amount = 2;
 }
+
 message MinGasPrice{
   repeated DecCoin coins=1;
 }
@@ -22,13 +22,13 @@ message LastCommitInfo {
   int32             round = 1;
   repeated VoteInfo votes = 2 ;
 }
+
 // Validator
 message Validator {
   bytes address = 1;  // The first 20 bytes of SHA256(public key)
   // PubKey pub_key = 2 [(gogoproto.nullable)=false];
   int64 power = 3;  // The voting power
 }
-
 
 // VoteInfo
 message VoteInfo {
@@ -41,9 +41,11 @@ enum EvidenceType {
   DUPLICATE_VOTE      = 1;
   LIGHT_CLIENT_ATTACK = 2;
 }
+
 message EvidenceList {
   repeated Evidence evidences=1;
 }
+
 message Evidence {
   EvidenceType type = 1;
   // The offending validator
@@ -74,7 +76,6 @@ message BlockParams {
   // Note: must be greater or equal to -1
   int64 max_gas = 2;
 }
-
 
 message Version {
   uint32 appVersion = 1;
@@ -154,7 +155,6 @@ message ChainConfig {
   bool terminal_total_difficulty_passed = 22;
   Clique clique = 23;
 }
-
 
 message EnvContent {
   uint64 base_fee = 1;

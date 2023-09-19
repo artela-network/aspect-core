@@ -33,19 +33,22 @@ message EthBlock {
   bytes dataHash = 6;
 }
 
-
-
 message EthStateChange {
   string account = 1; // hex string of account
   bytes value = 2;
   uint64 call_index = 3;
 }
 
+message EthStateChangeIndices {
+  repeated string indices = 1;
+}
+
 message EthStateChanges { repeated EthStateChange all = 1; }
 
 message EthCallStacks{
-  map<uint64,EthStackTransaction> calls=1;
+  map<uint64, EthStackTransaction> calls=1;
 }
+
 message EthCallStackQuery{
   string to_eq = 1;
   repeated uint64 index_in = 2;
