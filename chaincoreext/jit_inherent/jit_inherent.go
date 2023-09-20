@@ -156,7 +156,7 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.Us
 	ret, leftoverGas, err := evm.Call(vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
 	resp.LeftoverGas = leftoverGas
-	if err == nil || (err != nil && errors.Is(err, vm.ErrExecutionReverted)) {
+	if err == nil || (err != nil && err.Error() == vm.ErrExecutionReverted.Error()) {
 		resp.Ret = ret
 		resp.Success = true
 		err = nil
