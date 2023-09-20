@@ -60,7 +60,7 @@ func newManager(protocol integration.AspectProtocol) *Manager {
 	}
 }
 
-// Submit submits a JIT inherent call. There are two types of JIT inherent calls:
+// ·Submit submits a JIT inherent call. There are two types of JIT inherent calls:
 //  1. JIT transaction: the JIT transaction will be submitted directly into the block proposal to guarantee the execution.
 //     Please note that the JIT transaction submission could be failed if there is no space left in the block.
 //  2. JIT call: the JIT call will be injected into the current evm callstack to guarantee the execution.
@@ -156,11 +156,11 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.Us
 	ret, leftoverGas, err := evm.Call(vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
 	resp.LeftoverGas = leftoverGas
-	if err == nil || errors.Is(err, vm.ErrExecutionReverted) {
+	if err == nil || (err != nil && errors.Is(err, vm.ErrExecutionReverted)) {
 		resp.Ret = ret
+		resp.Success = true
 		err = nil
 	}
-
 	return resp, err
 }
 

@@ -95,16 +95,22 @@ func (aspect Aspect) blockAdvice(method types.PointCut, req *types.EthBlockAspec
 
 func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAspect) *types.JoinPointResult {
 	if req == nil || req.Tx == nil || types.IsAspectContract(req.Tx.To) {
-		return types.DefJoinPointResult("transactionAdvice invalid input.")
+		result := types.DefJoinPointResult("transactionAdvice invalid input.")
+		result.GasInfo = req.GasInfo
+		return result
 	}
 	if req.Tx.To == "" {
-		return types.DefJoinPointResult("it is create tx.")
+		result := types.DefJoinPointResult("it is create tx.")
+		result.GasInfo = req.GasInfo
+		return result
 	}
 	if len(req.Tx.Hash) != 0 {
 		//skip scheduleTx
 		txHash := common.BytesToHash(req.Tx.Hash)
 		if nil != scheduler.TaskInstance() && scheduler.TaskInstance().IsScheduleTx(txHash) {
-			return types.DefJoinPointResult("it is schedule tx.")
+			result := types.DefJoinPointResult("it is schedule tx.")
+			result.GasInfo = req.GasInfo
+			return result
 		}
 	}
 	// get binding contract address
@@ -114,10 +120,14 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	}
 	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr)
 	if err != nil {
-		return types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
+		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
+		result.GasInfo = req.GasInfo
+		return result
 	}
 	if aspectCodes == nil || len(aspectCodes) == 0 {
-		return types.DefJoinPointResult("not bond aspects.")
+		result := types.DefJoinPointResult("not bond aspects.")
+		result.GasInfo = req.GasInfo
+		return result
 	}
 
 	// run aspects on received transaction

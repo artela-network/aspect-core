@@ -22,4 +22,5 @@ message JitInherentResponse {
     bool success = 3;
     bytes ret = 4;
     uint64 leftover_gas = 5;
+    string errorMsg=6;
 }

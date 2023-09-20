@@ -73,6 +73,10 @@ message IntData{
 message BoolData{
   bool data=1;
 }
+message BytesArrayData{
+ repeated bytes data=1;
+}
+
 enum DataSpaceType{
   TX_ASPECT_CONTEXT = 0;
   TX_EXT_PROPERTIES = 1;

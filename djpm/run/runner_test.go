@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"os"
 	"path"
 	"testing"
@@ -42,7 +43,9 @@ func TestJoinPoint(t *testing.T) {
 	}
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	output, err := runner.JoinPoint(name, 99, 999, input)
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+
+	output, err := runner.JoinPoint(name, 99, 999, &address, input)
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
@@ -68,7 +71,9 @@ func TestIsOwner(t *testing.T) {
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.IsOwner(99, "hello")
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+
+	ret, err := runner.IsOwner(99, 99, &address, "hello")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
@@ -83,7 +88,8 @@ func TestOnContractBinding(t *testing.T) {
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.OnContractBinding(99, "0x0000000000000000000000000000000000000001")
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+	ret, err := runner.OnContractBinding(99, 99, &address, "0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
