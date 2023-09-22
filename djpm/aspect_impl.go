@@ -161,6 +161,8 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 
 		if hasErr, _ := response.HasErr(); hasErr {
 			// short-circuit Aspect call
+			totalGasUsed := gas - gasLeft
+			response.WithGas(totalGasUsed, totalGasUsed, gasLeft)
 			return response
 		}
 	}
