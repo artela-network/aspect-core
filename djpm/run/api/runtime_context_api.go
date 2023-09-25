@@ -32,5 +32,8 @@ func (r *Register) contextCallApis() interface{} {
 
 			return hook.SetAspectContext(r.runnerContext, key, value)
 		},
+		"aspectId": func() string {
+			return r.runnerContext.AspectId.String()
+		},
 	}
 }
