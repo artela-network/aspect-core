@@ -94,7 +94,7 @@ message EthStackTransaction {
   bytes ret=6;
   uint64 leftOverGas = 7;
   uint64 index = 8;
-  uint64 parentIndex = 9;
+  int64 parentIndex = 9;
   repeated uint64 childrenIndex = 10;
 }
 
