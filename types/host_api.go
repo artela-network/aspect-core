@@ -68,15 +68,18 @@ var ContextKeys = [...]string{TxAspectContext, TxContent, TxStateChanges, TxExtP
 // -- string： context key
 // -- []string： params
 func HasContextKey(key string) (bool, string, []string) {
+	split := make([]string, 0)
 	for _, contextKey := range ContextKeys {
 		if strings.HasPrefix(key, contextKey) {
-			sdata := key[len(contextKey)-1:]
-			split := make([]string, 0)
-			if sdata != "" {
-				split = strings.Split(sdata, DefConnector)
+			if key == contextKey {
+				return true, contextKey, split
+			}
+			strData := key[len(contextKey)+1:]
+			if strData != "" {
+				split = strings.Split(strData, DefConnector)
 			}
 			return true, contextKey, split
 		}
 	}
-	return false, "", nil
+	return false, "", split
 }
