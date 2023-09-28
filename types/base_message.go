@@ -9,7 +9,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
-func Ternary[T string | []byte | uint64](condition bool, trueValue func() T, falseValue T) T {
+func Ternary[T string | []byte | uint64 | int64](condition bool, trueValue func() T, falseValue T) T {
 	if condition {
 		return trueValue()
 	}
