@@ -25,7 +25,7 @@ func NewInnerTransaction(
 	ret []byte,
 	leftOverGas uint64,
 	index uint64,
-	parentIndex uint64,
+	parentIndex int64,
 	childrenIndex []uint64,
 ) *EthStackTransaction {
 	return &EthStackTransaction{
