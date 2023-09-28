@@ -12,9 +12,10 @@ const (
 	moduleCrypto         = "crypto-api"
 	moduleStateDb        = "statedb-api"
 	moduleSchedule       = "schedule-api"
-	moduleRuntimeContext = "runtime-context-api"
+	moduleRuntimeContext = "runtime-api"
 	moduleEvmCall        = "evm-call-api"
 	moduleAspectState    = "aspect-state-api"
+	moduleHost           = "aspect-state-api"
 
 	// namespace of hostapis
 	nsUtils             = "__UtilApi__"
@@ -57,9 +58,9 @@ func (r *Register) HostApis() *runtime.HostAPIRegistry {
 	r.registerApis(moduleUtils, nsUtils, r.utilApis())
 	r.registerApis(moduleCrypto, nsCryptoApi, r.cryptoApis())
 	r.registerApis(moduleSchedule, nsScheduleApi, r.scheduleApis())
-	r.registerApis(moduleRuntimeContext, nsRuntimeContextApi, r.contextCallApis())
 	r.registerApis(moduleEvmCall, nsEvmCallApi, r.evmCallApis())
-	r.registerApis(moduleAspectState, nsAspectStateApi, r.stateApis())
+	r.registerApis(moduleRuntimeContext, nsRuntimeContextApi, r.hostApi())
+
 	return r.collection
 }
 

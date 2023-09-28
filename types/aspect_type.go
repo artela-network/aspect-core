@@ -6,7 +6,7 @@ import (
 )
 
 // for jit-inherent
-var GetAspectContext func(contractAddr string, aspectId string, key string) string
+var GetAspectContext func(aspectId string, key string) string
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
 
 type PointCut string
@@ -34,13 +34,6 @@ const (
 )
 
 const DefaultKey = "-"
-
-func ErrCallMessageResponse(err error) *CallMessageResponse {
-	return &CallMessageResponse{
-		Result: ErrRunResult(err.Error()),
-		Data:   nil,
-	}
-}
 
 func ErrRunResult(message string) *RunResult {
 	return &RunResult{

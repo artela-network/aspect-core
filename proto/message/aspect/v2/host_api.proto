@@ -6,23 +6,23 @@ import "aspect/v2/base_message.proto";
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
+message ContextSetRequest{
+  SetNameSpace name_space=1;
+  string key=2;
+  string value=3;
+}
 message ContextQueryRequest {
-  DataSpaceType data_space = 1;
-  repeated string conditions=2;
+  QueryNameSpace name_space = 1;
+  google.protobuf.Any query=2;
+}
+message ContextRemoveRequest{
+  RemoveNameSpace name_space = 1;
+  google.protobuf.Any query=2;
 }
 
 message ContextQueryResponse {
   RunResult result=1;
-  string data_message_type=2;
-  google.protobuf.Any data=3;
-}
-
-message CallMessageRequest{
-  EthMessage message=1;
-}
-message CallMessageResponse{
-  RunResult result=1;
-  EthMessageCallResult data=2;
+  google.protobuf.Any data=2;
 }
 
 // MsgEthereumTxResponse defines the Msg/EthereumTx response type.
@@ -45,27 +45,26 @@ message EthMessageCallResult {
 }
 // Valida
 message EthMessage{
-  string from = 1;
-  string to = 2;
-
-  string gas_tip_cap = 3;
-  // gas_fee_cap defines the max value for the gas fee
-  string gas_fee_cap = 4;
-  // gas defines the gas limit defined for the transaction.
-  uint64 gas = 5;
-
-  string gas_price = 6;
-
-  string value = 7;
-  uint64 nonce = 8;
+  string to = 1;
   // data is the data payload bytes of the transaction.
-  bytes input = 9;
-
+  bytes input = 2;
+  uint64 nonce = 3;
+  string from = 4;
+  string gas_tip_cap = 5;
+  // gas_fee_cap defines the max value for the gas fee
+  string gas_fee_cap = 6;
+  // gas defines the gas limit defined for the transaction.
+  uint64 gas = 7;
+  string gas_price = 8;
+  string value = 9;
   bool is_fake = 10;
 }
 
 message StringData{
   string data=1;
+}
+message StringArrayData{
+ repeated string data=1;
 }
 message IntData{
   int64 data=1;
@@ -77,26 +76,38 @@ message BytesArrayData{
  repeated bytes data=1;
 }
 
+message CallMessageRequest{
+  EthMessage message=1;
+}
+message CallMessageResponse{
+  RunResult result=1;
+  EthMessageCallResult data=2;
+}
+
 message BytesData{
    bytes data=1;
 }
-enum DataSpaceType{
-  TX_ASPECT_CONTEXT = 0;
-  TX_EXT_PROPERTIES = 1;
-  TX_CONTENT = 2;
-  TX_STATE_CHANGES = 3;
-  TX_CALL_TREE = 4;
-  TX_RECEIPT = 5;
-  TX_GAS_METER = 6;
-  ENV_CONS_PARAMS = 7;
-  ENV_CHAIN_CONFIG = 8;
-  ENV_EVM_PARAMS = 9;
-  ENV_BASE_INFO = 10;
-  BLOCK_HEADER = 11;
-  BLOCK_TXS= 12;
-  BLOCK_GAS_METER= 13;
-  BLOCK_MIN_GAS_PRICE= 14;
-  BLOCK_LAST_COMMIT= 15;
-  BLOCK_BLOCK_ID= 16;
-  BLOCK_EVIDENCE= 17;
+enum QueryNameSpace{
+  QueryAspectState  = 0;
+  QueryAspectProperty = 1;
+}
+
+enum SetNameSpace{
+  SetAspectContext = 0;
+  SetAspectState = 1;
+}
+
+enum RemoveNameSpace{
+  RemoveAspectContext = 0;
+  RemoveAspectState = 1;
+}
+
+message SateChangeQuery{
+  string account=1;
+  string stateVarName=2;
+  repeated  bytes indices=3;
+}
+
+message CallStackQuery{
+  repeated uint64 callIndex=1;
 }

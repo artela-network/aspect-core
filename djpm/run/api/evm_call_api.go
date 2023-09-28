@@ -10,19 +10,14 @@ func (r *Register) evmCallApis() interface{} {
 	return map[string]interface{}{
 
 		"staticCall": func(request []byte) []byte {
-
+			defaultResult := make([]byte, 0)
 			hook, err := types.GetEvmHostHook()
 			if err != nil || hook == nil {
-				errRes := types.ErrCallMessageResponse(err)
-				marshal, _ := proto.Marshal(errRes)
-				return marshal
+				return defaultResult
 			}
-
-			ethMsg := &types.EthTransaction{}
+			ethMsg := &types.EthMessage{}
 			if unErr := proto.Unmarshal(request, ethMsg); unErr != nil {
-				errRes := types.ErrCallMessageResponse(unErr)
-				marshal, _ := proto.Marshal(errRes)
-				return marshal
+				return defaultResult
 			}
 			call := hook.StaticCall(r.runnerContext, ethMsg)
 			marshal, _ := proto.Marshal(call)
