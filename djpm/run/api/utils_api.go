@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/hex"
-	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"strings"
 )
 
@@ -25,7 +25,7 @@ func (r *Register) utilApis() interface{} {
 			}
 		},
 		"sLog": func(s string) {
-			fmt.Println(s)
+			log.Info(s)
 		},
 	}
 }
