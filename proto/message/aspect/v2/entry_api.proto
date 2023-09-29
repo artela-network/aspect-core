@@ -1,0 +1,56 @@
+syntax = "proto3";
+package aspect.v2;
+import "aspect/v2/base_message.proto";
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+message FilterTxResult {
+  bool is_filter = 1;
+}
+
+message VerifyTxResult {
+  bool is_verified = 1;
+}
+
+message GetPayMasterResult {
+  string pay_master = 1;
+}
+
+message AspectCode {
+  string aspect_id = 1;
+  uint64 version = 2;
+  uint32 priority = 3;
+  bytes code = 4;
+}
+
+// EthBlock for querying ethereum block from aspect
+message EthBlock {
+  EthBlockHeader header = 1;
+  repeated EthBlockHeader uncles = 2;
+  repeated EthTransaction transactions = 3;
+  string hash = 4;
+  uint64 size = 5;
+  bytes dataHash = 6;
+}
+
+message EthStateChange {
+  string account = 1; // hex string of account
+  bytes value = 2;
+  uint64 call_index = 3;
+}
+
+message EthStateChangeIndices {
+  repeated bytes indices = 1;
+}
+
+message EthStateChanges { repeated EthStateChange all = 1; }
+
+message EthCallStacks{
+  map<uint64, EthStackTransaction> calls=1;
+}
+
+message EthCallStackQuery{
+  string to_eq = 1;
+  repeated uint64 index_in = 2;
+  uint64 parentIndex_eq = 3;
+}

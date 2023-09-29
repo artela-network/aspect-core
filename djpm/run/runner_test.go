@@ -1,7 +1,8 @@
 package run
 
 import (
-	"errors"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"os"
 	"path"
 	"testing"
@@ -13,29 +14,24 @@ import (
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestJoinPoint(t *testing.T) {
-	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
-		return nil, errors.New("not init")
-	}
 
-	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
+	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs-test/build/release.wasm")
 
-	name := "onTxReceive"
-	input := &aspectType.AspectInput{
-		BlockHeight: 999,
-		Tx: &aspectType.AspTransaction{
+	name := aspectType.ON_TX_RECEIVE_METHOD
+	input := &aspectType.EthTxAspect{
+		Tx: &aspectType.EthTransaction{
 			ChainId:          "9000-artela",
 			Nonce:            123456789,
 			GasTipCap:        "GasTipCap-value",
 			GasFeeCap:        "GasFeeCap-value",
-			GasLimit:         1000000000,
-			GasPrice:         998,
+			Gas:              1000000000,
+			GasPrice:         "998",
 			To:               "0x1c0e4b5d5f50fe65adc4cd658cd88ae0dfdbb3ba",
-			Value:            9998,
+			Value:            "9998",
 			Input:            []byte{0x1, 0x2, 0x3, 0x4},
-			AccessList:       []*aspectType.AspAccessTuple{},
+			AccessList:       []*aspectType.EthAccessTuple{},
 			BlockHash:        []byte{},
-			BlockNumber:      0,
+			BlockNumber:      999,
 			From:             "",
 			Hash:             []byte{},
 			TransactionIndex: 0,
@@ -47,25 +43,37 @@ func TestJoinPoint(t *testing.T) {
 	}
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	output, err := runner.JoinPoint(name, input)
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+
+	output, err := runner.JoinPoint(name, 99, 999, &address, input)
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
-	require.Equal(t, true, output.Success)
+	data := output.Data
+	strData := &aspectType.StringData{}
+	err2 := data.UnmarshalTo(strData)
+	if err2 != nil {
+		return
+	}
+	fmt.Println(strData.GetData() + "------")
+
+	require.Equal(t, true, output.Result.Success)
 }
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestIsOwner(t *testing.T) {
-	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
-		return nil, errors.New("not init")
-	}
 
-	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
+	//cwd, _ := os.Getwd()
+	raw, err := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/new_test/build/release.wasm")
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.IsOwner("hello")
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+
+	ret, err := runner.IsOwner(99, 99, &address, "hello")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
@@ -74,16 +82,14 @@ func TestIsOwner(t *testing.T) {
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestOnContractBinding(t *testing.T) {
-	aspectType.GetHostApiHook = func() (aspectType.HostApi, error) {
-		return nil, errors.New("not init")
-	}
 
 	cwd, _ := os.Getwd()
 	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
 
 	runner, err := NewRunner("", raw)
 	require.Equal(t, nil, err)
-	ret, err := runner.OnContractBinding("0x0000000000000000000000000000000000000001")
+	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
+	ret, err := runner.OnContractBinding(99, 99, &address, "0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 

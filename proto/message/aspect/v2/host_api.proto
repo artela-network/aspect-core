@@ -1,0 +1,113 @@
+syntax = "proto3";
+package aspect.v2;
+import "google/protobuf/any.proto";
+import "aspect/v2/base_message.proto";
+
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+message ContextSetRequest{
+  SetNameSpace name_space=1;
+  string key=2;
+  string value=3;
+}
+message ContextQueryRequest {
+  QueryNameSpace name_space = 1;
+  google.protobuf.Any query=2;
+}
+message ContextRemoveRequest{
+  RemoveNameSpace name_space = 1;
+  google.protobuf.Any query=2;
+}
+
+message ContextQueryResponse {
+  RunResult result=1;
+  google.protobuf.Any data=2;
+}
+
+// MsgEthereumTxResponse defines the Msg/EthereumTx response type.
+message EthMessageCallResult {
+
+  // hash of the ethereum transaction in hex format. This hash differs from the
+  // Tendermint sha256 hash of the transaction bytes. See
+  // https://github.com/tendermint/tendermint/issues/6539 for reference
+  string hash = 1;
+  // logs contains the transaction hash and the proto-compatible ethereum
+  // logs.
+  repeated EthLog logs = 2;
+  // ret is the returned data from evm function (result or data supplied with revert
+  // opcode)
+  bytes ret = 3;
+  // vm_error is the error returned by vm execution
+  string vm_error = 4;
+  // gas_used specifies how much gas was consumed by the transaction
+  uint64 gas_used = 5;
+}
+// Valida
+message EthMessage{
+  string to = 1;
+  // data is the data payload bytes of the transaction.
+  bytes input = 2;
+  uint64 nonce = 3;
+  string from = 4;
+  string gas_tip_cap = 5;
+  // gas_fee_cap defines the max value for the gas fee
+  string gas_fee_cap = 6;
+  // gas defines the gas limit defined for the transaction.
+  uint64 gas = 7;
+  string gas_price = 8;
+  string value = 9;
+  bool is_fake = 10;
+}
+
+message StringData{
+  string data=1;
+}
+message StringArrayData{
+ repeated string data=1;
+}
+message IntData{
+  int64 data=1;
+}
+message BoolData{
+  bool data=1;
+}
+message BytesArrayData{
+ repeated bytes data=1;
+}
+
+message CallMessageRequest{
+  EthMessage message=1;
+}
+message CallMessageResponse{
+  RunResult result=1;
+  EthMessageCallResult data=2;
+}
+
+message BytesData{
+   bytes data=1;
+}
+enum QueryNameSpace{
+  QueryAspectState  = 0;
+  QueryAspectProperty = 1;
+}
+
+enum SetNameSpace{
+  SetAspectContext = 0;
+  SetAspectState = 1;
+}
+
+enum RemoveNameSpace{
+  RemoveAspectContext = 0;
+  RemoveAspectState = 1;
+}
+
+message SateChangeQuery{
+  string account=1;
+  string stateVarName=2;
+  repeated  bytes indices=3;
+}
+
+message CallStackQuery{
+  repeated uint64 callIndex=1;
+}

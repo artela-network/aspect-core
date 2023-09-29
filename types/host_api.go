@@ -1,44 +1,85 @@
 package types
 
 import (
-	"math/big"
-
-	"github.com/ethereum/go-ethereum/common"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"strings"
 )
 
-var GetHostApiHook func() (HostApi, error)
+func ErrEthMessageCallResult(err error) *EthMessageCallResult {
+	return &EthMessageCallResult{
+		Hash:    "",
+		Logs:    nil,
+		Ret:     nil,
+		VmError: err.Error(),
+		GasUsed: 0,
+	}
+}
 
-type HostApi interface {
-	// LocalCall calls EthCall
-	//	LocalCall(req *evmtypes.EthCallRequest) (*evmtypes.MsgEthereumTxResponse, error)
+func NewContextQueryResponse(condition bool, errMsg string) *ContextQueryResponse {
+	message := "success"
+	if condition {
+		message = errMsg
+	}
+	return &ContextQueryResponse{
+		Result: &RunResult{
+			Success: condition,
+			Message: message,
+		},
+	}
+}
+func (c *ContextQueryResponse) SetData(message proto.Message) {
+	if message == nil {
+		return
+	}
+	anyData, _ := anypb.New(message)
+	c.Data = anyData
+}
 
-	// TBD, if we need to return the artelamint blocks
-	// LastBlock() (*coretypes.ResultBlock, error)
-	// CurrentBlock() (*coretypes.ResultBlock, error)
+const (
+	TxAspectContext = "tx^context"
+	TxContent       = "tx^content"
+	TxStateChanges  = "tx^stateChanges"
+	TxExtProperties = "tx^extProperties"
+	TxCallTree      = "tx^callTree"
+	TxReceipt       = "tx^receipt"
+	TxGasMeter      = "tx^gasMeter"
 
-	// LastBlock returns last ethereum block
-	LastBlock() (*EthBlock, error)
+	EnvConsensusParams = "env^consensusParams"
+	EnvChainConfig     = "env^chainConfig"
+	EnvEvmParams       = "env^evmParams"
+	EnvBaseInfo        = "env^baseFee"
 
-	// CurrentBlock returns ethereum block built by the packing block,
-	// this should only be called when a new block is generating
-	CurrentBlock() (*EthBlock, error)
+	BlockHeader      = "block^header"
+	BlockGasMeter    = "block^gasMeter"
+	BlockMinGasPrice = "block^minGasPrice"
+	BlockLastCommit  = "block^lastCommit"
+	BlockTxs         = "block^txs"
+)
 
-	// CurrentBalance return current blance of account address
-	CurrentBalance(addr common.Address) (*big.Int, error)
+var DefConnector = "^"
 
-	// GetProperty returns the configuration of aspect
-	GetProperty(aspectID string, key string) (string, error)
+var ContextKeys = [...]string{TxAspectContext, TxContent, TxStateChanges, TxExtProperties,
+	TxCallTree, TxReceipt, TxGasMeter, EnvConsensusParams, EnvChainConfig, EnvEvmParams,
+	EnvBaseInfo, BlockHeader, BlockGasMeter, BlockMinGasPrice, BlockLastCommit, BlockTxs}
 
-	// GetStateChanges returns the state changes of fields
-	GetStateChanges(addr string, variable string, key []byte) *StateChanges
-	GetCallStack() *InnerTransactions
-
-	SetContext(aspectID string, key, value string) error
-	GetContext(aspectID string, key string) (string, error)
-
-	SetAspectState(aspectID string, key, value string) error
-	GetAspectState(aspectID string, key string) (string, error)
-
-	AddInherent()
-	ScheduleTx(sch *Schedule) bool
+// keypath match
+// -- bool： match success
+// -- string： context key
+// -- []string： params
+func HasContextKey(key string) (bool, string, []string) {
+	split := make([]string, 0)
+	for _, contextKey := range ContextKeys {
+		if strings.HasPrefix(key, contextKey) {
+			if key == contextKey {
+				return true, contextKey, split
+			}
+			strData := key[len(contextKey)+1:]
+			if strData != "" {
+				split = strings.Split(strData, DefConnector)
+			}
+			return true, contextKey, split
+		}
+	}
+	return false, "", split
 }

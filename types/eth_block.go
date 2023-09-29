@@ -8,40 +8,20 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type BlockRet = BlockOutput
-
-func NewBlockRet(success bool, errorMsg string, block *Block) *BlockRet {
-	return &BlockRet{
-		Res: &BlockOutput_Result{
-			Success: success,
-			Error:   errorMsg,
-		},
-		Block: block,
-	}
-}
-
-func (ret *BlockRet) MarshalProto() ([]byte, error) {
-	return proto.Marshal(ret)
-}
-
-func (ret *BlockRet) UnmarshalProto(data []byte) error {
-	return proto.Unmarshal(data, ret)
-}
-
 // EthBlock for querying ethereum block from aspect
 type Block = EthBlock
 
-func NewEthBlock() *Block {
-	return &Block{
-		Header: &EthHeader{
-			ReceiptHash: ethtypes.EmptyRootHash.String(),
-			UncleHash:   ethtypes.EmptyUncleHash.String(),
-			TxHash:      ethtypes.EmptyRootHash.String(),
+func NewEthBlock() *EthBlock {
+	return &EthBlock{
+		Header: &EthBlockHeader{
+			ReceiptHash:      ethtypes.EmptyRootHash.String(),
+			UncleHash:        ethtypes.EmptyUncleHash.String(),
+			TransactionsRoot: ethtypes.EmptyRootHash.String(),
 		},
 	}
 }
 
-func (block *Block) FillHeader(header *EthHeader, dataHash []byte, hash string) {
+func (block *Block) FillHeader(header *EthBlockHeader, dataHash []byte, hash string) {
 	block.Header = header
 	block.DataHash = dataHash
 	block.Hash = hash
@@ -59,9 +39,9 @@ func (block *Block) FillGasUsed(gasUsed uint64) {
 	block.Header.GasUsed = gasUsed
 }
 
-func (block *Block) FillTransactions(trans []*AspTransaction) {
+func (block *Block) FillTransactions(trans []*EthTransaction) {
 	if len(trans) > 0 {
-		block.Header.TxHash = common.BytesToHash(block.DataHash).String()
+		block.Header.TransactionsRoot = common.BytesToHash(block.DataHash).String()
 	}
 	block.Transactions = trans
 }
@@ -71,11 +51,11 @@ func (block *Block) FillBloom(bloom ethtypes.Bloom) {
 }
 
 func (block *Block) FillValidatorAddr(addr common.Address) {
-	block.Header.Miner = addr.String()
+	block.Header.Coinbase = addr.String()
 }
 
 func (block *Block) FillBaseFee(baseFee *big.Int) {
-	block.Header.BaseFeePerGas = baseFee.Uint64()
+	block.Header.BaseFee = baseFee.Uint64()
 }
 
 func (block *Block) MarshalProto() ([]byte, error) {

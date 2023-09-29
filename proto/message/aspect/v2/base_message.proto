@@ -1,0 +1,192 @@
+syntax = "proto3";
+package aspect.v2;
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+// GasInfo defines tx execution gas context.
+message GasInfo {
+  // GasWanted is the maximum units of work we allow this tx to perform.
+  uint64 gas_wanted = 1;
+
+  // GasUsed is the amount of gas actually consumed.
+  uint64 gas_used = 2;
+
+  // current call Gas
+  uint64 gas=3;
+
+}
+
+message JoinPointResult  {
+  GasInfo gas_info=1;
+  string  tx_hash=2;
+  map<string,AspectResponse> exec_result_map=3;
+}
+
+message EthTxAspect {
+
+  EthTransaction tx = 1;
+  EthStackTransaction curr_inner_tx = 2;
+  GasInfo gas_info=3;
+}
+message EthBlockAspect {
+  EthBlockHeader header=1;
+  GasInfo gas_info=2;
+}
+
+message AspectResponse {
+  RunResult result = 1;
+  string data_message_type=2;
+  optional google.protobuf.Any data = 3;
+}
+
+message EthTxQuery{
+  uint64 gas_limit_gt=1;
+}
+
+message EthTxArray{
+  repeated EthTransaction tx=1;
+}
+//like RPCTransaction
+message EthTransaction {
+  bytes block_hash = 1;
+  int64 block_number = 2;
+  string from = 3;
+  // gas defines the gas limit defined for the transaction.
+  uint64 gas= 4;
+
+  string gas_price = 5;
+  // gas_fee_cap defines the max value for the gas fee
+  string gas_fee_cap = 6;
+  // gas_tip_cap defines the max value for the gas tip
+  string gas_tip_cap = 7;
+
+  bytes hash = 8;
+  // data is the data payload bytes of the transaction.
+  bytes input = 9;
+  // nonce corresponds to the account nonce (transaction sequence).
+  uint64 nonce = 10;
+  // to is the hex formatted address of the recipient
+  string to = 11;
+  int64 transaction_index = 12;
+  // value defines the the transaction amount.
+  string value = 13;
+  int32 type = 14;
+  // accesses is an array of access tuples
+  repeated EthAccessTuple access_list = 15;
+  // chain_id of the destination EVM chain
+  string chain_id = 16;
+
+  // v defines the signature value
+  bytes v = 17;
+  // r defines the signature value
+  bytes r = 18;
+  // s define the signature value
+  bytes s = 19;
+}
+message EthStackTransaction {
+  string from = 1;
+  string to = 2;
+  bytes data = 3;
+  string value = 4;
+  string gas = 5;
+
+  bytes ret=6;
+  uint64 leftOverGas = 7;
+  uint64 index = 8;
+  int64 parentIndex = 9;
+  repeated uint64 childrenIndex = 10;
+}
+
+message EthInnerTransaction {
+  string from = 1;
+  string to = 2;
+  bytes data = 3;
+  string value = 4;
+  string gas = 5;
+}
+
+// AccessTuple is the element type of an access list.
+message EthAccessTuple {
+
+  // address is a hex formatted ethereum address
+  string address = 1;
+  // storage_keys are hex formatted hashes of the storage keys
+  repeated string storage_keys = 2;
+}
+
+message EthLog {
+  // address of the contract that generated the event
+  string address = 1;
+  // topics is a list of topics provided by the contract.
+  repeated string topics = 2;
+  // data which is supplied by the contract, usually ABI-encoded
+  bytes data = 3;
+
+  // block_number of the block in which the transaction was included
+  uint64 block_number = 4 ;
+  // tx_hash is the transaction hash
+  string tx_hash = 5 ;
+  // tx_index of the transaction in the block
+  uint64 tx_index = 6;
+  // block_hash of the block in which the transaction was included
+  string block_hash = 7 ;
+  // index of the log in the block
+  uint64 index = 8 ;
+
+  // removed is true if this log was reverted due to a chain
+  // reorganisation. You must pay attention to this field if you receive logs
+  // through a filter query.
+  bool removed = 9;
+}
+
+message EthReceipt {
+  // Consensus fields: These fields are defined by the Yellow Paper
+  uint32  type = 1;
+  bytes   post_state = 2;
+  uint64  status = 3;
+  uint64  cumulative_gas_used = 4;
+  bytes   logs_bloom = 5;
+  repeated  EthLog logs = 6;
+
+  // implementation fields: these fields are added by geth when processing a transaction.
+  // they are stored in the chain database.
+  string tx_hash = 7;
+  string contract_address = 8;
+  uint64 gas_used = 9;
+
+  // inclusion information: these fields provide information about the inclusion of the
+  // transaction corresponding to this receipt.
+  string block_hash = 10;
+  string block_number = 11;
+  uint32 transaction_index = 12;
+}
+
+// wasm runner result
+message RunResult{
+  bool   success = 1;
+  string message = 2;
+}
+
+message EthBlockHeader {
+  string parentHash = 1;
+  string uncleHash = 2;
+  string coinbase = 3;
+  string stateRoot = 4;
+  string transactionsRoot = 5;
+  string receiptHash = 6;
+  uint64 difficulty = 7;
+  uint64 number = 8;
+  uint64 gasLimit = 9;
+  uint64 gasUsed = 10;
+  uint64 timestamp = 11;
+  bytes extraData = 12;
+  bytes mixHash = 13;
+  uint64 nonce = 14;
+  // BaseFee was added by EIP-1559 and is ignored in legacy headers.
+  uint64 baseFee = 15;
+  // WithdrawalsHash was added by EIP-4895 and is ignored in legacy headers.
+  string withdrawalsRoot = 16;
+  // ExcessDataGas was added by EIP-4844 and is ignored in legacy headers.
+  string excessDataGas = 17;
+}

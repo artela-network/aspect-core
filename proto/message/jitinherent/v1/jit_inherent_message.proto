@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package jitinherent.v1;
+
+option go_package = "github.com/artela-network/artelasdk/types";
+
+message JitInherentRequest {
+    bytes sender = 1;
+    bytes nonce = 2;
+    bytes init_code = 3;
+    bytes call_data = 4;
+    bytes call_gas_limit = 5;
+    bytes verification_gas_limit = 6;
+    bytes max_fee_per_gas = 7;
+    bytes max_priority_fee_per_gas = 8;
+    bytes paymaster_and_data = 9;
+}
+
+message JitInherentResponse {
+    repeated bytes jit_inherent_hashes = 1;
+    bytes tx_hash = 2;
+    bool success = 3;
+    bytes ret = 4;
+    uint64 leftover_gas = 5;
+    string errorMsg=6;
+}

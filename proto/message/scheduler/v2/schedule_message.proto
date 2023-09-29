@@ -1,7 +1,7 @@
 syntax = "proto3";
-package scheduler.v1;
+package scheduler.v2;
 
-import "aspect/v1/hostapi_message.proto";
+import "aspect/v2/base_message.proto";
 
 option go_package = "github.com/artela-network/artelasdk/types";
 
@@ -22,7 +22,7 @@ message Schedule  {
   //	0 close, 1 start
   ScheduleStatus status = 3;
   // 0 periodic, 1 adhoc
-  aspect.v1.AspTransaction tx = 4;
+  aspect.v2.EthTransaction tx = 4;
   uint64 startBlock= 5;
   uint64 everyNBlock = 6;
   uint64 maxRetry = 7;
