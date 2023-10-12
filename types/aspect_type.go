@@ -7,6 +7,8 @@ import (
 
 // for jit-inherent
 var GetAspectContext func(aspectId string, key string) string
+var SetAspectContext func(aspectId string, key string, value string)
+
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
 
 type PointCut string
