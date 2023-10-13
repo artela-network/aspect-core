@@ -129,28 +129,27 @@ message Clique {
   uint64 period = 1;
   uint64 epoch = 2;
 }
-
 message ChainConfig {
   string chainId = 1;
   string homestead_block = 2;
   string dao_fork_block = 3;
   bool dao_fork_support = 4;
   string eip150_block = 5;
-  string eip150_hash = 6;
-  string eip155_block = 7;
-  string eip158_block = 8;
-  string byzantium_block = 9;
-  string constantinople_block = 10;
-  string petersburg_block = 11;
-  string istanbul_block = 12;
-  string muir_glacier_block = 13;
-  string berlin_block = 14;
-  string london_block = 15;
-  string arrow_glacier_block = 16;
-  string gray_glacier_block = 17;
-  string merge_netsplit_block = 18;
-  string shanghai_block = 19;
-  string cancun_block = 20;
+  string eip155_block = 6;
+  string eip158_block = 7;
+  string byzantium_block = 8;
+  string constantinople_block = 9;
+  string petersburg_block = 10;
+  string istanbul_block = 11;
+  string muir_glacier_block = 12;
+  string berlin_block = 13;
+  string london_block = 14;
+  string arrow_glacier_block = 15;
+  string gray_glacier_block = 16;
+  string merge_netsplit_block = 17;
+  uint64 shanghai_time = 18;
+  uint64 cancun_time = 19;
+  uint64 prague_time = 20;
   string terminal_total_difficulty = 21;
   bool terminal_total_difficulty_passed = 22;
   Clique clique = 23;
