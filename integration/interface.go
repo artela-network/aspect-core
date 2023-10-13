@@ -37,7 +37,6 @@ type Message interface {
 	Value() *big.Int
 
 	Nonce() uint64
-	IsFake() bool
 	Data() []byte
 }
 
