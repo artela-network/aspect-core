@@ -42,7 +42,7 @@ func NewInnerTransaction(
 	}
 }
 
-func NewEthTransactionByMessage(message core.Message, txHash common.Hash, chainId string, blockHash common.Hash, blockHeight int64, txType uint8) *EthTransaction {
+func NewEthTransactionByMessage(message *core.Message, txHash common.Hash, chainId string, blockHash common.Hash, blockHeight int64, txType uint8) *EthTransaction {
 	return &EthTransaction{
 		ChainId:     chainId,
 		Nonce:       message.Nonce,

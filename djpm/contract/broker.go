@@ -22,18 +22,18 @@ var BrokMetaData = &bind.MetaData{
 	},
 }
 
-func PackAllowanceMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, aspectId common.Address) (core.Message, error) {
+func PackAllowanceMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, aspectId common.Address) (*core.Message, error) {
 
 	parsed, err := BrokMetaData.GetAbi()
 	if err != nil {
-		return core.Message{}, err
+		return &core.Message{}, err
 	}
 	// Pack the input, call and unpack the results
 	input, err := parsed.Pack("allowance", aspectId)
 	if err != nil {
-		return core.Message{}, err
+		return &core.Message{}, err
 	}
-	message := core.Message{
+	message := &core.Message{
 		To:                to,
 		From:              from,
 		Nonce:             nonce,
