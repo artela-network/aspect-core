@@ -42,21 +42,21 @@ func NewInnerTransaction(
 	}
 }
 
-func NewEthTransactionByMessage(message core.Message, txHash common.Hash, chainId string, blockHash common.Hash, blockHeight int64, txType uint8) *EthTransaction {
+func NewEthTransactionByMessage(message *core.Message, txHash common.Hash, chainId string, blockHash common.Hash, blockHeight int64, txType uint8) *EthTransaction {
 	return &EthTransaction{
 		ChainId:     chainId,
-		Nonce:       message.Nonce(),
-		GasTipCap:   Ternary(message.GasTipCap() != nil, func() string { return message.GasTipCap().String() }, "0"),
-		GasFeeCap:   Ternary(message.GasFeeCap() != nil, func() string { return message.GasFeeCap().String() }, "0"),
-		Gas:         message.Gas(),
-		GasPrice:    Ternary(message.GasPrice() != nil, func() string { return message.GasPrice().String() }, "0"),
-		To:          Ternary(message.To() != nil, func() string { return message.To().Hex() }, ""),
-		Value:       Ternary(message.Value() != nil, func() string { return message.Value().String() }, "0"),
-		Input:       message.Data(),
-		AccessList:  ConvertTuples(message.AccessList()),
+		Nonce:       message.Nonce,
+		GasTipCap:   Ternary(message.GasTipCap != nil, func() string { return message.GasTipCap.String() }, "0"),
+		GasFeeCap:   Ternary(message.GasFeeCap != nil, func() string { return message.GasFeeCap.String() }, "0"),
+		Gas:         message.GasLimit,
+		GasPrice:    Ternary(message.GasPrice != nil, func() string { return message.GasPrice.String() }, "0"),
+		To:          Ternary(message.To != nil, func() string { return message.To.Hex() }, ""),
+		Value:       Ternary(message.Value != nil, func() string { return message.Value.String() }, "0"),
+		Input:       message.Data,
+		AccessList:  ConvertTuples(message.AccessList),
 		BlockHash:   blockHash.Bytes(),
 		BlockNumber: blockHeight,
-		From:        Ternary(message.From() != common.Address{}, func() string { return message.From().Hex() }, ""),
+		From:        Ternary(message.From != common.Address{}, func() string { return message.From.Hex() }, ""),
 		Hash:        txHash.Bytes(),
 		Type:        int32(txType),
 	}

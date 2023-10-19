@@ -22,18 +22,31 @@ var AspectOwnableMetaData = &bind.MetaData{
 	},
 }
 
-func PackIsOwnerMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, sender common.Address) (core.Message, error) {
+func PackIsOwnerMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, sender common.Address) (*core.Message, error) {
 	parsed, err := AspectOwnableMetaData.GetAbi()
 	if err != nil {
-		return nil, err
+		return &core.Message{}, err
 	}
 	// Pack the input, call and unpack the results
 	input, err := parsed.Pack("isOwner", &sender)
 	if err != nil {
-		return nil, err
+		return &core.Message{}, err
 	}
-	message := types.NewMessage(from, to, nonce, amount, gasLimit, gasPrice, gasFeeCap, gasTipCap, input, accessList, false)
+	message := &core.Message{
+		To:                to,
+		From:              from,
+		Nonce:             nonce,
+		Value:             amount,
+		GasLimit:          gasLimit,
+		GasPrice:          gasPrice,
+		GasFeeCap:         gasFeeCap,
+		GasTipCap:         gasTipCap,
+		Data:              input,
+		AccessList:        accessList,
+		SkipAccountChecks: false,
+	}
 	return message, nil
+
 }
 
 func UnpackIsOwnerResult(data []byte) (bool, error) {

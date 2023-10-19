@@ -124,6 +124,76 @@ func (task *TaskManager) GetFromAddr(hash common.Hash) string {
 	key := task.ethTxIndexMap[hash.String()]
 	return task.scheduleTasks[key].Schedule.Tx.From
 }
+func (task *TaskManager) Remove(tx []byte) error {
+
+	if task == nil || task.scheduleTasks == nil || len(task.scheduleTasks) == 0 {
+		return nil
+	}
+	key := getTxKey(tx)
+
+	// check is task tx
+	scheduleTask, ok := task.scheduleTasks[key]
+	if !ok {
+		return nil
+	}
+	if err := ScheduleManagerInstance().ClearScheduleTry(scheduleTask.Schedule.Id); err != nil {
+		return err
+	}
+
+	err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, scheduleTask.TxHash)
+	if err != nil {
+		return err
+	}
+
+	//Check the number of executions,or Close schedule
+	execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
+	if execErr != nil {
+		return execErr
+	}
+	//clean pool
+	delete(task.scheduleTasks, key)
+	delete(task.ethTxIndexMap, scheduleTask.TxHash)
+	return nil
+
+}
+func (task *TaskManager) Check() ([][]byte, error) {
+	leftTxs := make([][]byte, len(task.scheduleTasks))
+	// not confirmed tasks
+	for key, _ := range task.scheduleTasks {
+		// check and update schedule state
+		scheduleTask := task.scheduleTasks[key]
+
+		try, err := ScheduleManagerInstance().GetScheduleTry(scheduleTask.Schedule.Id)
+		if err != nil {
+			return nil, err
+		}
+		if uint64(len(try.TaskTxs)+1) < scheduleTask.Schedule.MaxRetry {
+			//try count less MaxRetry,then next  need try
+			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+		} else {
+			// try count more than maxRetry, Close next try
+			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
+
+			// add Fail txHash for placeholder
+			err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, "F")
+			if err != nil {
+				return nil, err
+			}
+
+			//Check the number of executions,or Close schedule
+			execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
+			if execErr != nil {
+				return nil, execErr
+			}
+		}
+		delete(task.scheduleTasks, key)
+		delete(task.ethTxIndexMap, scheduleTask.TxHash)
+		leftTxs = append(leftTxs, scheduleTask.SdkTx)
+	}
+
+	// we do not need to clear the task, all the task will be renew for next proposal.
+	return leftTxs, nil
+}
 
 // Confirm return left tx
 func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
