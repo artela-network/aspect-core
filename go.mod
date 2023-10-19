@@ -3,7 +3,7 @@ module github.com/artela-network/artelasdk
 go 1.19
 
 require (
-	github.com/artela-network/runtime v0.3.2-beta
+	github.com/artela-network/runtime v0.4.0-beta
 	github.com/cosmos/btcutil v1.0.5
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/holiman/uint256 v1.2.2
@@ -67,7 +67,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-
-replace (
-    github.com/artela-network/runtime => ../runtime
-)
+replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
