@@ -116,11 +116,17 @@ func (task *TaskManager) GetTxs() [][]byte {
 
 // GetTxs return the scheduled transactions
 func (task *TaskManager) IsScheduleTx(hash common.Hash) bool {
+	if task == nil || task.ethTxIndexMap == nil {
+		return false
+	}
 	_, ok := task.ethTxIndexMap[hash.String()]
 	return ok
 }
 
 func (task *TaskManager) GetFromAddr(hash common.Hash) string {
+	if task == nil || task.ethTxIndexMap == nil || task.scheduleTasks == nil {
+		return ""
+	}
 	key := task.ethTxIndexMap[hash.String()]
 	return task.scheduleTasks[key].Schedule.Tx.From
 }
