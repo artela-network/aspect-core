@@ -1,9 +1,10 @@
 package contract
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"math/big"
 )
 
 const (
@@ -21,6 +22,7 @@ func ArtelaAllowanceMsg(to *common.Address, nonce uint64, aspectId common.Addres
 	from := common.HexToAddress(ARTELA_FROM_ADDR)
 	return PackAllowanceMsg(from, to, nonce, big.NewInt(0), 9000000, big.NewInt(1000), big.NewInt(1000), big.NewInt(1000), nil, aspectId)
 }
+
 func ArtelaOwnerMsg(to *common.Address, nonce uint64, sender common.Address) (*core.Message, error) {
 	from := common.HexToAddress(ARTELA_FROM_ADDR)
 	return PackIsOwnerMsg(from, to, nonce, big.NewInt(0), 9000000, big.NewInt(1000), big.NewInt(30000), big.NewInt(2000), nil, sender)

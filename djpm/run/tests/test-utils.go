@@ -1,12 +1,12 @@
 package tests
 
 import (
-	jsoniter "github.com/json-iterator/go"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 func GetTestTarget(target string) ([]byte, error) {
-
 	readFile, _ := os.ReadFile("./test-config.json")
 	get := jsoniter.Get(readFile, "params")
 	param := make(map[string]interface{})

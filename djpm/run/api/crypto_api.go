@@ -4,10 +4,11 @@ import (
 	"crypto"
 	"crypto/sha256"
 	"encoding/base64"
+	"math/big"
+
 	"github.com/cosmos/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"math/big"
 )
 
 func (r *Register) cryptoApis() interface{} {
@@ -66,10 +67,10 @@ func (r *Register) cryptoApis() interface{} {
 
 			// the first byte of pubkey is bitcoin heritage
 			return common.LeftPadBytes(ethcrypto.Keccak256(pubKey[1:])[12:], 32)
-
 		},
 	}
 }
+
 func allZero(b []byte) bool {
 	for _, one := range b {
 		if one != 0 {

@@ -1,8 +1,9 @@
 package types
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -16,6 +17,7 @@ func IsAspectContract(to string) bool {
 	}
 	return false
 }
+
 func IsAspectContractAddr(to *common.Address) bool {
 	if to != nil && strings.EqualFold(ARTELA_ADDR, to.String()) {
 		// ignore contract deployment transaction & aspect op txs

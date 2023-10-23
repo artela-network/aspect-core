@@ -6,9 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
-)
+var globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
 
 func GetScheduleHostApi() (types.ScheduleHostApi, error) {
 	if globalHostApi == nil {
@@ -17,8 +15,7 @@ func GetScheduleHostApi() (types.ScheduleHostApi, error) {
 	return globalHostApi, nil
 }
 
-type scheduleHost struct {
-}
+type scheduleHost struct{}
 
 func NewScheduleHost() types.ScheduleHostApi {
 	globalHostApi = &scheduleHost{}

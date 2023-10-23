@@ -1,9 +1,10 @@
 package tests
 
 import (
+	"testing"
+
 	"github.com/artela-network/artelasdk/djpm/run"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestSlog(t *testing.T) {

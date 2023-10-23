@@ -1,8 +1,9 @@
 package types
 
 import (
-	"github.com/ethereum/go-ethereum/core"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/core"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -139,7 +140,7 @@ func ConvertTuple(tuple ethtypes.AccessTuple) EthAccessTuple {
 }
 
 func ConvertTuples(tuples []ethtypes.AccessTuple) []*EthAccessTuple {
-	if tuples == nil || len(tuples) == 0 {
+	if len(tuples) == 0 {
 		return nil
 	}
 	store := make([]*EthAccessTuple, 0, len(tuples))
@@ -160,6 +161,7 @@ func ConvertEthLogs(logs []*ethtypes.Log) []*EthLog {
 	}
 	return ethLogs
 }
+
 func ConvertEthLog(logs *ethtypes.Log) *EthLog {
 	if logs == nil {
 		return nil
@@ -179,5 +181,4 @@ func ConvertEthLog(logs *ethtypes.Log) *EthLog {
 		Index:       uint64(logs.Index),
 		Removed:     logs.Removed,
 	}
-
 }

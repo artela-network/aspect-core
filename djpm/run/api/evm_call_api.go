@@ -8,7 +8,6 @@ import (
 
 func (r *Register) evmCallApis() interface{} {
 	return map[string]interface{}{
-
 		"staticCall": func(request []byte) []byte {
 			defaultResult := make([]byte, 0)
 			hook, err := types.GetEvmHostHook()

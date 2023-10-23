@@ -13,10 +13,12 @@ type RunnerContext struct {
 
 // var GetAspectRuntimeHook func() (AspectRuntimeHostApi, error)
 // var GetAspectStateHook func() (AspectStateHostApi, error)
-var GetEvmHostHook func() (EvmHostApi, error)
-var GetScheduleHook func() (ScheduleHostApi, error)
-var GetStateDbHook func() (StateDbHostApi, error)
-var GetRuntimeHostHook func() (RuntimeHostApi, error)
+var (
+	GetEvmHostHook     func() (EvmHostApi, error)
+	GetScheduleHook    func() (ScheduleHostApi, error)
+	GetStateDbHook     func() (StateDbHostApi, error)
+	GetRuntimeHostHook func() (RuntimeHostApi, error)
+)
 
 type RuntimeHostApi interface {
 	GetContext(ctx *RunnerContext, key string) *ContextQueryResponse
@@ -58,15 +60,14 @@ type ScheduleHostApi interface {
 	SubmitSchedule(ctx *RunnerContext, sch *Schedule) *RunResult
 }
 type StateDbHostApi interface {
-
 	//	GetBalance(request AddressQueryRequest) StringDataResponse
 	GetBalance(ctx *RunnerContext, addressEquals string) string
-	//GetState(request StateQueryRequest) StringDataResponse
+	// GetState(request StateQueryRequest) StringDataResponse
 	GetState(ctx *RunnerContext, addressEquals, hashEquals string) string
-	//GetRefund() IntDataResponse
+	// GetRefund() IntDataResponse
 	GetRefund(ctx *RunnerContext) uint64
-	//GetCodeHash(request AddressQueryRequest) StringDataResponse
+	// GetCodeHash(request AddressQueryRequest) StringDataResponse
 	GetCodeHash(ctx *RunnerContext, addressEquals string) string
-	//GetNonce(request AddressQueryRequest) IntDataResponse
+	// GetNonce(request AddressQueryRequest) IntDataResponse
 	GetNonce(ctx *RunnerContext, addressEquals string) uint64
 }

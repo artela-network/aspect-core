@@ -1,10 +1,11 @@
 package types
 
 import (
+	"math/big"
+
 	aa "github.com/artela-network/artelasdk/chaincoreext/account_abstraction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
-	"math/big"
 )
 
 type UserOperation struct {

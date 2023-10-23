@@ -1,14 +1,17 @@
 package run
 
 import (
-	"github.com/artela-network/artelasdk/djpm/run/api"
-	"github.com/ethereum/go-ethereum/common"
 	"strings"
 
-	"github.com/artela-network/artelasdk/types"
+	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/artela-network/artelasdk/djpm/run/api"
+
 	"github.com/artela-network/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/artela-network/artelasdk/types"
 )
 
 var vmPool *runtime.RuntimePool
@@ -21,9 +24,9 @@ func RuntimePool() *runtime.RuntimePool {
 }
 
 type Runner struct {
-	vmKey    string
-	vm       runtime.AspectRuntime
-	fns      *runtime.HostAPIRegistry
+	vmKey string
+	vm    runtime.AspectRuntime
+	// fns      *runtime.HostAPIRegistry
 	register *api.Register
 	code     []byte
 }
@@ -51,7 +54,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	if r.vm == nil {
 		return nil, errors.New("runner not init")
 	}
-	//turn inputBytes into bytes
+	// turn inputBytes into bytes
 	reqData, err := proto.Marshal(txRequest)
 	if err != nil {
 		return nil, err
@@ -60,7 +63,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	//for get aspect Error message
+	// for get aspect Error message
 	r.register.SetErrCallback(callback)
 	r.register.SetRunnerContext(string(name), blockNumber, gas, contractAddr)
 

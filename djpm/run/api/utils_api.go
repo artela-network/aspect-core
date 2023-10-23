@@ -2,8 +2,9 @@ package api
 
 import (
 	"encoding/hex"
-	"github.com/ethereum/go-ethereum/log"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/log"
 )
 
 func (r *Register) utilApis() interface{} {

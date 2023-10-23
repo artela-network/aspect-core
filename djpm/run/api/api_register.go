@@ -1,9 +1,10 @@
 package api
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/artela-network/runtime"
 	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/artela-network/artelasdk/types"
 )
 
 const (
@@ -69,7 +70,6 @@ func (r *Register) registerApis(module, namespace string, apis interface{}) {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
 		_ = r.collection.AddApi(runtime.Module(module), runtime.NameSpace(namespace), runtime.MethodName(method), fn)
-
 	}
 }
 
@@ -86,7 +86,6 @@ func (r *Register) SetRunnerContext(name string, blockNum int64, gas uint64, con
 	if contractAddr != nil {
 		r.runnerContext.ContractAddr = contractAddr
 	}
-
 }
 
 func (r *Register) RunnerContext() *types.RunnerContext {

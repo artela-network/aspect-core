@@ -1,9 +1,10 @@
 package integration
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"math/big"
 )
 
 type SystemContractType int
