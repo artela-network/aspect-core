@@ -67,5 +67,3 @@ require (
 )
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
-
-replace github.com/artela-network/aspect-runtime => ../aspect-runtime
