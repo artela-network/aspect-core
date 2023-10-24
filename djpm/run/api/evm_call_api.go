@@ -1,14 +1,14 @@
 package api
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 func (r *Register) evmCallApis() interface{} {
 	return map[string]interface{}{
-
 		"staticCall": func(request []byte) []byte {
 			defaultResult := make([]byte, 0)
 			hook, err := types.GetEvmHostHook()

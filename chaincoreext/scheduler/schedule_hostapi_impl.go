@@ -1,14 +1,13 @@
 package scheduler
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
-var (
-	globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
-)
+var globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
 
 func GetScheduleHostApi() (types.ScheduleHostApi, error) {
 	if globalHostApi == nil {
@@ -17,8 +16,7 @@ func GetScheduleHostApi() (types.ScheduleHostApi, error) {
 	return globalHostApi, nil
 }
 
-type scheduleHost struct {
-}
+type scheduleHost struct{}
 
 func NewScheduleHost() types.ScheduleHostApi {
 	globalHostApi = &scheduleHost{}

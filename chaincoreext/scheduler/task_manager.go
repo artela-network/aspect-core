@@ -5,8 +5,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/artela-network/artelasdk/types"
 	"github.com/pkg/errors"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 // TxKeySize TxKey is same with the hash defined in cometbft
@@ -130,8 +131,8 @@ func (task *TaskManager) GetFromAddr(hash common.Hash) string {
 	key := task.ethTxIndexMap[hash.String()]
 	return task.scheduleTasks[key].Schedule.Tx.From
 }
-func (task *TaskManager) Remove(tx []byte) error {
 
+func (task *TaskManager) Remove(tx []byte) error {
 	if task == nil || task.scheduleTasks == nil || len(task.scheduleTasks) == 0 {
 		return nil
 	}
@@ -151,21 +152,21 @@ func (task *TaskManager) Remove(tx []byte) error {
 		return err
 	}
 
-	//Check the number of executions,or Close schedule
+	// Check the number of executions,or Close schedule
 	execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
 	if execErr != nil {
 		return execErr
 	}
-	//clean pool
+	// clean pool
 	delete(task.scheduleTasks, key)
 	delete(task.ethTxIndexMap, scheduleTask.TxHash)
 	return nil
-
 }
+
 func (task *TaskManager) Check() ([][]byte, error) {
 	leftTxs := make([][]byte, len(task.scheduleTasks))
 	// not confirmed tasks
-	for key, _ := range task.scheduleTasks {
+	for key := range task.scheduleTasks {
 		// check and update schedule state
 		scheduleTask := task.scheduleTasks[key]
 
@@ -174,19 +175,25 @@ func (task *TaskManager) Check() ([][]byte, error) {
 			return nil, err
 		}
 		if uint64(len(try.TaskTxs)+1) < scheduleTask.Schedule.MaxRetry {
-			//try count less MaxRetry,then next  need try
-			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			// try count less MaxRetry,then next  need try
+			err := ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			// try count more than maxRetry, Close next try
-			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
-
-			// add Fail txHash for placeholder
-			err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, "F")
+			err := ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
 			if err != nil {
 				return nil, err
 			}
 
-			//Check the number of executions,or Close schedule
+			// add Fail txHash for placeholder
+			errExec := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, "F")
+			if errExec != nil {
+				return nil, errExec
+			}
+
+			// Check the number of executions,or Close schedule
 			execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
 			if execErr != nil {
 				return nil, execErr
@@ -225,12 +232,12 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 			return nil, err
 		}
 
-		//Check the number of executions,or Close schedule
+		// Check the number of executions,or Close schedule
 		execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
 		if execErr != nil {
 			return nil, execErr
 		}
-		//clean pool
+		// clean pool
 		delete(task.scheduleTasks, key)
 		delete(task.ethTxIndexMap, scheduleTask.TxHash)
 	}
@@ -238,7 +245,7 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 	leftTxs := make([][]byte, len(task.scheduleTasks))
 
 	// not confirmed tasks
-	for key, _ := range task.scheduleTasks {
+	for key := range task.scheduleTasks {
 		// check and update schedule state
 		scheduleTask := task.scheduleTasks[key]
 
@@ -247,11 +254,17 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 			return nil, err
 		}
 		if uint64(len(try.TaskTxs)+1) < scheduleTask.Schedule.MaxRetry {
-			//try count less MaxRetry,then next  need try
-			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			// try count less MaxRetry,then next  need try
+			storeErr := ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, true, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			if storeErr != nil {
+				return nil, storeErr
+			}
 		} else {
 			// try count more than maxRetry, Close next try
-			ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			tryErr := ScheduleManagerInstance().StoreScheduleTry(scheduleTask.Schedule.Id, false, scheduleTask.BlockHeight, scheduleTask.TxHash)
+			if tryErr != nil {
+				return nil, tryErr
+			}
 
 			// add Fail txHash for placeholder
 			err := ScheduleManagerInstance().StoreScheduleExecResult(scheduleTask.Schedule.Id, scheduleTask.BlockHeight, "F")
@@ -259,7 +272,7 @@ func (task *TaskManager) Confirm(txs [][]byte) ([][]byte, error) {
 				return nil, err
 			}
 
-			//Check the number of executions,or Close schedule
+			// Check the number of executions,or Close schedule
 			execErr := ScheduleManagerInstance().CheckClose(scheduleTask.Schedule)
 			if execErr != nil {
 				return nil, execErr

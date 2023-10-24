@@ -2,19 +2,19 @@ package run
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"os"
 	"path"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/stretchr/testify/require"
 
-	aspectType "github.com/artela-network/artelasdk/types"
+	aspectType "github.com/artela-network/aspect-core/types"
 )
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestJoinPoint(t *testing.T) {
-
 	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs-test/build/release.wasm")
 
 	name := aspectType.ON_TX_RECEIVE_METHOD
@@ -62,8 +62,7 @@ func TestJoinPoint(t *testing.T) {
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestIsOwner(t *testing.T) {
-
-	//cwd, _ := os.Getwd()
+	// cwd, _ := os.Getwd()
 	raw, err := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-example/new_test/build/release.wasm")
 	if err != nil {
 		fmt.Println(err)
@@ -82,7 +81,6 @@ func TestIsOwner(t *testing.T) {
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestOnContractBinding(t *testing.T) {
-
 	cwd, _ := os.Getwd()
 	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
 

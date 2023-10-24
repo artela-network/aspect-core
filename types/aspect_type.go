@@ -2,12 +2,15 @@ package types
 
 import (
 	"errors"
+
 	"github.com/ethereum/go-ethereum/common"
 )
 
 // for jit-inherent
-var GetAspectContext func(aspectId string, key string) string
-var SetAspectContext func(aspectId string, key string, value string)
+var (
+	GetAspectContext func(aspectId string, key string) string
+	SetAspectContext func(aspectId string, key string, value string)
+)
 
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
 
@@ -43,6 +46,7 @@ func ErrRunResult(message string) *RunResult {
 		Message: message,
 	}
 }
+
 func DefRunResult() *RunResult {
 	return &RunResult{
 		Success: true,
@@ -64,6 +68,7 @@ func ErrJoinPointResult(message string) *JoinPointResult {
 		ExecResultMap: m,
 	}
 }
+
 func DefJoinPointResult(message string) *JoinPointResult {
 	response := &AspectResponse{
 		Result: &RunResult{
@@ -78,17 +83,19 @@ func DefJoinPointResult(message string) *JoinPointResult {
 		ExecResultMap: m,
 	}
 }
+
 func (c *JoinPointResult) HasErr() (bool, error) {
 	if c.ExecResultMap == nil {
 		return false, nil
 	}
 	for k, v := range c.ExecResultMap {
-		if v.Result.Success == false {
+		if !v.Result.Success {
 			return true, errors.New(k + " " + v.Result.Message)
 		}
 	}
 	return false, nil
 }
+
 func (c *JoinPointResult) WithResponse(aspectId string, output *AspectResponse) *JoinPointResult {
 	if c.ExecResultMap == nil {
 		c.ExecResultMap = make(map[string]*AspectResponse)
@@ -98,6 +105,7 @@ func (c *JoinPointResult) WithResponse(aspectId string, output *AspectResponse) 
 	}
 	return c
 }
+
 func (c *JoinPointResult) WithGas(gasWanted, gasUsed, gasLeft uint64) *JoinPointResult {
 	c.GasInfo = &GasInfo{
 		GasWanted: gasWanted,
@@ -106,6 +114,7 @@ func (c *JoinPointResult) WithGas(gasWanted, gasUsed, gasLeft uint64) *JoinPoint
 	}
 	return c
 }
+
 func (c *JoinPointResult) WithErr(aspectId string, err error) *JoinPointResult {
 	errMsg := "fail"
 	if err != nil {

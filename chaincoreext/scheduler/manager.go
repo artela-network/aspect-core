@@ -1,8 +1,9 @@
 package scheduler
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 var globalManager *ScheduleManager
@@ -76,7 +77,7 @@ func (manager *ScheduleManager) Query(status types.ScheduleStatus) ([]*types.Sch
 }
 
 func (manager *ScheduleManager) CheckClose(schedule *types.Schedule) error {
-	//Check the number of executions
+	// Check the number of executions
 	result, execErr := ScheduleManagerInstance().GetScheduleExecResult(schedule.Id)
 	if execErr != nil {
 		return execErr
@@ -142,6 +143,7 @@ func (manager *ScheduleManager) rmPool(id *types.ScheduleId) {
 		}
 	}
 }
+
 func (manager *ScheduleManager) WrapTransition(tx *types.EthTransaction) (common.Hash, []byte, error) {
 	return manager.WrapTx(tx)
 }

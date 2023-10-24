@@ -2,23 +2,20 @@ package account_abstraction
 
 import (
 	"encoding/json"
+	"math/big"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
-	"math/big"
-	"strings"
 )
 
-var (
-	// EntryPointContract defines the address of the built-in AA entry point contract.
-	EntryPointContract = common.HexToAddress("0x000000000000000000000000000000000000AAEC")
-)
+// EntryPointContract defines the address of the built-in AA entry point contract.
+var EntryPointContract = common.HexToAddress("0x000000000000000000000000000000000000AAEC")
 
-var (
-	entrypointABI, _ = IEntryPointMetaData.GetAbi()
-)
+var entrypointABI, _ = IEntryPointMetaData.GetAbi()
 
 var (
 	userOperationPackedJJSONABI = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hashInitCode\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"hashCallData\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hashPaymasterAndData\",\"type\":\"bytes32\"}],\"name\":\"pack\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"entrypoint\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"}],\"name\":\"packHash\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"

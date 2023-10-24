@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package jitinherent.v1;
 
-option go_package = "github.com/artela-network/artelasdk/types";
+option go_package = "github.com/artela-network/aspect-core/types";
 
 message JitInherentRequest {
     bytes sender = 1;

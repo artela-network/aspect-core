@@ -1,9 +1,10 @@
 package types
 
 import (
+	"strings"
+
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"strings"
 )
 
 func ErrEthMessageCallResult(err error) *EthMessageCallResult {
@@ -28,6 +29,7 @@ func NewContextQueryResponse(condition bool, errMsg string) *ContextQueryRespons
 		},
 	}
 }
+
 func (c *ContextQueryResponse) SetData(message proto.Message) {
 	if message == nil {
 		return
@@ -59,9 +61,11 @@ const (
 
 var DefConnector = "^"
 
-var ContextKeys = [...]string{TxAspectContext, TxContent, TxStateChanges, TxExtProperties,
+var ContextKeys = [...]string{
+	TxAspectContext, TxContent, TxStateChanges, TxExtProperties,
 	TxCallTree, TxReceipt, TxGasMeter, EnvConsensusParams, EnvChainConfig, EnvEvmParams,
-	EnvBaseInfo, BlockHeader, BlockGasMeter, BlockMinGasPrice, BlockLastCommit, BlockTxs}
+	EnvBaseInfo, BlockHeader, BlockGasMeter, BlockMinGasPrice, BlockLastCommit, BlockTxs,
+}
 
 // keypath match
 // -- bool： match success

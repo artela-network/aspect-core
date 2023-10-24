@@ -1,17 +1,19 @@
 package jit_inherent
 
 import (
-	aa "github.com/artela-network/artelasdk/chaincoreext/account_abstraction"
-	"github.com/artela-network/artelasdk/integration"
-	"github.com/artela-network/artelasdk/types"
+	"math/big"
+	"sync"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	types2 "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
-	"math/big"
-	"sync"
+
+	aa "github.com/artela-network/aspect-core/chaincoreext/account_abstraction"
+	"github.com/artela-network/aspect-core/integration"
+	"github.com/artela-network/aspect-core/types"
 )
 
 var (
@@ -66,7 +68,8 @@ func newManager(protocol integration.AspectProtocol) *Manager {
 //  2. JIT call: the JIT call will be injected into the current evm callstack to guarantee the execution.
 //     Only one JIT call can be submitted at a time.
 func (m *Manager) Submit(aspect common.Address,
-	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest) (*types.JitInherentResponse, error) {
+	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest,
+) (*types.JitInherentResponse, error) {
 	if len(inherents) == 0 {
 		return nil, errors.New("no jit inherent to submit")
 	}
@@ -88,7 +91,8 @@ func (m *Manager) Submit(aspect common.Address,
 }
 
 func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherentRequest) (
-	verificationGasLimit, callGasLimit *uint256.Int, err error) {
+	verificationGasLimit, callGasLimit *uint256.Int, err error,
+) {
 	// get vm with snapshot state
 	cvm, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
@@ -134,7 +138,8 @@ func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 
 // submitJITCall submits a JIT call to the current EVM callstack.
 func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.UserOperation, userOpHash common.Hash) (
-	*types.JitInherentResponse, error) {
+	*types.JitInherentResponse, error,
+) {
 	defer m.ClearUserOp(userOpHash)
 
 	// get current evm instance with snapshot state
@@ -174,7 +179,8 @@ func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperatio
 }
 
 func (m *Manager) submitJITTx(aspect common.Address, userOps ...*aa.UserOperation) (
-	*types.JitInherentResponse, error) {
+	*types.JitInherentResponse, error,
+) {
 	// one fails all
 	userOpHashes := make([][]byte, len(userOps))
 	for i, userOp := range userOps {

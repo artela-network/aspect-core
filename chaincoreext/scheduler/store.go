@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/aspect-core/types"
 )
 
 const (
@@ -30,8 +30,8 @@ func ScheduleIdKey(
 func ScheduleViewKey(
 	status int64,
 ) []byte {
-	var newInt = big.NewInt(status) // int to big Int
-	var statusBytes = newInt.Bytes()
+	newInt := big.NewInt(status) // int to big Int
+	statusBytes := newInt.Bytes()
 	var key []byte
 	key = append(key, []byte("ScheduleView")...)
 	key = append(key, []byte("/")...)
@@ -67,6 +67,7 @@ func (manager *ScheduleManager) StoreSchedule(req *types.Schedule) error {
 	manager.Store.Set(prefixKey(ScheduleKeyPrefix, key), reqBytes)
 	return nil
 }
+
 func (manager *ScheduleManager) GetSchedule(req *types.ScheduleId) (*types.Schedule, error) {
 	key := ScheduleIdKey(req)
 	get := manager.Store.Get(prefixKey(ScheduleKeyPrefix, key))
@@ -167,7 +168,7 @@ func (manager *ScheduleManager) StoreScheduleExecResult(id *types.ScheduleId, bl
 			exist = true
 		}
 	}
-	if exist == true {
+	if exist {
 		return nil
 	}
 	result.Count = result.Count + 1
@@ -184,6 +185,7 @@ func (manager *ScheduleManager) StoreScheduleExecResult(id *types.ScheduleId, bl
 	manager.Store.Set(prefixKey(ScheduleExecResultKeyPrefix, key), marshal)
 	return nil
 }
+
 func (manager *ScheduleManager) GetScheduleExecResult(id *types.ScheduleId) (*types.TaskResult, error) {
 	key := ScheduleIdKey(id)
 	get := manager.Store.Get(prefixKey(ScheduleExecResultKeyPrefix, key))
@@ -223,7 +225,7 @@ func (manager *ScheduleManager) StoreScheduleTry(id *types.ScheduleId, needTry b
 				exist = true
 			}
 		}
-		if exist == false {
+		if !exist {
 			tryTask.TaskTxs = append(tryTask.TaskTxs, &tx)
 		}
 	}
@@ -246,9 +248,6 @@ func (manager *ScheduleManager) GetScheduleTry(id *types.ScheduleId) (*types.Try
 		err := proto.Unmarshal(get, tryTask)
 		if err != nil {
 			return nil, err
-		}
-		if tryTask == nil {
-			tryTask = &types.TryTask{}
 		}
 	}
 	return tryTask, nil

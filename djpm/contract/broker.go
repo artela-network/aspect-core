@@ -2,12 +2,13 @@ package contract
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
-	"math/big"
 )
 
 // 1. brew tap ethereum/ethereum
@@ -23,7 +24,6 @@ var BrokMetaData = &bind.MetaData{
 }
 
 func PackAllowanceMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, aspectId common.Address) (*core.Message, error) {
-
 	parsed, err := BrokMetaData.GetAbi()
 	if err != nil {
 		return &core.Message{}, err

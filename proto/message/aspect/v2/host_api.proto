@@ -4,7 +4,7 @@ import "google/protobuf/any.proto";
 import "aspect/v2/base_message.proto";
 
 
-option go_package = "github.com/artela-network/artelasdk/types";
+option go_package = "github.com/artela-network/aspect-core/types";
 
 message ContextSetRequest{
   SetNameSpace name_space=1;

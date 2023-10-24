@@ -226,7 +226,6 @@ func (_IAggregator *IAggregatorTransactorRaw) Transact(opts *bind.TransactOpts, 
 func (_IAggregator *IAggregatorCaller) AggregateSignatures(opts *bind.CallOpts, userOps []UserOperation) ([]byte, error) {
 	var out []interface{}
 	err := _IAggregator.contract.Call(opts, &out, "aggregateSignatures", userOps)
-
 	if err != nil {
 		return *new([]byte), err
 	}
@@ -234,7 +233,6 @@ func (_IAggregator *IAggregatorCaller) AggregateSignatures(opts *bind.CallOpts, 
 	out0 := *abi.ConvertType(out[0], new([]byte)).(*[]byte)
 
 	return out0, err
-
 }
 
 // AggregateSignatures is a free data retrieval call binding the contract method 0x275e2d79.
@@ -257,13 +255,11 @@ func (_IAggregator *IAggregatorCallerSession) AggregateSignatures(userOps []User
 func (_IAggregator *IAggregatorCaller) ValidateSignatures(opts *bind.CallOpts, userOps []UserOperation, signature []byte) error {
 	var out []interface{}
 	err := _IAggregator.contract.Call(opts, &out, "validateSignatures", userOps, signature)
-
 	if err != nil {
 		return err
 	}
 
 	return err
-
 }
 
 // ValidateSignatures is a free data retrieval call binding the contract method 0xe3563a4f.
@@ -286,7 +282,6 @@ func (_IAggregator *IAggregatorCallerSession) ValidateSignatures(userOps []UserO
 func (_IAggregator *IAggregatorCaller) ValidateUserOpSignature(opts *bind.CallOpts, userOp UserOperation) ([]byte, error) {
 	var out []interface{}
 	err := _IAggregator.contract.Call(opts, &out, "validateUserOpSignature", userOp)
-
 	if err != nil {
 		return *new([]byte), err
 	}
@@ -294,7 +289,6 @@ func (_IAggregator *IAggregatorCaller) ValidateUserOpSignature(opts *bind.CallOp
 	out0 := *abi.ConvertType(out[0], new([]byte)).(*[]byte)
 
 	return out0, err
-
 }
 
 // ValidateUserOpSignature is a free data retrieval call binding the contract method 0x64c530cd.
@@ -489,7 +483,6 @@ func (_IEntryPoint *IEntryPointTransactorRaw) Transact(opts *bind.TransactOpts, 
 func (_IEntryPoint *IEntryPointCaller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
 	var out []interface{}
 	err := _IEntryPoint.contract.Call(opts, &out, "balanceOf", account)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -497,7 +490,6 @@ func (_IEntryPoint *IEntryPointCaller) BalanceOf(opts *bind.CallOpts, account co
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
@@ -520,7 +512,6 @@ func (_IEntryPoint *IEntryPointCallerSession) BalanceOf(account common.Address) 
 func (_IEntryPoint *IEntryPointCaller) GetDepositInfo(opts *bind.CallOpts, account common.Address) (IStakeManagerDepositInfo, error) {
 	var out []interface{}
 	err := _IEntryPoint.contract.Call(opts, &out, "getDepositInfo", account)
-
 	if err != nil {
 		return *new(IStakeManagerDepositInfo), err
 	}
@@ -528,7 +519,6 @@ func (_IEntryPoint *IEntryPointCaller) GetDepositInfo(opts *bind.CallOpts, accou
 	out0 := *abi.ConvertType(out[0], new(IStakeManagerDepositInfo)).(*IStakeManagerDepositInfo)
 
 	return out0, err
-
 }
 
 // GetDepositInfo is a free data retrieval call binding the contract method 0x5287ce12.
@@ -551,7 +541,6 @@ func (_IEntryPoint *IEntryPointCallerSession) GetDepositInfo(account common.Addr
 func (_IEntryPoint *IEntryPointCaller) GetNonce(opts *bind.CallOpts, sender common.Address, key *big.Int) (*big.Int, error) {
 	var out []interface{}
 	err := _IEntryPoint.contract.Call(opts, &out, "getNonce", sender, key)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -559,7 +548,6 @@ func (_IEntryPoint *IEntryPointCaller) GetNonce(opts *bind.CallOpts, sender comm
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // GetNonce is a free data retrieval call binding the contract method 0x35567e1a.
@@ -582,7 +570,6 @@ func (_IEntryPoint *IEntryPointCallerSession) GetNonce(sender common.Address, ke
 func (_IEntryPoint *IEntryPointCaller) GetUserOpHash(opts *bind.CallOpts, userOp UserOperation) ([32]byte, error) {
 	var out []interface{}
 	err := _IEntryPoint.contract.Call(opts, &out, "getUserOpHash", userOp)
-
 	if err != nil {
 		return *new([32]byte), err
 	}
@@ -590,7 +577,6 @@ func (_IEntryPoint *IEntryPointCaller) GetUserOpHash(opts *bind.CallOpts, userOp
 	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
 
 	return out0, err
-
 }
 
 // GetUserOpHash is a free data retrieval call binding the contract method 0xa6193531.
@@ -918,7 +904,6 @@ type IEntryPointAccountDeployed struct {
 //
 // Solidity: event AccountDeployed(bytes32 indexed userOpHash, address indexed sender, address factory, address paymaster)
 func (_IEntryPoint *IEntryPointFilterer) FilterAccountDeployed(opts *bind.FilterOpts, userOpHash [][32]byte, sender []common.Address) (*IEntryPointAccountDeployedIterator, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -939,7 +924,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterAccountDeployed(opts *bind.Filter
 //
 // Solidity: event AccountDeployed(bytes32 indexed userOpHash, address indexed sender, address factory, address paymaster)
 func (_IEntryPoint *IEntryPointFilterer) WatchAccountDeployed(opts *bind.WatchOpts, sink chan<- *IEntryPointAccountDeployed, userOpHash [][32]byte, sender []common.Address) (event.Subscription, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -1069,7 +1053,6 @@ type IEntryPointBeforeExecution struct {
 //
 // Solidity: event BeforeExecution()
 func (_IEntryPoint *IEntryPointFilterer) FilterBeforeExecution(opts *bind.FilterOpts) (*IEntryPointBeforeExecutionIterator, error) {
-
 	logs, sub, err := _IEntryPoint.contract.FilterLogs(opts, "BeforeExecution")
 	if err != nil {
 		return nil, err
@@ -1081,7 +1064,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterBeforeExecution(opts *bind.Filter
 //
 // Solidity: event BeforeExecution()
 func (_IEntryPoint *IEntryPointFilterer) WatchBeforeExecution(opts *bind.WatchOpts, sink chan<- *IEntryPointBeforeExecution) (event.Subscription, error) {
-
 	logs, sub, err := _IEntryPoint.contract.WatchLogs(opts, "BeforeExecution")
 	if err != nil {
 		return nil, err
@@ -1204,7 +1186,6 @@ type IEntryPointDeposited struct {
 //
 // Solidity: event Deposited(address indexed account, uint256 totalDeposit)
 func (_IEntryPoint *IEntryPointFilterer) FilterDeposited(opts *bind.FilterOpts, account []common.Address) (*IEntryPointDepositedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1221,7 +1202,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterDeposited(opts *bind.FilterOpts, 
 //
 // Solidity: event Deposited(address indexed account, uint256 totalDeposit)
 func (_IEntryPoint *IEntryPointFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *IEntryPointDeposited, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1348,7 +1328,6 @@ type IEntryPointSignatureAggregatorChanged struct {
 //
 // Solidity: event SignatureAggregatorChanged(address indexed aggregator)
 func (_IEntryPoint *IEntryPointFilterer) FilterSignatureAggregatorChanged(opts *bind.FilterOpts, aggregator []common.Address) (*IEntryPointSignatureAggregatorChangedIterator, error) {
-
 	var aggregatorRule []interface{}
 	for _, aggregatorItem := range aggregator {
 		aggregatorRule = append(aggregatorRule, aggregatorItem)
@@ -1365,7 +1344,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterSignatureAggregatorChanged(opts *
 //
 // Solidity: event SignatureAggregatorChanged(address indexed aggregator)
 func (_IEntryPoint *IEntryPointFilterer) WatchSignatureAggregatorChanged(opts *bind.WatchOpts, sink chan<- *IEntryPointSignatureAggregatorChanged, aggregator []common.Address) (event.Subscription, error) {
-
 	var aggregatorRule []interface{}
 	for _, aggregatorItem := range aggregator {
 		aggregatorRule = append(aggregatorRule, aggregatorItem)
@@ -1494,7 +1472,6 @@ type IEntryPointStakeLocked struct {
 //
 // Solidity: event StakeLocked(address indexed account, uint256 totalStaked, uint256 unstakeDelaySec)
 func (_IEntryPoint *IEntryPointFilterer) FilterStakeLocked(opts *bind.FilterOpts, account []common.Address) (*IEntryPointStakeLockedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1511,7 +1488,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterStakeLocked(opts *bind.FilterOpts
 //
 // Solidity: event StakeLocked(address indexed account, uint256 totalStaked, uint256 unstakeDelaySec)
 func (_IEntryPoint *IEntryPointFilterer) WatchStakeLocked(opts *bind.WatchOpts, sink chan<- *IEntryPointStakeLocked, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1639,7 +1615,6 @@ type IEntryPointStakeUnlocked struct {
 //
 // Solidity: event StakeUnlocked(address indexed account, uint256 withdrawTime)
 func (_IEntryPoint *IEntryPointFilterer) FilterStakeUnlocked(opts *bind.FilterOpts, account []common.Address) (*IEntryPointStakeUnlockedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1656,7 +1631,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterStakeUnlocked(opts *bind.FilterOp
 //
 // Solidity: event StakeUnlocked(address indexed account, uint256 withdrawTime)
 func (_IEntryPoint *IEntryPointFilterer) WatchStakeUnlocked(opts *bind.WatchOpts, sink chan<- *IEntryPointStakeUnlocked, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1785,7 +1759,6 @@ type IEntryPointStakeWithdrawn struct {
 //
 // Solidity: event StakeWithdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IEntryPoint *IEntryPointFilterer) FilterStakeWithdrawn(opts *bind.FilterOpts, account []common.Address) (*IEntryPointStakeWithdrawnIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1802,7 +1775,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterStakeWithdrawn(opts *bind.FilterO
 //
 // Solidity: event StakeWithdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IEntryPoint *IEntryPointFilterer) WatchStakeWithdrawn(opts *bind.WatchOpts, sink chan<- *IEntryPointStakeWithdrawn, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -1935,7 +1907,6 @@ type IEntryPointUserOperationEvent struct {
 //
 // Solidity: event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)
 func (_IEntryPoint *IEntryPointFilterer) FilterUserOperationEvent(opts *bind.FilterOpts, userOpHash [][32]byte, sender []common.Address, paymaster []common.Address) (*IEntryPointUserOperationEventIterator, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -1960,7 +1931,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterUserOperationEvent(opts *bind.Fil
 //
 // Solidity: event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)
 func (_IEntryPoint *IEntryPointFilterer) WatchUserOperationEvent(opts *bind.WatchOpts, sink chan<- *IEntryPointUserOperationEvent, userOpHash [][32]byte, sender []common.Address, paymaster []common.Address) (event.Subscription, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -2098,7 +2068,6 @@ type IEntryPointUserOperationRevertReason struct {
 //
 // Solidity: event UserOperationRevertReason(bytes32 indexed userOpHash, address indexed sender, uint256 nonce, bytes revertReason)
 func (_IEntryPoint *IEntryPointFilterer) FilterUserOperationRevertReason(opts *bind.FilterOpts, userOpHash [][32]byte, sender []common.Address) (*IEntryPointUserOperationRevertReasonIterator, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -2119,7 +2088,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterUserOperationRevertReason(opts *b
 //
 // Solidity: event UserOperationRevertReason(bytes32 indexed userOpHash, address indexed sender, uint256 nonce, bytes revertReason)
 func (_IEntryPoint *IEntryPointFilterer) WatchUserOperationRevertReason(opts *bind.WatchOpts, sink chan<- *IEntryPointUserOperationRevertReason, userOpHash [][32]byte, sender []common.Address) (event.Subscription, error) {
-
 	var userOpHashRule []interface{}
 	for _, userOpHashItem := range userOpHash {
 		userOpHashRule = append(userOpHashRule, userOpHashItem)
@@ -2252,7 +2220,6 @@ type IEntryPointWithdrawn struct {
 //
 // Solidity: event Withdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IEntryPoint *IEntryPointFilterer) FilterWithdrawn(opts *bind.FilterOpts, account []common.Address) (*IEntryPointWithdrawnIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -2269,7 +2236,6 @@ func (_IEntryPoint *IEntryPointFilterer) FilterWithdrawn(opts *bind.FilterOpts, 
 //
 // Solidity: event Withdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IEntryPoint *IEntryPointFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- *IEntryPointWithdrawn, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -2484,7 +2450,6 @@ func (_INonceManager *INonceManagerTransactorRaw) Transact(opts *bind.TransactOp
 func (_INonceManager *INonceManagerCaller) GetNonce(opts *bind.CallOpts, sender common.Address, key *big.Int) (*big.Int, error) {
 	var out []interface{}
 	err := _INonceManager.contract.Call(opts, &out, "getNonce", sender, key)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -2492,7 +2457,6 @@ func (_INonceManager *INonceManagerCaller) GetNonce(opts *bind.CallOpts, sender 
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // GetNonce is a free data retrieval call binding the contract method 0x35567e1a.
@@ -2700,7 +2664,6 @@ func (_IStakeManager *IStakeManagerTransactorRaw) Transact(opts *bind.TransactOp
 func (_IStakeManager *IStakeManagerCaller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
 	var out []interface{}
 	err := _IStakeManager.contract.Call(opts, &out, "balanceOf", account)
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -2708,7 +2671,6 @@ func (_IStakeManager *IStakeManagerCaller) BalanceOf(opts *bind.CallOpts, accoun
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
@@ -2731,7 +2693,6 @@ func (_IStakeManager *IStakeManagerCallerSession) BalanceOf(account common.Addre
 func (_IStakeManager *IStakeManagerCaller) GetDepositInfo(opts *bind.CallOpts, account common.Address) (IStakeManagerDepositInfo, error) {
 	var out []interface{}
 	err := _IStakeManager.contract.Call(opts, &out, "getDepositInfo", account)
-
 	if err != nil {
 		return *new(IStakeManagerDepositInfo), err
 	}
@@ -2739,7 +2700,6 @@ func (_IStakeManager *IStakeManagerCaller) GetDepositInfo(opts *bind.CallOpts, a
 	out0 := *abi.ConvertType(out[0], new(IStakeManagerDepositInfo)).(*IStakeManagerDepositInfo)
 
 	return out0, err
-
 }
 
 // GetDepositInfo is a free data retrieval call binding the contract method 0x5287ce12.
@@ -2939,7 +2899,6 @@ type IStakeManagerDeposited struct {
 //
 // Solidity: event Deposited(address indexed account, uint256 totalDeposit)
 func (_IStakeManager *IStakeManagerFilterer) FilterDeposited(opts *bind.FilterOpts, account []common.Address) (*IStakeManagerDepositedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -2956,7 +2915,6 @@ func (_IStakeManager *IStakeManagerFilterer) FilterDeposited(opts *bind.FilterOp
 //
 // Solidity: event Deposited(address indexed account, uint256 totalDeposit)
 func (_IStakeManager *IStakeManagerFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *IStakeManagerDeposited, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3085,7 +3043,6 @@ type IStakeManagerStakeLocked struct {
 //
 // Solidity: event StakeLocked(address indexed account, uint256 totalStaked, uint256 unstakeDelaySec)
 func (_IStakeManager *IStakeManagerFilterer) FilterStakeLocked(opts *bind.FilterOpts, account []common.Address) (*IStakeManagerStakeLockedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3102,7 +3059,6 @@ func (_IStakeManager *IStakeManagerFilterer) FilterStakeLocked(opts *bind.Filter
 //
 // Solidity: event StakeLocked(address indexed account, uint256 totalStaked, uint256 unstakeDelaySec)
 func (_IStakeManager *IStakeManagerFilterer) WatchStakeLocked(opts *bind.WatchOpts, sink chan<- *IStakeManagerStakeLocked, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3230,7 +3186,6 @@ type IStakeManagerStakeUnlocked struct {
 //
 // Solidity: event StakeUnlocked(address indexed account, uint256 withdrawTime)
 func (_IStakeManager *IStakeManagerFilterer) FilterStakeUnlocked(opts *bind.FilterOpts, account []common.Address) (*IStakeManagerStakeUnlockedIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3247,7 +3202,6 @@ func (_IStakeManager *IStakeManagerFilterer) FilterStakeUnlocked(opts *bind.Filt
 //
 // Solidity: event StakeUnlocked(address indexed account, uint256 withdrawTime)
 func (_IStakeManager *IStakeManagerFilterer) WatchStakeUnlocked(opts *bind.WatchOpts, sink chan<- *IStakeManagerStakeUnlocked, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3376,7 +3330,6 @@ type IStakeManagerStakeWithdrawn struct {
 //
 // Solidity: event StakeWithdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IStakeManager *IStakeManagerFilterer) FilterStakeWithdrawn(opts *bind.FilterOpts, account []common.Address) (*IStakeManagerStakeWithdrawnIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3393,7 +3346,6 @@ func (_IStakeManager *IStakeManagerFilterer) FilterStakeWithdrawn(opts *bind.Fil
 //
 // Solidity: event StakeWithdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IStakeManager *IStakeManagerFilterer) WatchStakeWithdrawn(opts *bind.WatchOpts, sink chan<- *IStakeManagerStakeWithdrawn, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3522,7 +3474,6 @@ type IStakeManagerWithdrawn struct {
 //
 // Solidity: event Withdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IStakeManager *IStakeManagerFilterer) FilterWithdrawn(opts *bind.FilterOpts, account []common.Address) (*IStakeManagerWithdrawnIterator, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
@@ -3539,7 +3490,6 @@ func (_IStakeManager *IStakeManagerFilterer) FilterWithdrawn(opts *bind.FilterOp
 //
 // Solidity: event Withdrawn(address indexed account, address withdrawAddress, uint256 amount)
 func (_IStakeManager *IStakeManagerFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- *IStakeManagerWithdrawn, account []common.Address) (event.Subscription, error) {
-
 	var accountRule []interface{}
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)

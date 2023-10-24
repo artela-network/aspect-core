@@ -2,17 +2,18 @@ package tests
 
 import (
 	"fmt"
-	"github.com/artela-network/artelasdk/djpm/run"
-	jsoniter "github.com/json-iterator/go"
 	"testing"
+
+	jsoniter "github.com/json-iterator/go"
+
+	"github.com/artela-network/aspect-core/djpm/run"
 
 	"github.com/stretchr/testify/require"
 
-	aspectType "github.com/artela-network/artelasdk/types"
+	aspectType "github.com/artela-network/aspect-core/types"
 )
 
 func TestAspect(t *testing.T) {
-
 	raw, _ := GetTestTarget("aspect-test")
 	input := &aspectType.EthTxAspect{
 		Tx: &aspectType.EthTransaction{
@@ -59,6 +60,9 @@ func TestAspect(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
+		if err != nil {
+			return
+		}
 		fmt.Println("------" + (string(marshal)) + "------")
 
 		data := output.Data
@@ -78,6 +82,9 @@ func TestAspect(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 		marshal, err := jsoniter.Marshal(output)
+		if err != nil {
+			return
+		}
 		fmt.Println("------" + (string(marshal)) + "------")
 
 		data := output.Data
@@ -89,7 +96,8 @@ func TestAspect(t *testing.T) {
 		fmt.Println(strData.GetData())
 	}
 
-	pointcuts = []aspectType.PointCut{aspectType.PRE_CONTRACT_CALL_METHOD,
+	pointcuts = []aspectType.PointCut{
+		aspectType.PRE_CONTRACT_CALL_METHOD,
 		aspectType.POST_CONTRACT_CALL_METHOD,
 		aspectType.PRE_TX_EXECUTE_METHOD,
 		aspectType.POST_TX_EXECUTE_METHOD,
@@ -101,7 +109,10 @@ func TestAspect(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, true, output.Result.Success)
 
-		marshal, err := jsoniter.Marshal(output)
+		marshal, outErr := jsoniter.Marshal(output)
+		if outErr != nil {
+			return
+		}
 		fmt.Println("------" + (string(marshal)) + "------")
 
 	}
@@ -111,8 +122,7 @@ func TestAspect(t *testing.T) {
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestIsOwner(t *testing.T) {
-
-	//cwd, _ := os.Getwd()
+	// cwd, _ := os.Getwd()
 	raw, err := GetTestTarget("aspect-test")
 	if err != nil {
 		fmt.Println(err)
@@ -129,7 +139,6 @@ func TestIsOwner(t *testing.T) {
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestOnContractBinding(t *testing.T) {
-
 	raw, _ := GetTestTarget("aspect-test")
 	runner, err := run.NewRunner("", raw)
 	require.Equal(t, nil, err)
