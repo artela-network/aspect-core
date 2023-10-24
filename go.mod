@@ -1,6 +1,6 @@
 module github.com/artela-network/aspect-core
 
-go 1.18
+go 1.20
 
 require (
 	github.com/artela-network/aspect-runtime v0.4.1-beta
@@ -67,5 +67,3 @@ require (
 )
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
-
-replace github.com/artela-network/aspect-runtime => ../aspect-runtime
