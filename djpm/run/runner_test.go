@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	aspectType "github.com/artela-network/artelasdk/types"
+	aspectType "github.com/artela-network/aspect-core/types"
 )
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.

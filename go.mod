@@ -1,9 +1,9 @@
-module github.com/artela-network/artelasdk
+module github.com/artela-network/aspect-core
 
 go 1.18
 
 require (
-	github.com/artela-network/runtime v0.4.0-beta
+	github.com/artela-network/aspect-runtime v0.4.1-beta
 	github.com/cosmos/btcutil v1.0.5
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/holiman/uint256 v1.2.2
@@ -68,7 +68,4 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
 
-replace (
-    github.com/artela-network/runtime => ../runtime
-)
-
+replace github.com/artela-network/aspect-runtime => ../aspect-runtime

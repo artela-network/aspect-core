@@ -1,6 +1,6 @@
 package api
 
-import "github.com/artela-network/artelasdk/types"
+import "github.com/artela-network/aspect-core/types"
 
 func (r *Register) stateDbApis() interface{} {
 	return map[string]interface{}{

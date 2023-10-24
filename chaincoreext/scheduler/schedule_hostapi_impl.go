@@ -1,9 +1,10 @@
 package scheduler
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 var globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)

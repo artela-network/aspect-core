@@ -3,7 +3,7 @@ package scheduler.v2;
 
 import "aspect/v2/base_message.proto";
 
-option go_package = "github.com/artela-network/artelasdk/types";
+option go_package = "github.com/artela-network/aspect-core/types";
 
 message ScheduleTask{
   Schedule schedule=1;

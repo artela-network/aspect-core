@@ -1,6 +1,6 @@
 syntax = "proto3";
 package aspect.v2;
-option go_package = "github.com/artela-network/artelasdk/types";
+option go_package = "github.com/artela-network/aspect-core/types";
 
 message GasMeter {
   uint64 gas_consumed = 1;

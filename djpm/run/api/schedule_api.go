@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 func (r *Register) scheduleApis() interface{} {

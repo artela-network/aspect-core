@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/aspect-core/types"
 )
 
 // TxKeySize TxKey is same with the hash defined in cometbft

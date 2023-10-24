@@ -1,8 +1,9 @@
 package scheduler
 
 import (
-	"github.com/artela-network/artelasdk/types"
 	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/artela-network/aspect-core/types"
 )
 
 var globalManager *ScheduleManager

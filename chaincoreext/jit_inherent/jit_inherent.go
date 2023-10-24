@@ -4,15 +4,16 @@ import (
 	"math/big"
 	"sync"
 
-	aa "github.com/artela-network/artelasdk/chaincoreext/account_abstraction"
-	"github.com/artela-network/artelasdk/integration"
-	"github.com/artela-network/artelasdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	types2 "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
+
+	aa "github.com/artela-network/aspect-core/chaincoreext/account_abstraction"
+	"github.com/artela-network/aspect-core/integration"
+	"github.com/artela-network/aspect-core/types"
 )
 
 var (

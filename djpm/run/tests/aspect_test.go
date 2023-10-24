@@ -6,11 +6,11 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/artela-network/artelasdk/djpm/run"
+	"github.com/artela-network/aspect-core/djpm/run"
 
 	"github.com/stretchr/testify/require"
 
-	aspectType "github.com/artela-network/artelasdk/types"
+	aspectType "github.com/artela-network/aspect-core/types"
 )
 
 func TestAspect(t *testing.T) {

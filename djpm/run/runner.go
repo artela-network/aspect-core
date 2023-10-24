@@ -5,13 +5,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/artela-network/artelasdk/djpm/run/api"
+	"github.com/artela-network/aspect-core/djpm/run/api"
 
-	"github.com/artela-network/runtime"
+	"github.com/artela-network/aspect-runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/aspect-core/types"
 )
 
 var vmPool *runtime.RuntimePool

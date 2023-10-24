@@ -4,9 +4,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/artela-network/artelasdk/chaincoreext/scheduler"
-	"github.com/artela-network/artelasdk/djpm/run"
-	"github.com/artela-network/artelasdk/types"
+	"github.com/artela-network/aspect-core/chaincoreext/scheduler"
+	"github.com/artela-network/aspect-core/djpm/run"
+	"github.com/artela-network/aspect-core/types"
 )
 
 var globalAspect *Aspect
