@@ -58,4 +58,5 @@ pre-commit install
 
 ## License
 Copyright © Artela Network, Inc. All rights reserved.
+
 Licensed under the [Apache v2](LICENSE) License.
