@@ -4,7 +4,7 @@ parent:
 -->
 
 <div align="center">
-  <h1> Artela SDK </h1>
+  <h1> Aspect Core </h1>
 </div>
 
 <div align="center">
@@ -23,14 +23,39 @@ Artela SDK implement all of joinpoints.
 
 **Warning**: This project is still in a very early stage, DO NOT USE IT IN PRODUCTION.
 
-**Note**: Requires [Go 1.19+](https://go.dev/dl)
-
-## System Overview
 
 All of our major modules are currently under `/artela/aspect` folder, includes the following:
-- 
-- `djpm` : Manager for all aspects
-- `djpm/run` : Provides basic aspect functionalities, including call WASM runtime, gas metering and etc.
-- `scheduler` : Provides the functionalities to generate automated on-chain transaction
-- `proto` : define protobuf message for Aspect
-- `types` : Basic data type of aspects
+
+
+## Development
+### Requires
+*  [Go 1.20+](https://go.dev/dl)
+*  [Pre-Commit 3.5+](https://pre-commit.com/)
+
+The quality of project code needs to be checked through lint，please install the git hook scripts。
+```shell
+pre-commit install
+```
+
+### Directory Structure
+
+```shell
+├── chaincoreext               // Chain scalability 
+│   ├── account_abstraction    // Implementing ethereum `Account Abstraction`
+│   ├── jit_inherent           // Initiate message calls through account abstraction
+│   └── scheduler              // Provides the functionalities to generate automated on-chain transaction
+├── djpm                       // Manager for all aspects
+│   ├── contract               // Call smart contract related functions
+│   └── run                    // Provides basic aspect functionalities, including call WASM runtime, gas metering and etc.
+├── integration                // Message calls interface provider
+├── proto                      // Define protobuf message for Aspect
+│   └── message
+├── scripts                     
+└── types                      // Basic data type of aspects
+
+```
+
+
+## License
+Copyright © Artela Network, Inc. All rights reserved.
+Licensed under the [Apache v2](LICENSE) License.
