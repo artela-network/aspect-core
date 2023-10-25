@@ -1,6 +1,8 @@
 package djpm
 
 import (
+	"errors"
+
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 
@@ -140,12 +142,20 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	return runAspect
 }
 
-func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, req []*types.AspectCode) *types.JoinPointResult {
-	response := &types.JoinPointResult{}
+func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, req []*types.AspectCode) (response *types.JoinPointResult) {
+	aspectId := ""
+	defer func() {
+		if err := recover(); err != nil {
+			// TODO log.Error(running aspect failed")
+			response.WithErr(aspectId, errors.New("fatal: panic in running aspect"))
+		}
+	}()
+
+	response = &types.JoinPointResult{}
 
 	gasLeft := gas
 	for _, aspect := range req {
-		aspectId := aspect.AspectId
+		aspectId = aspect.AspectId
 		runner, err := run.NewRunner(aspectId, aspect.Code)
 		if err != nil {
 			return response.WithErr(aspectId, err)
