@@ -7,7 +7,7 @@ import (
 
 	"github.com/artela-network/aspect-core/djpm/run/api"
 
-	"github.com/artela-network/aspect-runtime"
+	runtime "github.com/artela-network/aspect-runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 

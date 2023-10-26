@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/artela-network/aspect-runtime"
+	runtime "github.com/artela-network/aspect-runtime"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/artela-network/aspect-core/types"
