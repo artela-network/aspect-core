@@ -25,7 +25,7 @@ type Runner struct {
 func NewRunner(aspID string, code []byte) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
 	register := api.NewRegister(&aspectId)
-	key, vm, err := types.RuntimePool().Runtime(runtime.WASM, code, register.HostApis())
+	key, vm, err := types.Runtime(code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func NewRunner(aspID string, code []byte) (*Runner, error) {
 }
 
 func (r *Runner) Return() {
-	types.RuntimePool().Return(r.vmKey, r.vm)
+	types.ReturnRuntime(r.vmKey, r.vm)
 }
 
 func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) (*types.AspectResponse, error) {
