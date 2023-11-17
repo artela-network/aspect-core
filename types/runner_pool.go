@@ -31,6 +31,8 @@ func Runtime(code []byte, registry *runtime.HostAPIRegistry) (string, runtime.As
 // ReturnRuntime returns the the runtime instance to the pool, is the pool is enabled.
 func ReturnRuntime(key string, instance runtime.AspectRuntime) {
 	if !enable {
+		// release the host functions and memorys in Destory
+		instance.Destroy()
 		return
 	}
 	if vmPool == nil {
