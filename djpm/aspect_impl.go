@@ -38,11 +38,10 @@ func (aspect Aspect) FilterTx(request *types.EthTxAspect) *types.JoinPointResult
 	return aspect.transactionAdvice(types.ON_TX_RECEIVE_METHOD, request)
 }
 
-//	func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult {
-//		return aspect.transactionAdvice(types.ON_TX_VERIFY_METHOD, request)
-//
-// }
-//
+func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult {
+	return aspect.transactionAdvice(types.ON_TX_VERIFY_METHOD, request)
+}
+
 //	func (aspect Aspect) VerifyAccount(request *types.EthTxAspect) *types.JoinPointResult {
 //		return aspect.transactionAdvice(types.ON_ACCOUNT_VERIFY_METHOD, request)
 //
