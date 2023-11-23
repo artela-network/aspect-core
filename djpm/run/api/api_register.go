@@ -31,7 +31,7 @@ const (
 	ApiEntrance           = "execute"
 	CheckBlockLevel       = "isBlockLevel"
 	CheckTransactionLevel = "isTransactionLevel"
-	CheckIsTxVerifier     = "isTxVerifier"
+	CheckIsTxVerifier     = "isTransactionVerifier"
 )
 
 type HostFunc interface {

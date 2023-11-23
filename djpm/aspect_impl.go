@@ -87,7 +87,7 @@ func (aspect Aspect) GetSenderAndCallData(block int64, tx *types2.Transaction) (
 	// the data is encoded as follows: abi.encode(validationData, callData)
 	// validationData is the data that will be passed to the aspect verifier
 	// callData is the data that will be passed to the contract
-	validation, call, err := decodeValidationAndCallData(tx.Data())
+	validation, call, err := DecodeValidationAndCallData(tx.Data())
 	if err != nil {
 		return common.Address{}, nil, err
 	}
@@ -116,10 +116,22 @@ func (aspect Aspect) GetSenderAndCallData(block int64, tx *types2.Transaction) (
 		return common.Address{}, nil, err
 	}
 
+	request.Tx = &types.EthTransaction{
+		BlockHash:   nil,
+		BlockNumber: block,
+		Hash:        tx.Hash().Bytes(),
+		Input:       tx.Data(),
+		Nonce:       tx.Nonce(),
+		To:          tx.To().Hex(),
+		Value:       tx.Value().String(),
+		Type:        int32(tx.Type()),
+		ChainId:     tx.ChainId().String(),
+	}
+
 	// execute aspect verification
 	verifyRes := aspect.VerifyTx(request)
-	ok, err := verifyRes.HasErr()
-	if !ok {
+	hasErr, err := verifyRes.HasErr()
+	if hasErr {
 		return common.Address{}, nil, err
 	}
 
@@ -219,7 +231,7 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 
 func (aspect Aspect) verification(method types.PointCut, req *types.EthTxAspect) *types.JoinPointResult {
 	if req == nil || req.Tx == nil || types.IsAspectContract(req.Tx.To) {
-		result := types.DefJoinPointResult("transactionAdvice invalid input.")
+		result := types.DefJoinPointResult("verification invalid input.")
 		result.GasInfo = req.GasInfo
 		return result
 	}
@@ -305,7 +317,7 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 	return response
 }
 
-func decodeValidationAndCallData(txData []byte) (validationData, callData []byte, err error) {
+func DecodeValidationAndCallData(txData []byte) (validationData, callData []byte, err error) {
 	validationData, err = loadParamBytes(txData, 0)
 	if err != nil {
 		return
