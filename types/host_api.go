@@ -46,6 +46,7 @@ const (
 	TxCallTree      = "tx^callTree"
 	TxReceipt       = "tx^receipt"
 	TxGasMeter      = "tx^gasMeter"
+	TxMsgHash       = "tx^msgHash"
 
 	EnvConsensusParams = "env^consensusParams"
 	EnvChainConfig     = "env^chainConfig"
@@ -62,7 +63,7 @@ const (
 var DefConnector = "^"
 
 var ContextKeys = [...]string{
-	TxAspectContext, TxContent, TxStateChanges, TxExtProperties,
+	TxAspectContext, TxContent, TxStateChanges, TxExtProperties, TxMsgHash,
 	TxCallTree, TxReceipt, TxGasMeter, EnvConsensusParams, EnvChainConfig, EnvEvmParams,
 	EnvBaseInfo, BlockHeader, BlockGasMeter, BlockMinGasPrice, BlockLastCommit, BlockTxs,
 }
