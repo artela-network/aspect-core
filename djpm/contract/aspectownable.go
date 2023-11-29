@@ -1,7 +1,6 @@
 package contract
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -55,9 +54,8 @@ func UnpackIsOwnerResult(data []byte) (bool, error) {
 		return false, err
 	}
 	maps := make(map[string]interface{}, 0)
-	err2 := parsed.UnpackIntoMap(maps, "isOwner", data)
-	if err2 != nil {
-		fmt.Println("pack error", err2)
+	if err := parsed.UnpackIntoMap(maps, "isOwner", data); err != nil {
+		return false, err
 	}
 	out0 := *abi.ConvertType(maps["result"], new(bool)).(*bool)
 	return out0, nil
