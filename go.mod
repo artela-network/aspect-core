@@ -3,7 +3,7 @@ module github.com/artela-network/aspect-core
 go 1.20
 
 require (
-	github.com/artela-network/aspect-runtime v0.4.1-beta
+	github.com/artela-network/aspect-runtime v0.4.2-beta
 	github.com/cosmos/btcutil v1.0.5
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/holiman/uint256 v1.2.2
@@ -19,7 +19,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.6.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
-	github.com/bytecodealliance/wasmtime-go/v9 v9.0.0 // indirect
+	github.com/bytecodealliance/wasmtime-go/v14 v14.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
