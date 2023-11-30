@@ -66,20 +66,10 @@ func NewEthTransactionByMessage(message *core.Message, txHash common.Hash, chain
 // NewTransactionFromData returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).
 func NewEthTransaction(
+	from common.Address,
 	tx *ethtypes.Transaction, blockHash common.Hash, blockNumber, index int64, baseFee *big.Int,
 	chainID string,
 ) (*EthTransaction, error) {
-	// Determine the signer. For replay-protected transactions, use the most permissive
-	// signer, because we assume that signers are backwards-compatible with old
-	// transactions. For non-protected transactions, the homestead signer signer is used
-	// because the return value of ChainId is zero for those transactions.
-	var signer ethtypes.Signer
-	if tx.Protected() {
-		signer = ethtypes.LatestSignerForChainID(tx.ChainId())
-	} else {
-		signer = ethtypes.HomesteadSigner{}
-	}
-	from, _ := ethtypes.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
 
 	result := &EthTransaction{

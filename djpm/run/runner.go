@@ -1,6 +1,7 @@
 package run
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -8,7 +9,6 @@ import (
 	"github.com/artela-network/aspect-core/djpm/run/api"
 
 	runtime "github.com/artela-network/aspect-runtime"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/aspect-core/types"
@@ -71,7 +71,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	}
 	output := &types.AspectResponse{}
 	if err := proto.Unmarshal(resData, output); err != nil {
-		return nil, errors.Wrap(err, "unmarshal AspectOutput")
+		return nil, err
 	}
 	return output, nil
 }
@@ -151,6 +151,25 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	}
 	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(api.CheckTransactionLevel)
+	if err != nil {
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
+		}
+		return false, err
+	}
+	return res.(bool), nil
+}
+
+func (r *Runner) IsTxVerifier() (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
+	res, err := r.vm.Call(api.CheckIsTxVerifier)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
