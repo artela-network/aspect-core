@@ -18,7 +18,10 @@ type PointCut string
 
 type AspectProvider interface {
 	GetTxBondAspects(int64, common.Address) ([]*AspectCode, error)
+	GetAccountVerifiers(int64, common.Address) ([]*AspectCode, error)
 	GetBlockBondAspects(int64) ([]*AspectCode, error)
+	GetLatestBlock() int64
+	CreateTxPointRequestWithData(data []byte) (*EthTxAspect, error)
 }
 
 const (

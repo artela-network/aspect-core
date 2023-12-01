@@ -23,7 +23,6 @@ func NewScheduleHost() types.ScheduleHostApi {
 }
 
 func (base *scheduleHost) SubmitSchedule(ctx *types.RunnerContext, sch *types.Schedule) *types.RunResult {
-
 	defResult := &types.RunResult{
 		Success: false,
 	}

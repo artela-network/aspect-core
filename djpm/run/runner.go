@@ -1,6 +1,7 @@
 package run
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -8,20 +9,10 @@ import (
 	"github.com/artela-network/aspect-core/djpm/run/api"
 
 	runtime "github.com/artela-network/aspect-runtime"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/aspect-core/types"
 )
-
-var vmPool *runtime.RuntimePool
-
-func RuntimePool() *runtime.RuntimePool {
-	if vmPool == nil {
-		vmPool = runtime.NewRuntimePool(10)
-	}
-	return vmPool
-}
 
 type Runner struct {
 	vmKey string
@@ -34,7 +25,7 @@ type Runner struct {
 func NewRunner(aspID string, code []byte) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
 	register := api.NewRegister(&aspectId)
-	key, vm, err := RuntimePool().Runtime(runtime.WASM, code, register.HostApis())
+	key, vm, err := types.Runtime(code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +38,7 @@ func NewRunner(aspID string, code []byte) (*Runner, error) {
 }
 
 func (r *Runner) Return() {
-	RuntimePool().Return(r.vmKey, r.vm)
+	types.ReturnRuntime(r.vmKey, r.vm)
 }
 
 func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) (*types.AspectResponse, error) {
@@ -80,7 +71,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	}
 	output := &types.AspectResponse{}
 	if err := proto.Unmarshal(resData, output); err != nil {
-		return nil, errors.Wrap(err, "unmarshal AspectOutput")
+		return nil, err
 	}
 	return output, nil
 }
@@ -159,6 +150,25 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	}
 	r.register.SetErrCallback(callback)
 	res, err := r.vm.Call(api.CheckTransactionLevel)
+	if err != nil {
+		if !strings.EqualFold(revertMsg, "") {
+			return false, errors.New(revertMsg)
+		}
+		return false, err
+	}
+	return res.(bool), nil
+}
+
+func (r *Runner) IsTxVerifier() (bool, error) {
+	if r.vm == nil {
+		return false, errors.New("not init")
+	}
+	revertMsg := ""
+	callback := func(msg string) {
+		revertMsg = msg
+	}
+	r.register.SetErrCallback(callback)
+	res, err := r.vm.Call(api.CheckIsTxVerifier)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
