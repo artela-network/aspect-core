@@ -76,6 +76,11 @@ message BytesArrayData{
  repeated bytes data=1;
 }
 
+message UintData{
+  uint64 data=1;
+}
+
+
 message CallMessageRequest{
   EthMessage message=1;
 }

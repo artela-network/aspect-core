@@ -8,7 +8,6 @@ type RunnerContext struct {
 	Point        string
 	ContractAddr *common.Address
 	Gas          uint64
-	Commit       bool
 }
 
 // var GetAspectRuntimeHook func() (AspectRuntimeHostApi, error)

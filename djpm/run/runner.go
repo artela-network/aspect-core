@@ -137,9 +137,8 @@ func (r *Runner) OnContractBinding(blockNumber int64, gas uint64, contractAddr *
 		revertMsg = msg
 	}
 	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext("", blockNumber, gas, contractAddr)
-
-	res, err := r.vm.Call(api.ApiEntrance, "onContractBinding", sender)
+	r.register.SetRunnerContext(string(types.ON_CONTRACT_BINDING_METHOD), blockNumber, gas, contractAddr)
+	res, err := r.vm.Call(api.ApiEntrance, string(types.ON_CONTRACT_BINDING_METHOD), sender)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
