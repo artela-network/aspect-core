@@ -3,16 +3,21 @@ package djpm
 import (
 	"errors"
 	"fmt"
-	types2 "github.com/ethereum/go-ethereum/core/types"
-	"github.com/holiman/uint256"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	types2 "github.com/ethereum/go-ethereum/core/types"
+	"github.com/holiman/uint256"
+	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	"github.com/artela-network/aspect-core/chaincoreext/scheduler"
 	"github.com/artela-network/aspect-core/djpm/run"
 	"github.com/artela-network/aspect-core/types"
 )
+
+const JoinPointEnabledKey = "joinpoints"
 
 var globalAspect *Aspect
 
@@ -288,6 +293,11 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 	gasLeft := gas
 	for _, aspect := range req {
 		aspectId = aspect.AspectId
+		if !isJoinPointEnabled(aspectId, blockNumber, method) {
+			response.WithGas(0, 0, gasLeft)
+			return response
+		}
+
 		runner, err := run.NewRunner(aspectId, aspect.Code)
 		if err != nil {
 			return response.WithErr(aspectId, err)
@@ -349,4 +359,45 @@ func loadParamBytes(input []byte, index int) ([]byte, error) {
 	}
 
 	return input[start:end], nil
+}
+
+func isJoinPointEnabled(aspectID string, blockNum int64, method types.PointCut) bool {
+	hook, err := types.GetRuntimeHostHook()
+	if err != nil || hook == nil {
+		return false
+	}
+
+	// Convert aspectID to address
+	aspID := common.HexToAddress(aspectID)
+
+	// Set query data of property
+	valueData := &types.StringData{Data: JoinPointEnabledKey}
+	anyData, _ := anypb.New(valueData)
+
+	// Build the requst struct
+	request := &types.ContextQueryRequest{
+		NameSpace: types.QueryNameSpace_QueryAspectProperty,
+		Query:     anyData,
+	}
+	res := hook.Query(&types.RunnerContext{
+		AspectId:    &aspID,
+		BlockNumber: blockNum,
+	}, request)
+
+	// enables, err := anypb.UnmarshalNew(res.Data, )
+	enableMsg, err := res.Data.UnmarshalNew()
+	if err != nil {
+		return false
+	}
+
+	enableStr := enableMsg.(*types.StringData).Data
+	// If no property is set to control the enabled joinpoints, all joinpoints are considered open.
+	// This mechanism ensures compatibility with aspects deployed before enabling this property.
+	// Enabling all joinpoints obviously leads to the execution of blank joinpoints, resulting in higher gas consumption.
+	// If there is no need to enable all aspects, set it to enable the specified aspects and separate them with commas.
+	if len(strings.Trim(enableStr, " ")) == 0 {
+		return true
+	}
+
+	return slices.Contains(strings.Split(enableStr, ","), string(method))
 }
