@@ -391,13 +391,5 @@ func isJoinPointEnabled(aspectID string, blockNum int64, method types.PointCut) 
 	}
 
 	enableStr := enableMsg.(*types.StringData).Data
-	// If no property is set to control the enabled joinpoints, all joinpoints are considered open.
-	// This mechanism ensures compatibility with aspects deployed before enabling this property.
-	// Enabling all joinpoints obviously leads to the execution of blank joinpoints, resulting in higher gas consumption.
-	// If there is no need to enable all aspects, set it to enable the specified aspects and separate them with commas.
-	if len(strings.Trim(enableStr, " ")) == 0 {
-		return true
-	}
-
 	return slices.Contains(strings.Split(enableStr, ","), string(method))
 }
