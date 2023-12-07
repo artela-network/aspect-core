@@ -13,7 +13,9 @@ import (
 )
 
 // EntryPointContract defines the address of the built-in AA entry point contract.
-var EntryPointContract = common.HexToAddress("0x000000000000000000000000000000000000AAEC")
+// var EntryPointContract = common.HexToAddress("0x000000000000000000000000000000000000AAEC")
+// FIXME: temporary use the address of the entry point contract
+var EntryPointContract = common.HexToAddress("0x7b20970624Cd01582Cd01385B67B969446AC5110")
 
 var entrypointABI, _ = IEntryPointMetaData.GetAbi()
 
