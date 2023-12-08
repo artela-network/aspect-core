@@ -119,27 +119,6 @@ func (r *Runner) IsBlockLevel() (bool, error) {
 	return res.(bool), nil
 }
 
-func (r *Runner) OnContractBinding(blockNumber int64, gas uint64, contractAddr *common.Address, sender string) (bool, error) {
-	if r.vm == nil {
-		return false, errors.New("run not init")
-	}
-	revertMsg := ""
-	callback := func(msg string) {
-		revertMsg = msg
-	}
-	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext(string(types.ON_CONTRACT_BINDING_METHOD), blockNumber, gas, contractAddr)
-	res, err := r.vm.Call(api.ApiEntrance, string(types.ON_CONTRACT_BINDING_METHOD), sender)
-	if err != nil {
-		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
-		}
-		return false, err
-	}
-
-	return res.(bool), nil
-}
-
 func (r *Runner) IsTransactionLevel() (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("not init")

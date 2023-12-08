@@ -1,9 +1,12 @@
 package djpm
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	types2 "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/holiman/uint256"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -12,6 +15,10 @@ import (
 	"github.com/artela-network/aspect-core/chaincoreext/scheduler"
 	"github.com/artela-network/aspect-core/djpm/run"
 	"github.com/artela-network/aspect-core/types"
+)
+
+var (
+	CustomVerificationPrefix = hexutil.MustDecode("0xCAFECAFE")
 )
 
 var globalAspect *Aspect
@@ -318,17 +325,43 @@ func (aspect Aspect) runAspect(method types.PointCut, gas uint64, blockNumber in
 }
 
 func DecodeValidationAndCallData(txData []byte) (validationData, callData []byte, err error) {
-	validationData, err = loadParamBytes(txData, 0)
+	// the customized data layout will be [4B Header][4B Checksum][NB ABI.Encode(ValidationData, CallData)]
+	if len(txData) < 8 {
+		return nil, nil, errors.New("invalid validation data")
+	}
+
+	// check header
+	header := txData[:4]
+	if bytes.Compare(header, CustomVerificationPrefix) != 0 {
+		return nil, nil, errors.New("invalid validation data header")
+	}
+
+	// check checksum
+	checksum := txData[4:8]
+	dataHash := crypto.Keccak256(txData[8:])
+	if bytes.Compare(checksum, dataHash[:4]) != 0 {
+		return nil, nil, errors.New("invalid validation data checksum")
+	}
+
+	// decode payload
+	payload := txData[8:]
+	validationData, err = loadParamBytes(payload, 0)
 	if err != nil {
 		return
 	}
 
-	callData, err = loadParamBytes(txData, 1)
+	callData, err = loadParamBytes(payload, 1)
 	return
 }
 
 func loadParamBytes(input []byte, index int) ([]byte, error) {
-	dataOffset, overflow := uint256.NewInt(0).SetBytes32(input[index*32 : (index+1)*32]).Uint64WithOverflow()
+	offsetLowerBound := index * 32
+	offsetUpperbound := offsetLowerBound + 32
+	if len(input) < offsetUpperbound {
+		return nil, errors.New("invalid input data length")
+	}
+
+	dataOffset, overflow := uint256.NewInt(0).SetBytes32(input[offsetLowerBound:offsetUpperbound]).Uint64WithOverflow()
 	if overflow {
 		return nil, errors.New("invalid offset")
 	}
