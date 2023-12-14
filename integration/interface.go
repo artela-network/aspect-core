@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -100,5 +101,5 @@ type VM interface {
 	Msg() Message
 
 	// Call executes the contract call using the given input.
-	Call(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
+	Call(ctx context.Context, caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
 }

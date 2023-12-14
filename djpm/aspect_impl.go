@@ -67,28 +67,28 @@ func (aspect Aspect) PreTxExecute(ctx context.Context, request *types.EthTxAspec
 	return aspect.transactionAdvice(ctx, types.PRE_TX_EXECUTE_METHOD, request)
 }
 
-func (aspect Aspect) PreContractCall(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(nil, types.PRE_CONTRACT_CALL_METHOD, request)
+func (aspect Aspect) PreContractCall(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
+	return aspect.transactionAdvice(ctx, types.PRE_CONTRACT_CALL_METHOD, request)
 }
 
-func (aspect Aspect) PostContractCall(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(nil, types.POST_CONTRACT_CALL_METHOD, request)
+func (aspect Aspect) PostContractCall(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
+	return aspect.transactionAdvice(ctx, types.POST_CONTRACT_CALL_METHOD, request)
 }
 
-func (aspect Aspect) PostTxExecute(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(nil, types.POST_TX_EXECUTE_METHOD, request)
+func (aspect Aspect) PostTxExecute(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
+	return aspect.transactionAdvice(ctx, types.POST_TX_EXECUTE_METHOD, request)
 }
 
-func (aspect Aspect) PostTxCommit(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(nil, types.ON_TX_COMMIT_METHOD, request)
+func (aspect Aspect) PostTxCommit(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
+	return aspect.transactionAdvice(ctx, types.ON_TX_COMMIT_METHOD, request)
 }
 
-func (aspect Aspect) OnBlockInitialize(request *types.EthBlockAspect) *types.JoinPointResult {
+func (aspect Aspect) OnBlockInitialize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
 	return aspect.blockAdvice(nil, types.ON_BLOCK_INITIALIZE_METHOD, request)
 }
 
-func (aspect Aspect) OnBlockFinalize(request *types.EthBlockAspect) *types.JoinPointResult {
-	return aspect.blockAdvice(nil, types.ON_BLOCK_FINALIZE_METHOD, request)
+func (aspect Aspect) OnBlockFinalize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
+	return aspect.blockAdvice(ctx, types.ON_BLOCK_FINALIZE_METHOD, request)
 }
 
 func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *types2.Transaction) (common.Address, []byte, error) {

@@ -1,6 +1,7 @@
 package jit_inherent
 
 import (
+	"context"
 	"math/big"
 	"sync"
 
@@ -44,6 +45,8 @@ func Get() *Manager {
 
 // Manager manages the JIT inherent calls.
 type Manager struct {
+	ctx context.Context
+
 	protocol      integration.AspectProtocol
 	entrypointABI *abi.ABI
 
@@ -158,7 +161,7 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.Us
 	if err != nil {
 		return resp, err
 	}
-	ret, leftoverGas, err := evm.Call(vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
+	ret, leftoverGas, err := evm.Call(m.ctx, vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
 	resp.LeftoverGas = leftoverGas
 	if err == nil || (err != nil && err.Error() == vm.ErrExecutionReverted.Error()) {
@@ -264,7 +267,7 @@ func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperati
 		return err
 	}
 
-	ret, _, err := cvm.Call(vm.AccountRef(aspect), aa.EntryPointContract,
+	ret, _, err := cvm.Call(m.ctx, vm.AccountRef(aspect), aa.EntryPointContract,
 		calldata, userOp.CallGasLimit.Uint64(), big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return err
@@ -298,7 +301,7 @@ func (m *Manager) getNonce(address common.Address, key *big.Int) (*big.Int, erro
 	}
 
 	// FIXME: use a fixed gas limit for now
-	ret, _, err := cvm.Call(vm.AccountRef(address), aa.EntryPointContract,
+	ret, _, err := cvm.Call(m.ctx, vm.AccountRef(address), aa.EntryPointContract,
 		calldata, 100000, big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return nil, err
