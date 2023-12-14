@@ -11,7 +11,7 @@ func (r *Register) evmCallApis() interface{} {
 	return map[string]interface{}{
 		"staticCall": func(request []byte) []byte {
 			defaultResult := make([]byte, 0)
-			hook, err := types.GetEvmHostHook()
+			hook, err := types.GetEvmHostHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				return defaultResult
 			}
@@ -24,7 +24,7 @@ func (r *Register) evmCallApis() interface{} {
 			return marshal
 		},
 		"jitCall": func(request []byte) ([]byte, error) {
-			hook, err := types.GetEvmHostHook()
+			hook, err := types.GetEvmHostHook(r.runnerContext.Ctx)
 			errRes := &types.JitInherentResponse{
 				Success: false,
 			}

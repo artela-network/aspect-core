@@ -9,7 +9,7 @@ import (
 func (r *Register) scheduleApis() interface{} {
 	return map[string]interface{}{
 		"submit": func(arg []byte) bool {
-			hook, err := types.GetScheduleHook()
+			hook, err := types.GetScheduleHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				return false
 			}

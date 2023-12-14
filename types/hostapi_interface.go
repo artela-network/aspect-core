@@ -17,9 +17,9 @@ type RunnerContext struct {
 }
 
 var (
-	GetEvmHostHook     func() (EvmHostApi, error)
-	GetScheduleHook    func() (ScheduleHostApi, error)
-	GetStateDbHook     func() (StateDbHostApi, error)
+	GetEvmHostHook     func(context.Context) (EvmHostApi, error)
+	GetScheduleHook    func(context.Context) (ScheduleHostApi, error)
+	GetStateDbHook     func(context.Context) (StateDbHostApi, error)
 	GetRuntimeHostHook func(context.Context) (RuntimeHostApi, error)
 )
 
