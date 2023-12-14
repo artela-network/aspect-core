@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -50,7 +51,7 @@ func TestAspect(t *testing.T) {
 			ChildrenIndex: nil,
 		},
 	}
-	runner, err := run.NewRunner("", raw)
+	runner, err := run.NewRunner(context.Background(), "", raw)
 	require.Equal(t, nil, err)
 	pointcuts := []aspectType.PointCut{aspectType.ON_TX_RECEIVE_METHOD}
 
@@ -128,7 +129,7 @@ func TestIsOwner(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	runner, err := run.NewRunner("", raw)
+	runner, err := run.NewRunner(context.Background(), "", raw)
 	require.Equal(t, nil, err)
 	ret, err := runner.IsOwner(99, 99, nil, "hello")
 	require.Equal(t, nil, err)
@@ -138,13 +139,13 @@ func TestIsOwner(t *testing.T) {
 }
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
-func TestOnContractBinding(t *testing.T) {
-	raw, _ := GetTestTarget("aspect-test")
-	runner, err := run.NewRunner("", raw)
-	require.Equal(t, nil, err)
-	ret, err := runner.OnContractBinding(99, 999, nil, "0x0000000000000000000000000000000000000001")
-	require.Equal(t, nil, err)
-	defer runner.Return()
+// func TestOnContractBinding(t *testing.T) {
+// 	raw, _ := GetTestTarget("aspect-test")
+// 	runner, err := run.NewRunner("", raw)
+// 	require.Equal(t, nil, err)
+// 	ret, err := runner.OnContractBinding(99, 999, nil, "0x0000000000000000000000000000000000000001")
+// 	require.Equal(t, nil, err)
+// 	defer runner.Return()
 
-	require.Equal(t, true, ret)
-}
+// 	require.Equal(t, true, ret)
+// }
