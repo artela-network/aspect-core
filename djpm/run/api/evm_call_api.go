@@ -1,7 +1,8 @@
 package api
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/aspect-core/types"
@@ -29,23 +30,19 @@ func (r *Register) evmCallApis() interface{} {
 				Success: false,
 			}
 			if err != nil || hook == nil {
-				errRes.ErrorMsg = "evm host hook not init"
-				errMsg, _ := proto.Marshal(errRes)
-				return errMsg, nil
+				errRes.Ret = []byte("evm host hook not init")
+				errMsg, err := proto.Marshal(errRes)
+				return errMsg, err
 			}
 			jitRequest := &types.JitInherentRequest{}
 			if unErr := proto.Unmarshal(request, jitRequest); unErr != nil {
-				errRes.ErrorMsg = "jitRequest unmarshal error"
-				errMsg, _ := proto.Marshal(errRes)
-				return errMsg, nil
+				errRes.Ret = []byte(fmt.Sprintf("jitRequest unmarshal error: %s", err.Error()))
+				errMsg, err := proto.Marshal(errRes)
+				return errMsg, err
 			}
-			call := hook.JITCall(r.runnerContext, jitRequest)
-			if !call.Success {
-				errMsg, _ := proto.Marshal(errRes)
-				return errMsg, errors.New(call.ErrorMsg)
-			}
-			marshal, _ := proto.Marshal(call)
-			return marshal, nil
+			resp := hook.JITCall(r.runnerContext, jitRequest)
+			marshal, err := proto.Marshal(resp)
+			return marshal, err
 		},
 	}
 }
