@@ -30,13 +30,13 @@ func (r *Register) evmCallApis() interface{} {
 				Success: false,
 			}
 			if err != nil || hook == nil {
-				errRes.Ret = []byte("evm host hook not init")
+				errRes.ErrorMsg = "evm host hook not init"
 				errMsg, err := proto.Marshal(errRes)
 				return errMsg, err
 			}
 			jitRequest := &types.JitInherentRequest{}
 			if unErr := proto.Unmarshal(request, jitRequest); unErr != nil {
-				errRes.Ret = []byte(fmt.Sprintf("jitRequest unmarshal error: %s", err.Error()))
+				errRes.ErrorMsg = fmt.Sprintf("jitRequest unmarshal error: %s", err.Error())
 				errMsg, err := proto.Marshal(errRes)
 				return errMsg, err
 			}

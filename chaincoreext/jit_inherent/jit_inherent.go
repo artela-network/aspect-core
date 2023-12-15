@@ -70,19 +70,19 @@ func newManager(protocol integration.AspectProtocol) *Manager {
 //     Only one JIT call can be submitted at a time.
 func (m *Manager) Submit(aspect common.Address,
 	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest,
-) (*types.JitInherentResponse, error) {
+) (*types.JitInherentResponse, uint64, error) {
 	if len(inherents) == 0 {
-		return nil, errors.New("no jit inherent to submit")
+		return nil, gas, errors.New("no jit inherent to submit")
 	}
 
 	switch stage {
 	case integration.TransactionExecution:
 		if len(inherents) != 1 {
-			return nil, errors.New("only one user operation is allowed in current join point")
+			return nil, gas, errors.New("only one user operation is allowed in current join point")
 		}
 		return m.submitJITCall(aspect, gas, inherents[0])
 	default:
-		return nil, errors.New("cannot submit jit inherent in current join point")
+		return nil, gas, errors.New("cannot submit jit inherent in current join point")
 	}
 }
 
@@ -134,12 +134,12 @@ func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 
 // submitJITCall submits a JIT call to the current EVM callstack.
 func (m *Manager) submitJITCall(aspect common.Address, gas uint64, request *types.JitInherentRequest) (
-	*types.JitInherentResponse, error,
+	*types.JitInherentResponse, uint64, error,
 ) {
 	baseLayerVM, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
 		log.Error("failed to get vm from snapshot state", "err", err)
-		return nil, err
+		return nil, gas, err
 	}
 
 	msg := baseLayerVM.Msg()
@@ -154,7 +154,7 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, request *type
 			gas)
 		if err != nil {
 			log.Error("failed to get nonce", "err", err)
-			return nil, err
+			return nil, gas, err
 		}
 	}
 
@@ -164,22 +164,20 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, request *type
 	resp := &types.JitInherentResponse{
 		JitInherentHashes: [][]byte{userOpHashes[0].Bytes()},
 		Success:           false,
-		LeftoverGas:       gas,
 	}
 
 	callData, err := m.entrypointABI.Pack("handleOps", []aa.UserOperation{*userOp}, userOp.Sender)
 	if err != nil {
-		return nil, err
+		return nil, gas, err
 	}
-	ret, leftoverGas, err := baseLayerVM.Call(vm.AccountRef(userOp.Sender), aa.EntryPointContract, callData, gas, big.NewInt(0))
+	ret, gas, err := baseLayerVM.Call(vm.AccountRef(userOp.Sender), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
-	resp.LeftoverGas = leftoverGas
 	if err == nil || err.Error() == vm.ErrExecutionReverted.Error() {
+		// ignore the reverted error
 		resp.Ret = ret
-		err = nil
 	}
 
-	return resp, err
+	return resp, gas, err
 }
 
 func (m *Manager) getAAWalletNonce(baseLayerVM integration.VM, address common.Address, nonceKey *uint256.Int, gas uint64) (*big.Int, uint64, error) {
