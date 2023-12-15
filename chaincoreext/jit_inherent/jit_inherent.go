@@ -184,8 +184,8 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, request *type
 
 func (m *Manager) getAAWalletNonce(baseLayerVM integration.VM, address common.Address, nonceKey *uint256.Int, gas uint64) (*big.Int, uint64, error) {
 	// call entrypoint's getNonce method to retrieve the nonce
-	callData, err := m.entrypointABI.Pack("getNonce", address, nonceKey)
-	if err == nil {
+	callData, err := m.entrypointABI.Pack("getNonce", address, nonceKey.ToBig())
+	if err != nil {
 		return nil, gas, err
 	}
 
@@ -282,7 +282,7 @@ func NewUserOperation(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePer
 	}
 	if callGasLimit.Cmp(zero) <= 0 {
 		// by default use 4/5 remaining gas for call
-		callGasLimit.SetUint64(leftoverGas * 4 / 5)
+		callGasLimit.SetUint64(leftoverGas * 3 / 5)
 	}
 
 	nonceKey := uint256.NewInt(0).SetBytes(protoMsg.NonceKey)
