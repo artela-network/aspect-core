@@ -2,8 +2,8 @@ package types
 
 import (
 	"errors"
-
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 )
 
 // for jit-inherent
@@ -17,7 +17,7 @@ var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Ad
 type PointCut string
 
 type AspectProvider interface {
-	GetTxBondAspects(int64, common.Address) ([]*AspectCode, error)
+	GetTxBondAspects(int64, common.Address, PointCut) ([]*AspectCode, error)
 	GetAccountVerifiers(int64, common.Address) ([]*AspectCode, error)
 	GetBlockBondAspects(int64) ([]*AspectCode, error)
 	GetLatestBlock() int64
@@ -25,16 +25,16 @@ type AspectProvider interface {
 }
 
 const (
-	ON_TX_RECEIVE_METHOD       PointCut = "onTxReceive"
+	FILTER_TX                  PointCut = "filterTx"
 	ON_BLOCK_INITIALIZE_METHOD PointCut = "onBlockInitialize"
-	ON_TX_VERIFY_METHOD        PointCut = "onTxVerify"
+	VERIFY_TX                  PointCut = "verifyTx"
 	ON_ACCOUNT_VERIFY_METHOD   PointCut = "onAccountVerify"
 	ON_GAS_PAYMENT_METHOD      PointCut = "onGasPayment"
 	PRE_TX_EXECUTE_METHOD      PointCut = "preTxExecute"
 	PRE_CONTRACT_CALL_METHOD   PointCut = "preContractCall"
 	POST_CONTRACT_CALL_METHOD  PointCut = "postContractCall"
 	POST_TX_EXECUTE_METHOD     PointCut = "postTxExecute"
-	ON_TX_COMMIT_METHOD        PointCut = "onTxCommit"
+	POST_TX_COMMIT             PointCut = "postTxCommit"
 	ON_BLOCK_FINALIZE_METHOD   PointCut = "onBlockFinalize"
 	OPERATION_METHOD           PointCut = "operation"
 	IS_OWNER_METHOD            PointCut = "isOwner"
@@ -42,6 +42,77 @@ const (
 )
 
 const DefaultKey = "-"
+
+type JoinPointRunType int64
+
+const (
+	JoinPointRunType_VerifyTx          JoinPointRunType = 1
+	JoinPointRunType_PreTxExecute      JoinPointRunType = 2
+	JoinPointRunType_PreContractCall   JoinPointRunType = 4
+	JoinPointRunType_PostContractCall  JoinPointRunType = 8
+	JoinPointRunType_PostTxExecute     JoinPointRunType = 16
+	JoinPointRunType_PostTxCommit      JoinPointRunType = 32
+	JoinPointRunType_OnBlockInitialize JoinPointRunType = 64
+	JoinPointRunType_OnBlockFinalize   JoinPointRunType = 128
+)
+
+// Enum value maps for JoinPointRunType.
+var (
+	JoinPointRunType_name = map[int64]string{
+		int64(JoinPointRunType_VerifyTx):          string(VERIFY_TX),
+		int64(JoinPointRunType_PreTxExecute):      string(PRE_TX_EXECUTE_METHOD),
+		int64(JoinPointRunType_PreContractCall):   string(PRE_CONTRACT_CALL_METHOD),
+		int64(JoinPointRunType_PostContractCall):  string(POST_CONTRACT_CALL_METHOD),
+		int64(JoinPointRunType_PostTxExecute):     string(POST_TX_EXECUTE_METHOD),
+		int64(JoinPointRunType_PostTxCommit):      string(POST_TX_COMMIT),
+		int64(JoinPointRunType_OnBlockInitialize): string(ON_BLOCK_INITIALIZE_METHOD),
+		int64(JoinPointRunType_OnBlockFinalize):   string(ON_BLOCK_FINALIZE_METHOD),
+	}
+	JoinPointRunType_value = map[string]int64{
+		string(VERIFY_TX):                  int64(JoinPointRunType_VerifyTx),
+		string(PRE_TX_EXECUTE_METHOD):      int64(JoinPointRunType_PreTxExecute),
+		string(PRE_CONTRACT_CALL_METHOD):   int64(JoinPointRunType_PreContractCall),
+		string(POST_CONTRACT_CALL_METHOD):  int64(JoinPointRunType_PostContractCall),
+		string(POST_TX_EXECUTE_METHOD):     int64(JoinPointRunType_PostTxExecute),
+		string(POST_TX_COMMIT):             int64(JoinPointRunType_PostTxCommit),
+		string(ON_BLOCK_INITIALIZE_METHOD): int64(JoinPointRunType_OnBlockInitialize),
+		string(ON_BLOCK_FINALIZE_METHOD):   int64(JoinPointRunType_OnBlockFinalize),
+	}
+)
+
+func CheckIsJoinPoint(runJPs *big.Int) (bool, map[int64]string) {
+	if runJPs == nil {
+		return false, nil
+	}
+	runValue := runJPs.Int64()
+	jpMap := make(map[int64]string)
+	if runValue <= 0 {
+		return false, jpMap
+	}
+	for k, v := range JoinPointRunType_name {
+		// verify with & to see if it is included jp value，like:  5&1==1
+		if runValue&k == k {
+			jpMap[k] = v
+		}
+	}
+	return len(jpMap) > 0, jpMap
+}
+func CanExecPoint(runJPs int64, cut PointCut) bool {
+	if value, exit := JoinPointRunType_value[string(cut)]; exit {
+		return runJPs&value == value
+	}
+	return false
+}
+
+func CheckIsBlockLevel(runJPs int64) bool {
+	return runJPs&(int64(JoinPointRunType_OnBlockInitialize)+int64(JoinPointRunType_OnBlockFinalize)) > 0
+}
+func CheckIsTransactionLevel(runJPs int64) bool {
+	return runJPs&(int64(JoinPointRunType_PreTxExecute)+int64(JoinPointRunType_PreContractCall)+int64(JoinPointRunType_PostContractCall)+int64(JoinPointRunType_PostTxExecute)+int64(JoinPointRunType_PostTxCommit)) > 0
+}
+func CheckIsTxVerifier(runJPs int64) bool {
+	return runJPs&(int64(JoinPointRunType_VerifyTx)) == int64(JoinPointRunType_VerifyTx)
+}
 
 func ErrRunResult(message string) *RunResult {
 	return &RunResult{
