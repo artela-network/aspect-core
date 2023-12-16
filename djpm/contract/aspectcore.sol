@@ -53,25 +53,27 @@ contract AspectCore {
     returns (bytes memory result)
     {}
 
-
-    function getAspect(address aspectId) public view returns (Aspect memory aspect) {}
-
-
     struct KVPair {
-        bytes key;
-        bytes value;
+        string key;
+        string value;
     }
     struct AspectBoundInfoArr {
         address aspectId;
         uint64 version;
         int8 priority;
     }
+    /*
+    function getAspect(address aspectId) public view returns (Aspect memory aspect) {}
 
     struct Aspect {
         address aspectId;
-        uint64 version;
+        uint64  aspectVersion;
+        uint64[]  allVersions;
+        bytes  aspectCode;
         KVPair[]  properties;
         string[]  joinPoints;
-        uint64[]  allVersions;
+        bytes  proof;
+        address account;
     }
+    */
 }
