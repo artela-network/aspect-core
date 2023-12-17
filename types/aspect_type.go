@@ -58,16 +58,6 @@ const (
 
 // Enum value maps for JoinPointRunType.
 var (
-	JoinPointRunType_name = map[int64]string{
-		int64(JoinPointRunType_VerifyTx):          string(VERIFY_TX),
-		int64(JoinPointRunType_PreTxExecute):      string(PRE_TX_EXECUTE_METHOD),
-		int64(JoinPointRunType_PreContractCall):   string(PRE_CONTRACT_CALL_METHOD),
-		int64(JoinPointRunType_PostContractCall):  string(POST_CONTRACT_CALL_METHOD),
-		int64(JoinPointRunType_PostTxExecute):     string(POST_TX_EXECUTE_METHOD),
-		int64(JoinPointRunType_PostTxCommit):      string(POST_TX_COMMIT),
-		int64(JoinPointRunType_OnBlockInitialize): string(ON_BLOCK_INITIALIZE_METHOD),
-		int64(JoinPointRunType_OnBlockFinalize):   string(ON_BLOCK_FINALIZE_METHOD),
-	}
 	JoinPointRunType_value = map[string]int64{
 		string(VERIFY_TX):                  int64(JoinPointRunType_VerifyTx),
 		string(PRE_TX_EXECUTE_METHOD):      int64(JoinPointRunType_PreTxExecute),
@@ -89,10 +79,10 @@ func CheckIsJoinPoint(runJPs *big.Int) (bool, map[int64]string) {
 	if runValue <= 0 {
 		return false, jpMap
 	}
-	for k, v := range JoinPointRunType_name {
+	for k, v := range JoinPointRunType_value {
 		// verify with & to see if it is included jp value，like:  5&1==1
-		if runValue&k == k {
-			jpMap[k] = v
+		if runValue&v == v {
+			jpMap[v] = k
 		}
 	}
 	return len(jpMap) > 0, jpMap
