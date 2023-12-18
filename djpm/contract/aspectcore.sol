@@ -41,10 +41,10 @@ contract AspectCore {
     returns (AspectBoundInfoArr[] memory aspectBoundInfo)
     {}
 
-    function contractsOf(address aspectId)
+    function boundAddressesOf(address aspectId)
     public
     view
-    returns (address[] memory contracts)
+    returns (address[] memory accounts)
     {}
 
     function entrypoint(address aspectId, bytes calldata data)

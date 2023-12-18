@@ -54,6 +54,10 @@ const (
 	JoinPointRunType_PostTxCommit      JoinPointRunType = 32
 	JoinPointRunType_OnBlockInitialize JoinPointRunType = 64
 	JoinPointRunType_OnBlockFinalize   JoinPointRunType = 128
+
+	BlockLevelJP = int64(JoinPointRunType_OnBlockInitialize) + int64(JoinPointRunType_OnBlockFinalize)
+
+	TransactionLevelJP = int64(JoinPointRunType_PreTxExecute) + int64(JoinPointRunType_PreContractCall) + int64(JoinPointRunType_PostContractCall) + int64(JoinPointRunType_PostTxExecute) + int64(JoinPointRunType_PostTxCommit)
 )
 
 // Enum value maps for JoinPointRunType.
@@ -70,14 +74,14 @@ var (
 	}
 )
 
-func CheckIsJoinPoint(runJPs *big.Int) (bool, map[int64]string) {
+func CheckIsJoinPoint(runJPs *big.Int) (map[int64]string, bool) {
 	if runJPs == nil {
-		return false, nil
+		return nil, false
 	}
 	runValue := runJPs.Int64()
 	jpMap := make(map[int64]string)
 	if runValue <= 0 {
-		return false, jpMap
+		return jpMap, false
 	}
 	for k, v := range JoinPointRunType_value {
 		// verify with & to see if it is included jp value，like:  5&1==1
@@ -85,7 +89,7 @@ func CheckIsJoinPoint(runJPs *big.Int) (bool, map[int64]string) {
 			jpMap[v] = k
 		}
 	}
-	return len(jpMap) > 0, jpMap
+	return jpMap, len(jpMap) > 0
 }
 func CanExecPoint(runJPs int64, cut PointCut) bool {
 	if value, exit := JoinPointRunType_value[string(cut)]; exit {
@@ -95,10 +99,10 @@ func CanExecPoint(runJPs int64, cut PointCut) bool {
 }
 
 func CheckIsBlockLevel(runJPs int64) bool {
-	return runJPs&(int64(JoinPointRunType_OnBlockInitialize)+int64(JoinPointRunType_OnBlockFinalize)) > 0
+	return runJPs&BlockLevelJP > 0
 }
 func CheckIsTransactionLevel(runJPs int64) bool {
-	return runJPs&(int64(JoinPointRunType_PreTxExecute)+int64(JoinPointRunType_PreContractCall)+int64(JoinPointRunType_PostContractCall)+int64(JoinPointRunType_PostTxExecute)+int64(JoinPointRunType_PostTxCommit)) > 0
+	return runJPs&TransactionLevelJP > 0
 }
 func CheckIsTxVerifier(runJPs int64) bool {
 	return runJPs&(int64(JoinPointRunType_VerifyTx)) == int64(JoinPointRunType_VerifyTx)
