@@ -84,7 +84,7 @@ func (aspect Aspect) PostTxCommit(ctx context.Context, request *types.EthTxAspec
 }
 
 func (aspect Aspect) OnBlockInitialize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
-	return aspect.blockAdvice(nil, types.ON_BLOCK_INITIALIZE_METHOD, request)
+	return aspect.blockAdvice(ctx, types.ON_BLOCK_INITIALIZE_METHOD, request)
 }
 
 func (aspect Aspect) OnBlockFinalize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
