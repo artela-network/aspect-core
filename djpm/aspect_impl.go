@@ -45,22 +45,13 @@ func AspectInstance() *Aspect {
 }
 
 func (aspect Aspect) FilterTx(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(types.ON_TX_RECEIVE_METHOD, request)
+	return aspect.transactionAdvice(types.FILTER_TX, request)
 }
 
 func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.verification(types.ON_TX_VERIFY_METHOD, request)
+	return aspect.verification(types.VERIFY_TX, request)
 }
 
-//	func (aspect Aspect) VerifyAccount(request *types.EthTxAspect) *types.JoinPointResult {
-//		return aspect.transactionAdvice(types.ON_ACCOUNT_VERIFY_METHOD, request)
-//
-// }
-//
-//	func (aspect Aspect) GetPayMaster(request *types.EthTxAspect) *types.JoinPointResult {
-//		return aspect.transactionAdvice(types.ON_GAS_PAYMENT_METHOD, request)
-//
-// }
 func (aspect Aspect) PreTxExecute(request *types.EthTxAspect) *types.JoinPointResult {
 	return aspect.transactionAdvice(types.PRE_TX_EXECUTE_METHOD, request)
 }
@@ -78,7 +69,7 @@ func (aspect Aspect) PostTxExecute(request *types.EthTxAspect) *types.JoinPointR
 }
 
 func (aspect Aspect) PostTxCommit(request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(types.ON_TX_COMMIT_METHOD, request)
+	return aspect.transactionAdvice(types.POST_TX_COMMIT, request)
 }
 
 func (aspect Aspect) OnBlockInitialize(request *types.EthBlockAspect) *types.JoinPointResult {
@@ -216,7 +207,7 @@ func (aspect Aspect) transactionAdvice(method types.PointCut, req *types.EthTxAs
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr, method)
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 		result.GasInfo = req.GasInfo
@@ -261,7 +252,7 @@ func (aspect Aspect) verification(method types.PointCut, req *types.EthTxAspect)
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr, method)
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 		result.GasInfo = req.GasInfo

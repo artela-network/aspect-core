@@ -3,7 +3,6 @@ package run
 import (
 	"fmt"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,7 +16,7 @@ import (
 func TestJoinPoint(t *testing.T) {
 	raw, _ := os.ReadFile("/Users/admin/mytech/go-work/src/github.com/artela-network/aspect-tooling/packages/libs-test/build/release.wasm")
 
-	name := aspectType.ON_TX_RECEIVE_METHOD
+	name := aspectType.FILTER_TX
 	input := &aspectType.EthTxAspect{
 		Tx: &aspectType.EthTransaction{
 			ChainId:          "9000-artela",
@@ -73,21 +72,6 @@ func TestIsOwner(t *testing.T) {
 	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
 
 	ret, err := runner.IsOwner(99, 99, &address, "hello")
-	require.Equal(t, nil, err)
-	defer runner.Return()
-
-	require.Equal(t, true, ret)
-}
-
-// Run "scripts/build-wasm.sh" in project root, before run this test.
-func TestOnContractBinding(t *testing.T) {
-	cwd, _ := os.Getwd()
-	raw, _ := os.ReadFile(path.Join(cwd, "./testdata/release.wasm"))
-
-	runner, err := NewRunner("", raw)
-	require.Equal(t, nil, err)
-	address := common.HexToAddress("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4")
-	ret, err := runner.OnContractBinding(99, 99, &address, "0x0000000000000000000000000000000000000001")
 	require.Equal(t, nil, err)
 	defer runner.Return()
 
