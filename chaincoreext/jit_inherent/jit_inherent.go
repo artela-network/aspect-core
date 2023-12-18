@@ -35,6 +35,19 @@ func Init(protocol integration.AspectProtocol) {
 	}
 }
 
+// TODO, do not use global instance of Manager?
+func Update(protocol integration.AspectProtocol) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	if instance == nil {
+		instance = newManager(protocol)
+	} else {
+		instance.UpdateProtocol(protocol)
+	}
+
+}
+
 // Get returns the global JITInherentManager instance.
 func Get() *Manager {
 	lock.RLock()
@@ -45,8 +58,6 @@ func Get() *Manager {
 
 // Manager manages the JIT inherent calls.
 type Manager struct {
-	ctx context.Context
-
 	protocol      integration.AspectProtocol
 	entrypointABI *abi.ABI
 
@@ -65,12 +76,18 @@ func newManager(protocol integration.AspectProtocol) *Manager {
 	}
 }
 
+// TODO: Refactor the code to eliminate the use of a global instance for managing JIT calls.
+// After that, the protocol should not be updated.
+func (m *Manager) UpdateProtocol(protocol integration.AspectProtocol) {
+	m.protocol = protocol
+}
+
 // ·Submit submits a JIT inherent call. There are two types of JIT inherent calls:
 //  1. JIT transaction: the JIT transaction will be submitted directly into the block proposal to guarantee the execution.
 //     Please note that the JIT transaction submission could be failed if there is no space left in the block.
 //  2. JIT call: the JIT call will be injected into the current evm callstack to guarantee the execution.
 //     Only one JIT call can be submitted at a time.
-func (m *Manager) Submit(aspect common.Address,
+func (m *Manager) Submit(ctx context.Context, aspect common.Address,
 	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest,
 ) (*types.JitInherentResponse, error) {
 	if len(inherents) == 0 {
@@ -82,12 +99,12 @@ func (m *Manager) Submit(aspect common.Address,
 
 	switch stage {
 	case integration.BlockInitialization:
-		return m.submitJITTx(aspect, userOps...)
+		return m.submitJITTx(ctx, aspect, userOps...)
 	case integration.TransactionExecution:
 		if len(inherents) != 1 {
 			return nil, errors.New("only one user operation is allowed in current join point")
 		}
-		return m.submitJITCall(aspect, gas, userOps[0], userOps[0].Hash(m.protocol.ChainId()))
+		return m.submitJITCall(ctx, aspect, gas, userOps[0], userOps[0].Hash(m.protocol.ChainId()))
 	default:
 		return nil, errors.New("cannot submit jit inherent in current join point")
 	}
@@ -107,12 +124,12 @@ func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherent
 	return gas, gas, nil
 }
 
-func (m *Manager) Nonce(account common.Address, key *big.Int) (nonce *big.Int, err error) {
+func (m *Manager) Nonce(ctx context.Context, account common.Address, key *big.Int) (nonce *big.Int, err error) {
 	if key.BitLen() > 192 {
 		return nil, errors.New("key is too large")
 	}
 
-	return m.getNonce(account, key)
+	return m.getNonce(ctx, account, key)
 }
 
 // ClearLookup clears the user operation sender lookup. When current block finished, the lookup table should be cleared.
@@ -140,7 +157,7 @@ func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 }
 
 // submitJITCall submits a JIT call to the current EVM callstack.
-func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.UserOperation, userOpHash common.Hash) (
+func (m *Manager) submitJITCall(ctx context.Context, aspect common.Address, gas uint64, userOp *aa.UserOperation, userOpHash common.Hash) (
 	*types.JitInherentResponse, error,
 ) {
 	defer m.ClearUserOp(userOpHash)
@@ -161,7 +178,7 @@ func (m *Manager) submitJITCall(aspect common.Address, gas uint64, userOp *aa.Us
 	if err != nil {
 		return resp, err
 	}
-	ret, leftoverGas, err := evm.Call(m.ctx, vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
+	ret, leftoverGas, err := evm.Call(ctx, vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	resp.Success = err == nil
 	resp.LeftoverGas = leftoverGas
 	if err == nil || (err != nil && err.Error() == vm.ErrExecutionReverted.Error()) {
@@ -181,7 +198,7 @@ func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperatio
 	}
 }
 
-func (m *Manager) submitJITTx(aspect common.Address, userOps ...*aa.UserOperation) (
+func (m *Manager) submitJITTx(ctx context.Context, aspect common.Address, userOps ...*aa.UserOperation) (
 	*types.JitInherentResponse, error,
 ) {
 	// one fails all
@@ -189,7 +206,7 @@ func (m *Manager) submitJITTx(aspect common.Address, userOps ...*aa.UserOperatio
 	for i, userOp := range userOps {
 		userOpHashes[i] = userOp.Hash(m.protocol.ChainId()).Bytes()
 		// simulate the user op validation, drop the jit tx if any of the user op failed the validation
-		if err := m.simulateValidate(aspect, userOp); err != nil {
+		if err := m.simulateValidate(ctx, aspect, userOp); err != nil {
 			return nil, errors.Errorf("user operation #%d validation failed, reason: %s", i, err)
 		}
 	}
@@ -254,7 +271,7 @@ func (m *Manager) submitJITTx(aspect common.Address, userOps ...*aa.UserOperatio
 	}, nil
 }
 
-func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperation) error {
+func (m *Manager) simulateValidate(ctx context.Context, aspect common.Address, userOp *aa.UserOperation) error {
 	// get vm with canonical state
 	cvm, err := m.protocol.VMFromCanonicalState()
 	if err != nil {
@@ -267,7 +284,7 @@ func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperati
 		return err
 	}
 
-	ret, _, err := cvm.Call(m.ctx, vm.AccountRef(aspect), aa.EntryPointContract,
+	ret, _, err := cvm.Call(ctx, vm.AccountRef(aspect), aa.EntryPointContract,
 		calldata, userOp.CallGasLimit.Uint64(), big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return err
@@ -287,7 +304,7 @@ func (m *Manager) simulateValidate(aspect common.Address, userOp *aa.UserOperati
 	return nil
 }
 
-func (m *Manager) getNonce(address common.Address, key *big.Int) (*big.Int, error) {
+func (m *Manager) getNonce(ctx context.Context, address common.Address, key *big.Int) (*big.Int, error) {
 	// FIXME: get vm with canonical state, this is just a temporary solution
 	cvm, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
@@ -301,7 +318,7 @@ func (m *Manager) getNonce(address common.Address, key *big.Int) (*big.Int, erro
 	}
 
 	// FIXME: use a fixed gas limit for now
-	ret, _, err := cvm.Call(m.ctx, vm.AccountRef(address), aa.EntryPointContract,
+	ret, _, err := cvm.Call(ctx, vm.AccountRef(address), aa.EntryPointContract,
 		calldata, 100000, big.NewInt(0))
 	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
 		return nil, err
