@@ -52,15 +52,6 @@ func (aspect Aspect) VerifyTx(request *types.EthTxAspect) *types.JoinPointResult
 	return aspect.verification(types.VERIFY_TX, request)
 }
 
-//	func (aspect Aspect) VerifyAccount(request *types.EthTxAspect) *types.JoinPointResult {
-//		return aspect.transactionAdvice(types.ON_ACCOUNT_VERIFY_METHOD, request)
-//
-// }
-//
-//	func (aspect Aspect) GetPayMaster(request *types.EthTxAspect) *types.JoinPointResult {
-//		return aspect.transactionAdvice(types.ON_GAS_PAYMENT_METHOD, request)
-//
-// }
 func (aspect Aspect) PreTxExecute(request *types.EthTxAspect) *types.JoinPointResult {
 	return aspect.transactionAdvice(types.PRE_TX_EXECUTE_METHOD, request)
 }
