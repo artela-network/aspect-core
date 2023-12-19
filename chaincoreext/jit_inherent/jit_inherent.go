@@ -17,45 +17,6 @@ import (
 	"github.com/artela-network/aspect-core/types"
 )
 
-var (
-	// global jit inherent instance
-	instance *Manager
-
-	// lock for instance
-	lock sync.RWMutex
-)
-
-// Init initializes the global JITInherentManager instance.
-func Init(protocol integration.AspectProtocol) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if instance == nil {
-		instance = newManager(protocol)
-	}
-}
-
-// TODO, do not use global instance of Manager?
-func Update(protocol integration.AspectProtocol) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if instance == nil {
-		instance = newManager(protocol)
-	} else {
-		instance.UpdateProtocol(protocol)
-	}
-
-}
-
-// Get returns the global JITInherentManager instance.
-func Get() *Manager {
-	lock.RLock()
-	defer lock.RUnlock()
-
-	return instance
-}
-
 // Manager manages the JIT inherent calls.
 type Manager struct {
 	protocol      integration.AspectProtocol
@@ -66,8 +27,8 @@ type Manager struct {
 	userOpSenderLookup map[common.Hash]common.Address
 }
 
-// newManager creates a new JITInherentManager instance.
-func newManager(protocol integration.AspectProtocol) *Manager {
+// NewManager creates a new JITInherentManager instance.
+func NewManager(protocol integration.AspectProtocol) *Manager {
 	entrypointABI, _ := aa.IEntryPointMetaData.GetAbi()
 	return &Manager{
 		protocol:           protocol,
