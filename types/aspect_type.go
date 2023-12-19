@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"errors"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -8,8 +9,8 @@ import (
 
 // for jit-inherent
 var (
-	GetAspectContext func(aspectId string, key string) string
-	SetAspectContext func(aspectId string, key string, value string)
+	GetAspectContext func(ctx context.Context, aspectId string, key string) string
+	SetAspectContext func(ctx context.Context, aspectId string, key string, value string)
 )
 
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
