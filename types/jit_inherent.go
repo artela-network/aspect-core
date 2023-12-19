@@ -11,7 +11,7 @@ import (
 )
 
 // JITSenderAspectByContext returns the sender Aspect address of the user operation
-var JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) common.Address
+var JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
 
 type UserOperation struct {
 	Sender               common.Address

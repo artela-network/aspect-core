@@ -9,8 +9,8 @@ import (
 
 // for jit-inherent
 var (
-	GetAspectContext func(ctx context.Context, aspectId string, key string) string
-	SetAspectContext func(ctx context.Context, aspectId string, key string, value string)
+	GetAspectContext func(ctx context.Context, aspectId string, key string) (string, error)
+	SetAspectContext func(ctx context.Context, aspectId string, key string, value string) error
 )
 
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
