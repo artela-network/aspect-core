@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -8,6 +9,9 @@ import (
 
 	aa "github.com/artela-network/aspect-core/chaincoreext/account_abstraction"
 )
+
+// JITSenderAspectByContext returns the sender Aspect address of the user operation
+var JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
 
 type UserOperation struct {
 	Sender               common.Address

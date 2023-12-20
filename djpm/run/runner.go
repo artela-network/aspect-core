@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 )
 
 type Runner struct {
+	ctx   context.Context
 	vmKey string
 	vm    runtime.AspectRuntime
 	// fns      *runtime.HostAPIRegistry
@@ -22,14 +24,15 @@ type Runner struct {
 	code     []byte
 }
 
-func NewRunner(aspID string, code []byte) (*Runner, error) {
+func NewRunner(ctx context.Context, aspID string, code []byte) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
-	register := api.NewRegister(&aspectId)
+	register := api.NewRegister(ctx, &aspectId)
 	key, vm, err := types.Runtime(code, register.HostApis())
 	if err != nil {
 		return nil, err
 	}
 	return &Runner{
+		ctx:      ctx,
 		vmKey:    key,
 		vm:       vm,
 		register: register,

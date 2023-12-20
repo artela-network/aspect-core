@@ -9,7 +9,7 @@ import (
 func (r *Register) hostApi() interface{} {
 	return map[string]interface{}{
 		"get": func(key string) []byte {
-			hook, err := types.GetRuntimeHostHook()
+			hook, err := types.GetRuntimeHostHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				response := types.NewContextQueryResponse(false, "hook not init")
 				marshal, _ := proto.Marshal(response)
@@ -20,7 +20,7 @@ func (r *Register) hostApi() interface{} {
 			return marshal
 		},
 		"remove": func(s []byte) bool {
-			hook, err := types.GetRuntimeHostHook()
+			hook, err := types.GetRuntimeHostHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				return false
 			}
@@ -31,7 +31,7 @@ func (r *Register) hostApi() interface{} {
 			return hook.Remove(r.runnerContext, sch)
 		},
 		"set": func(s []byte) bool {
-			hook, err := types.GetRuntimeHostHook()
+			hook, err := types.GetRuntimeHostHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				return false
 			}
@@ -42,7 +42,7 @@ func (r *Register) hostApi() interface{} {
 			return hook.Set(r.runnerContext, sch)
 		},
 		"query": func(s []byte) []byte {
-			hook, err := types.GetRuntimeHostHook()
+			hook, err := types.GetRuntimeHostHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				response := types.NewContextQueryResponse(false, "hook not init")
 				marshal, _ := proto.Marshal(response)

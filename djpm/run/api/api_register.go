@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+
 	runtime "github.com/artela-network/aspect-runtime"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -45,9 +47,10 @@ type Register struct {
 	errCallback   func(message string)
 }
 
-func NewRegister(aspectID *common.Address) *Register {
+func NewRegister(ctx context.Context, aspectID *common.Address) *Register {
 	return &Register{
 		runnerContext: &types.RunnerContext{
+			Ctx:      ctx,
 			AspectId: aspectID,
 		},
 		collection: runtime.NewHostAPIRegistry(),

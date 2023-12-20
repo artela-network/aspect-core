@@ -1,14 +1,15 @@
 package scheduler
 
 import (
-	"github.com/pkg/errors"
+	"context"
 
 	"github.com/artela-network/aspect-core/types"
+	"github.com/pkg/errors"
 )
 
 var globalHostApi types.ScheduleHostApi = (*scheduleHost)(nil)
 
-func GetScheduleHostApi() (types.ScheduleHostApi, error) {
+func GetScheduleHostApi(ctx context.Context) (types.ScheduleHostApi, error) {
 	if globalHostApi == nil {
 		return nil, errors.New("scheduleHost is not init")
 	}
