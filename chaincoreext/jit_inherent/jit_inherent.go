@@ -5,6 +5,8 @@ import (
 	"math/big"
 	"sync"
 
+	"github.com/ethereum/go-ethereum/log"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	types2 "github.com/ethereum/go-ethereum/core/types"
@@ -50,24 +52,19 @@ func (m *Manager) UpdateProtocol(protocol integration.AspectProtocol) {
 //     Only one JIT call can be submitted at a time.
 func (m *Manager) Submit(ctx context.Context, aspect common.Address,
 	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest,
-) (*types.JitInherentResponse, error) {
+) (*types.JitInherentResponse, uint64, error) {
 	if len(inherents) == 0 {
-		return nil, errors.New("no jit inherent to submit")
+		return nil, gas, errors.New("no jit inherent to submit")
 	}
 
-	userOps := NewUserOperations(inherents...)
-	m.cacheUserOp(aspect, userOps...)
-
 	switch stage {
-	case integration.BlockInitialization:
-		return m.submitJITTx(ctx, aspect, userOps...)
 	case integration.TransactionExecution:
 		if len(inherents) != 1 {
-			return nil, errors.New("only one user operation is allowed in current join point")
+			return nil, gas, errors.New("only one user operation is allowed in current join point")
 		}
-		return m.submitJITCall(ctx, aspect, gas, userOps[0], userOps[0].Hash(m.protocol.ChainId()))
+		return m.submitJITCall(ctx, aspect, gas, inherents[0])
 	default:
-		return nil, errors.New("cannot submit jit inherent in current join point")
+		return nil, gas, errors.New("cannot submit jit inherent in current join point")
 	}
 }
 
@@ -118,118 +115,80 @@ func (m *Manager) SenderAspect(userOpHash common.Hash) common.Address {
 }
 
 // submitJITCall submits a JIT call to the current EVM callstack.
-func (m *Manager) submitJITCall(ctx context.Context, aspect common.Address, gas uint64, userOp *aa.UserOperation, userOpHash common.Hash) (
-	*types.JitInherentResponse, error,
+func (m *Manager) submitJITCall(ctx context.Context, aspect common.Address, gas uint64, request *types.JitInherentRequest) (
+	*types.JitInherentResponse, uint64, error,
 ) {
-	defer m.ClearUserOp(userOpHash)
-
-	// get current evm instance with snapshot state
-	evm, err := m.protocol.VMFromSnapshotState()
+	baseLayerVM, err := m.protocol.VMFromSnapshotState()
 	if err != nil {
-		return nil, err
+		log.Error("failed to get vm from snapshot state", "err", err)
+		return nil, gas, err
 	}
 
-	resp := &types.JitInherentResponse{
-		JitInherentHashes: [][]byte{userOpHash.Bytes()},
-		Success:           false,
-	}
+	msg := baseLayerVM.Msg()
+	maxFeePerGas, maxPriorityFeePerGas := msg.GasFeeCap().Uint64(), msg.GasTipCap().Uint64()
+	userOp := NewUserOperations(gas, maxFeePerGas, maxPriorityFeePerGas, request)[0]
 
-	// FIXME: pay gas with Aspect's settlement account
-	callData, err := m.entrypointABI.Pack("handleOps", []aa.UserOperation{*userOp}, userOp.Sender)
-	if err != nil {
-		return resp, err
-	}
-	ret, leftoverGas, err := evm.Call(ctx, vm.AccountRef(aspect), aa.EntryPointContract, callData, gas, big.NewInt(0))
-	resp.Success = err == nil
-	resp.LeftoverGas = leftoverGas
-	if err == nil || (err != nil && err.Error() == vm.ErrExecutionReverted.Error()) {
-		resp.Ret = ret
-		resp.Success = true
-		err = nil
-	}
-	return resp, err
-}
-
-func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperation) {
-	m.lookupMutex.Lock()
-	defer m.lookupMutex.Unlock()
-
-	for _, userOp := range userOps {
-		m.userOpSenderLookup[userOp.Hash(m.protocol.ChainId())] = aspect
-	}
-}
-
-func (m *Manager) submitJITTx(ctx context.Context, aspect common.Address, userOps ...*aa.UserOperation) (
-	*types.JitInherentResponse, error,
-) {
-	// one fails all
-	userOpHashes := make([][]byte, len(userOps))
-	for i, userOp := range userOps {
-		userOpHashes[i] = userOp.Hash(m.protocol.ChainId()).Bytes()
-		// simulate the user op validation, drop the jit tx if any of the user op failed the validation
-		if err := m.simulateValidate(ctx, aspect, userOp); err != nil {
-			return nil, errors.Errorf("user operation #%d validation failed, reason: %s", i, err)
+	// get nonce from entrypoint and set it if not provided
+	if userOp.Nonce.Cmp(big.NewInt(0)) == 0 {
+		userOp.Nonce, gas, err = m.getAAWalletNonce(ctx, baseLayerVM,
+			common.BytesToAddress(request.Sender),
+			uint256.NewInt(0).SetBytes(request.NonceKey),
+			gas)
+		if err != nil {
+			log.Error("failed to get nonce", "err", err)
+			return nil, gas, err
 		}
 	}
 
-	// convert tx with the protocol side, since the Aspect framework is not supposed to know the tx format
-	callData, err := aa.PackCallData(userOps, aspect)
+	userOpHashes := m.cacheUserOp(aspect, userOp)
+	defer m.ClearUserOp(userOpHashes[0])
+
+	resp := &types.JitInherentResponse{
+		JitInherentHashes: [][]byte{userOpHashes[0].Bytes()},
+		Success:           false,
+	}
+
+	callData, err := m.entrypointABI.Pack("handleOps", []aa.UserOperation{*userOp}, userOp.Sender)
 	if err != nil {
-		return nil, err
+		return nil, gas, err
+	}
+	ret, gas, err := baseLayerVM.Call(ctx, vm.AccountRef(userOp.Sender), aa.EntryPointContract, callData, gas, big.NewInt(0))
+	resp.Success = err == nil
+	if err == nil || err.Error() == vm.ErrExecutionReverted.Error() {
+		// ignore the reverted error
+		resp.Ret = ret
 	}
 
-	// build aa bundled tx
-	tx := &aaBundleTx{
-		from: aspect,
-		data: callData,
-	}
+	return resp, gas, err
+}
 
-	// estimate transaction gas cost
-	tx.gas, err = m.protocol.EstimateGas(tx)
+func (m *Manager) getAAWalletNonce(ctx context.Context, baseLayerVM integration.VM, address common.Address, nonceKey *uint256.Int, gas uint64) (*big.Int, uint64, error) {
+	// call entrypoint's getNonce method to retrieve the nonce
+	callData, err := m.entrypointABI.Pack("getNonce", address, nonceKey.ToBig())
 	if err != nil {
-		return nil, err
+		return nil, gas, err
 	}
 
-	// check out current gas price
-	tx.gasPrice, err = m.protocol.GasPrice()
+	ret, leftoverGas, err := baseLayerVM.Call(ctx, vm.AccountRef(address), aa.EntryPointContract, callData, gas, big.NewInt(0))
 	if err != nil {
-		return nil, err
+		return nil, leftoverGas, err
 	}
 
-	// get last block header
-	blockHeader, err := m.protocol.LastBlockHeader()
-	if err != nil {
-		return nil, err
+	return uint256.NewInt(0).SetBytes(ret).ToBig(), leftoverGas, nil
+}
+
+func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperation) []common.Hash {
+	m.lookupMutex.Lock()
+	defer m.lookupMutex.Unlock()
+
+	res := make([]common.Hash, len(userOps))
+	for i, userOp := range userOps {
+		hash := userOp.Hash(m.protocol.ChainId())
+		m.userOpSenderLookup[hash] = aspect
+		res[i] = hash
 	}
 
-	// get account nonce
-	tx.nonce, err = m.protocol.NonceOf(aspect)
-	if err != nil {
-		return nil, err
-	}
-
-	// use base fee as cap, inherent tx does not need to pay for the priority fee
-	// TODO: discuss later whether priority fee should be paid or not
-	tx.gasFeeCap = blockHeader.BaseFee()
-	tx.gasTipCap = blockHeader.BaseFee()
-
-	// convert to underlying protocol tx
-	protocolTx, err := m.protocol.ConvertProtocolTx(tx)
-	if err != nil {
-		return nil, err
-	}
-
-	// submit tx to current proposal, this should be handled by the protocol side
-	if err := m.protocol.SubmitTxToCurrentProposal(protocolTx); err != nil {
-		return nil, err
-	}
-
-	return &types.JitInherentResponse{
-		JitInherentHashes: userOpHashes,
-		TxHash:            protocolTx.Hash(),
-		Success:           true,
-		Ret:               nil,
-	}, nil
+	return res
 }
 
 func (m *Manager) simulateValidate(ctx context.Context, aspect common.Address, userOp *aa.UserOperation) error {
@@ -293,25 +252,42 @@ func (m *Manager) getNonce(ctx context.Context, address common.Address, key *big
 	return decoded[0].(*big.Int), nil
 }
 
-func NewUserOperation(protoMsg *types.JitInherentRequest) *aa.UserOperation {
-	return &aa.UserOperation{
+func NewUserOperation(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePerGas uint64, protoMsg *types.JitInherentRequest) *aa.UserOperation {
+	zero := new(big.Int)
+	callGasLimit := new(big.Int).SetUint64(protoMsg.CallGasLimit)
+	verificationGasLimit := new(big.Int).SetUint64(protoMsg.VerificationGasLimit)
+	if verificationGasLimit.Cmp(zero) <= 0 {
+		// by default use 1/5 remaining gas for verification
+		verificationGasLimit.SetUint64(leftoverGas / 5)
+	}
+	if callGasLimit.Cmp(zero) <= 0 {
+		// by default use 4/5 remaining gas for call
+		callGasLimit.SetUint64(leftoverGas * 3 / 5)
+	}
+
+	nonceKey := uint256.NewInt(0).SetBytes(protoMsg.NonceKey)
+	nonceKey.Lsh(nonceKey, 64)
+
+	userOp := &aa.UserOperation{
 		Sender:               common.BytesToAddress(protoMsg.Sender),
-		Nonce:                big.NewInt(0).SetBytes(protoMsg.Nonce),
+		Nonce:                nonceKey.Add(nonceKey, uint256.NewInt(0).SetUint64(protoMsg.Nonce)).ToBig(),
 		InitCode:             protoMsg.InitCode,
 		CallData:             protoMsg.CallData,
-		CallGasLimit:         big.NewInt(0).SetBytes(protoMsg.CallGasLimit),
-		VerificationGasLimit: big.NewInt(0).SetBytes(protoMsg.VerificationGasLimit),
-		PreVerificationGas:   big.NewInt(10000), // Fixed gas overhead compensation for verification
-		MaxFeePerGas:         big.NewInt(0).SetBytes(protoMsg.MaxFeePerGas),
-		MaxPriorityFeePerGas: big.NewInt(0).SetBytes(protoMsg.MaxPriorityFeePerGas),
+		CallGasLimit:         callGasLimit,
+		VerificationGasLimit: verificationGasLimit,
+		PreVerificationGas:   big.NewInt(21000), // Use this fixed value for now, unless we came up a more proper one
+		MaxFeePerGas:         new(big.Int).SetUint64(maxFeePerGas),
+		MaxPriorityFeePerGas: new(big.Int).SetUint64(maxPriorityFeePerGas),
 		PaymasterAndData:     protoMsg.PaymasterAndData,
 	}
+
+	return userOp
 }
 
-func NewUserOperations(protoMsg ...*types.JitInherentRequest) []*aa.UserOperation {
+func NewUserOperations(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePerGas uint64, protoMsg ...*types.JitInherentRequest) []*aa.UserOperation {
 	userOps := make([]*aa.UserOperation, len(protoMsg))
 	for i, msg := range protoMsg {
-		userOps[i] = NewUserOperation(msg)
+		userOps[i] = NewUserOperation(leftoverGas, maxFeePerGas, maxPriorityFeePerGas, msg)
 	}
 	return userOps
 }

@@ -53,7 +53,7 @@ func TestAspect(t *testing.T) {
 	}
 	runner, err := run.NewRunner(context.Background(), "", raw)
 	require.Equal(t, nil, err)
-	pointcuts := []aspectType.PointCut{aspectType.ON_TX_RECEIVE_METHOD}
+	pointcuts := []aspectType.PointCut{aspectType.FILTER_TX}
 
 	for _, point := range pointcuts {
 
@@ -102,7 +102,7 @@ func TestAspect(t *testing.T) {
 		aspectType.POST_CONTRACT_CALL_METHOD,
 		aspectType.PRE_TX_EXECUTE_METHOD,
 		aspectType.POST_TX_EXECUTE_METHOD,
-		aspectType.ON_TX_COMMIT_METHOD,
+		aspectType.POST_TX_COMMIT,
 	}
 
 	for _, point := range pointcuts {
@@ -137,15 +137,3 @@ func TestIsOwner(t *testing.T) {
 
 	require.Equal(t, true, ret)
 }
-
-// Run "scripts/build-wasm.sh" in project root, before run this test.
-// func TestOnContractBinding(t *testing.T) {
-// 	raw, _ := GetTestTarget("aspect-test")
-// 	runner, err := run.NewRunner("", raw)
-// 	require.Equal(t, nil, err)
-// 	ret, err := runner.OnContractBinding(99, 999, nil, "0x0000000000000000000000000000000000000001")
-// 	require.Equal(t, nil, err)
-// 	defer runner.Return()
-
-// 	require.Equal(t, true, ret)
-// }
