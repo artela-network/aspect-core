@@ -90,11 +90,11 @@ message BytesArrayData {
     repeated bytes data = 1;
 }
 
-message AccessLists {
-    repeated AccessList access_lists = 1;
+message AccessList {
+    repeated AccessTuple access_list = 1;
 }
 
-message AccessList {
+message AccessTuple {
     bytes address = 1;
     repeated bytes storage_keys = 2;
 }

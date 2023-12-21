@@ -7,12 +7,14 @@ import (
 )
 
 type RunnerContext struct {
-	Ctx          context.Context
-	AspectId     *common.Address
-	BlockNumber  int64
-	Point        string
-	ContractAddr *common.Address
-	Gas          uint64
+	Ctx           context.Context
+	AspectId      *common.Address
+	AspectVersion uint64
+	BlockNumber   int64
+	Point         string
+	ContractAddr  *common.Address
+	Gas           uint64
+	Commit        bool
 }
 
 var (
