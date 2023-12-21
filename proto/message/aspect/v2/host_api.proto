@@ -125,7 +125,7 @@ enum RemoveNameSpace {
     RemoveAspectState = 1;
 }
 
-message SateChangeQuery {
+message StateChangeQuery {
     string account = 1;
     string state_var_name = 2;
     repeated bytes indices = 3;
