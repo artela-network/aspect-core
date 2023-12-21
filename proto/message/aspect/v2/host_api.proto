@@ -70,8 +70,16 @@ message StringArrayData {
     repeated string data = 1;
 }
 
+message UintData {
+    uint64 data = 1;
+}
+
 message IntData {
     int64 data = 1;
+}
+
+message IntArrayData {
+    repeated int64 data = 1;
 }
 
 message BoolData {
@@ -82,8 +90,13 @@ message BytesArrayData {
     repeated bytes data = 1;
 }
 
-message UintData{
-  uint64 data=1;
+message AccessLists {
+    repeated AccessList access_lists = 1;
+}
+
+message AccessList {
+    bytes address = 1;
+    repeated bytes storage_keys = 2;
 }
 
 message CallMessageRequest {
