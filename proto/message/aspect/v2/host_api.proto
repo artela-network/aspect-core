@@ -127,7 +127,7 @@ enum RemoveNameSpace {
 
 message SateChangeQuery {
     string account = 1;
-    string stateVarName = 2;
+    string state_var_name = 2;
     repeated bytes indices = 3;
 }
 
