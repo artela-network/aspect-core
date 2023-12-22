@@ -209,7 +209,7 @@ func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCu
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr, method)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, contractAddr, method)
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 		result.GasInfo = req.GasInfo
@@ -254,7 +254,9 @@ func (aspect Aspect) verification(ctx context.Context, method types.PointCut, re
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber-1, contractAddr, method)
+
+	aspectCodes, err := aspect.provider.GetAccountVerifiers(req.GetTx().BlockNumber, contractAddr)
+
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 		result.GasInfo = req.GasInfo
