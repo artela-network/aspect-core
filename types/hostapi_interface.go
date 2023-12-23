@@ -46,7 +46,7 @@ type (
 	}
 
 	AspectTransientStorageHostAPI interface {
-		Get(ctx *RunnerContext, key string) []byte
+		Get(ctx *RunnerContext, aspectId []byte, key string) []byte
 		Set(ctx *RunnerContext, key string, value []byte)
 	}
 

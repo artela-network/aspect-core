@@ -6,7 +6,7 @@ import (
 
 func (r *Registry) aspectPropertyAPIs() interface{} {
 	return map[string]interface{}{
-		"get": func(aspectId []byte, key string) []byte {
+		"get": func(key string) []byte {
 			hook, err := types.GetAspectPropertyHostHook(r.runnerContext.Ctx)
 			if err != nil {
 				panic("failed to init aspect runtime context host api: " + err.Error())
