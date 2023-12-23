@@ -83,7 +83,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	return resData, gas, nil
 }
 
-func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender string) (bool, error) {
+func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, error) {
 	if r.vm == nil {
 		return false, errors.New("vm not init")
 	}
