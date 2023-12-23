@@ -19,6 +19,7 @@ const (
 	moduleAspectState            = "aspect-state-api"
 	moduleAspectProperty         = "aspect-property-api"
 	moduleAspectTransientStorage = "aspect-transient-storage-api"
+	moduleTrace                  = "trace-api"
 
 	// namespace of hostapis
 	nsUtils                  = "__UtilApi__"
@@ -26,6 +27,7 @@ const (
 	nsStateDB                = "__StateDbApi__"
 	nsRuntimeContext         = "__RuntimeContextApi__"
 	nsEvmCall                = "__EvmCallApi__"
+	nsTrace                  = "__TraceApi__"
 	nsAspectState            = "__AspectStateApi__"
 	nsAspectProperty         = "__AspectPropertyApi__"
 	nsAspectTransientStorage = "__AspectTransientStorageApi__"
@@ -69,6 +71,7 @@ func (r *Registry) HostApis() *runtime.HostAPIRegistry {
 	r.registerApis(moduleAspectProperty, nsAspectProperty, r.aspectPropertyAPIs())
 	r.registerApis(moduleAspectState, nsAspectState, r.aspectStateAPIs())
 	r.registerApis(moduleAspectTransientStorage, nsAspectTransientStorage, r.transientStorageAPIs())
+	r.registerApis(moduleTrace, nsTrace, r.traceAPIs())
 
 	return r.collection
 }
