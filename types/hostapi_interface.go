@@ -2,62 +2,70 @@ package types
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
 type RunnerContext struct {
 	Ctx           context.Context
-	AspectId      *common.Address
+	AspectId      common.Address
 	AspectVersion uint64
 	BlockNumber   int64
 	Point         string
-	ContractAddr  *common.Address
+	ContractAddr  common.Address
 	Gas           uint64
 	Commit        bool
 }
 
 var (
-	GetEvmHostHook     func(context.Context) (EvmHostApi, error)
-	GetScheduleHook    func(context.Context) (ScheduleHostApi, error)
-	GetStateDbHook     func(context.Context) (StateDbHostApi, error)
-	GetRuntimeHostHook func(context.Context) (RuntimeHostApi, error)
+	GetEvmHostHook                    func(context.Context) (EVMHostAPI, error)
+	GetStateDbHook                    func(context.Context) (StateDBHostAPI, error)
+	GetAspectRuntimeContextHostHook   func(context.Context) (RuntimeContextHostAPI, error)
+	GetAspectStateHostHook            func(context.Context) (AspectStateHostAPI, error)
+	GetAspectPropertyHostHook         func(context.Context) (AspectPropertyHostAPI, error)
+	GetAspectTransientStorageHostHook func(context.Context) (AspectTransientStorageHostAPI, error)
+	GetAspectTraceHostHook            func(context.Context) (AspectTraceHostAPI, error)
 
 	// JITSenderAspectByContext returns the sender Aspect address of the user operation
 	JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
 )
 
 type (
-	RuntimeHostApi interface {
-		GetContext(ctx *RunnerContext, key string) *ContextQueryResponse
-		Set(ctx *RunnerContext, set *ContextSetRequest) bool
-		Query(ctx *RunnerContext, query *ContextQueryRequest) *ContextQueryResponse
-		Remove(ctx *RunnerContext, set *ContextRemoveRequest) bool
+	RuntimeContextHostAPI interface {
+		Get(ctx *RunnerContext, key string) []byte
 	}
 
-	EvmHostApi interface {
-		//	StaticCall( request CallMessageRequest) CallMessageResponse
-		StaticCall(ctx *RunnerContext, request *EthMessage) *EthMessageCallResult
+	AspectStateHostAPI interface {
+		Get(ctx *RunnerContext, key string) []byte
+		Set(ctx *RunnerContext, key string, value []byte)
+	}
 
-		// JITCall(request CallMessageRequest) *CallMessageResponse
+	AspectPropertyHostAPI interface {
+		Get(ctx *RunnerContext, key string) []byte
+	}
+
+	AspectTransientStorageHostAPI interface {
+		Get(ctx *RunnerContext, key string) []byte
+		Set(ctx *RunnerContext, key string, value []byte)
+	}
+
+	AspectTraceHostAPI interface {
+		QueryStateChange(ctx *RunnerContext, query *StateChangeQuery) []byte
+		QueryCallTree(ctx *RunnerContext, query *CallTreeQuery) []byte
+	}
+
+	EVMHostAPI interface {
+		StaticCall(ctx *RunnerContext, request *StaticCallRequest) *StaticCallResult
 		JITCall(ctx *RunnerContext, request *JitInherentRequest) *JitInherentResponse
 	}
 
-	ScheduleHostApi interface {
-		// SubmitSchedule(sch Schedule) bool
-		SubmitSchedule(ctx *RunnerContext, sch *Schedule) *RunResult
-	}
-
-	StateDbHostApi interface {
-		//	GetBalance(request AddressQueryRequest) StringDataResponse
-		GetBalance(ctx *RunnerContext, addressEquals string) string
-		// GetState(request StateQueryRequest) StringDataResponse
-		GetState(ctx *RunnerContext, addressEquals, hashEquals string) string
-		// GetRefund() IntDataResponse
-		GetRefund(ctx *RunnerContext) uint64
-		// GetCodeHash(request AddressQueryRequest) StringDataResponse
-		GetCodeHash(ctx *RunnerContext, addressEquals string) string
-		// GetNonce(request AddressQueryRequest) IntDataResponse
-		GetNonce(ctx *RunnerContext, addressEquals string) uint64
+	StateDBHostAPI interface {
+		GetBalance(address common.Address) *big.Int
+		GetState(address common.Address, key common.Hash) common.Hash
+		GetCodeHash(address common.Address) common.Hash
+		GetCodeSize(address common.Address) int
+		GetNonce(address common.Address) uint64
+		HasSuicided(address common.Address) bool
 	}
 )

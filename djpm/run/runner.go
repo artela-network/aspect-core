@@ -20,14 +20,14 @@ type Runner struct {
 	vmKey string
 	vm    runtime.AspectRuntime
 	// fns      *runtime.HostAPIRegistry
-	register *api.Register
+	registry *api.Registry
 	code     []byte
 }
 
-func NewRunner(ctx context.Context, aspID string, code []byte) (*Runner, error) {
+func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
-	register := api.NewRegister(ctx, &aspectId)
-	key, vm, err := types.Runtime(code, register.HostApis())
+	registry := api.NewRegistry(ctx, aspectId, aspVer)
+	key, vm, err := types.Runtime(code, registry.HostApis())
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func NewRunner(ctx context.Context, aspID string, code []byte) (*Runner, error) 
 		ctx:      ctx,
 		vmKey:    key,
 		vm:       vm,
-		register: register,
+		registry: registry,
 		code:     code,
 	}, nil
 }
@@ -44,39 +44,43 @@ func (r *Runner) Return() {
 	types.ReturnRuntime(r.vmKey, r.vm)
 }
 
-func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) (*types.AspectResponse, error) {
+func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) ([]byte, uint64, error) {
 	if r.vm == nil {
-		return nil, errors.New("runner not init")
+		return nil, gas, errors.New("runner not init")
 	}
 	// turn inputBytes into bytes
 	reqData, err := proto.Marshal(txRequest)
 	if err != nil {
-		return nil, err
+		return nil, gas, err
 	}
+
 	revertMsg := ""
-	callback := func(msg string) {
+	errorFunc := func(msg string) {
 		revertMsg = msg
 	}
 	// for get aspect Error message
-	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext(string(name), blockNumber, gas, contractAddr)
+	r.registry.SetErrCallback(errorFunc)
+	r.registry.SetRunnerContext(string(name), blockNumber, gas, contractAddr)
 
-	res, err := r.vm.Call(api.ApiEntrance, string(name), reqData)
+	res, err := r.vm.Call(api.APIEntrance, string(name), reqData)
+	gas = r.registry.RunnerContext().Gas
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
-			return nil, errors.New(revertMsg)
+			return []byte(revertMsg), gas, errors.New(revertMsg)
 		}
-		return nil, err
+		return nil, gas, err
 	}
+
+	if res == nil {
+		return nil, gas, nil
+	}
+
 	resData, ok := res.([]byte)
 	if !ok {
-		return nil, errors.New("read output failed, return value is not byte array")
+		return nil, gas, errors.New("read output failed, return value is not byte array")
 	}
-	output := &types.AspectResponse{}
-	if err := proto.Unmarshal(resData, output); err != nil {
-		return nil, err
-	}
-	return output, nil
+
+	return resData, gas, nil
 }
 
 func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender string) (bool, error) {
@@ -87,10 +91,10 @@ func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Add
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext("isOwner", blockNumber, gas, contractAddr)
+	r.registry.SetErrCallback(callback)
+	r.registry.SetRunnerContext("isOwner", blockNumber, gas, contractAddr)
 
-	res, err := r.vm.Call(api.ApiEntrance, "isOwner", sender)
+	res, err := r.vm.Call(api.APIEntrance, "isOwner", sender)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
@@ -111,7 +115,7 @@ func (r *Runner) IsBlockLevel() (bool, error) {
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	r.register.SetErrCallback(callback)
+	r.registry.SetErrCallback(callback)
 	res, err := r.vm.Call(api.CheckBlockLevel)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
@@ -130,7 +134,7 @@ func (r *Runner) IsTransactionLevel() (bool, error) {
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	r.register.SetErrCallback(callback)
+	r.registry.SetErrCallback(callback)
 	res, err := r.vm.Call(api.CheckTransactionLevel)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
@@ -149,7 +153,7 @@ func (r *Runner) IsTxVerifier() (bool, error) {
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	r.register.SetErrCallback(callback)
+	r.registry.SetErrCallback(callback)
 	res, err := r.vm.Call(api.CheckIsTxVerifier)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
@@ -161,7 +165,7 @@ func (r *Runner) IsTxVerifier() (bool, error) {
 }
 
 func (r *Runner) Gas() uint64 {
-	return r.register.RunnerContext().Gas
+	return r.registry.RunnerContext().Gas
 }
 
 func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, error) {
@@ -172,8 +176,8 @@ func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contra
 	callback := func(msg string) {
 		revertMsg = msg
 	}
-	r.register.SetErrCallback(callback)
-	r.register.SetRunnerContext(funcName, blockNumber, gas, contractAddr)
+	r.registry.SetErrCallback(callback)
+	r.registry.SetRunnerContext(funcName, blockNumber, gas, contractAddr)
 	res, err := r.vm.Call(funcName, args...)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {

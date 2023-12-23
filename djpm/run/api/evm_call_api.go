@@ -8,7 +8,7 @@ import (
 	"github.com/artela-network/aspect-core/types"
 )
 
-func (r *Register) evmCallApis() interface{} {
+func (r *Registry) evmCallAPIs() interface{} {
 	return map[string]interface{}{
 		"staticCall": func(request []byte) []byte {
 			defaultResult := make([]byte, 0)
@@ -16,12 +16,12 @@ func (r *Register) evmCallApis() interface{} {
 			if err != nil || hook == nil {
 				return defaultResult
 			}
-			ethMsg := &types.EthMessage{}
-			if unErr := proto.Unmarshal(request, ethMsg); unErr != nil {
+			staticCall := &types.StaticCallRequest{}
+			if unErr := proto.Unmarshal(request, staticCall); unErr != nil {
 				return defaultResult
 			}
-			call := hook.StaticCall(r.runnerContext, ethMsg)
-			marshal, _ := proto.Marshal(call)
+			res := hook.StaticCall(r.runnerContext, staticCall)
+			marshal, _ := proto.Marshal(res)
 			return marshal
 		},
 		"jitCall": func(request []byte) ([]byte, error) {

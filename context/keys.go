@@ -75,6 +75,7 @@ const (
 	TxSigR          = "tx.sig.r"
 	TxSigS          = "tx.sig.s"
 	TxFrom          = "tx.from"
+	TxIndex         = "tx.index"
 )
 
 // Aspect Context Related Keys
@@ -94,4 +95,13 @@ const (
 	MsgResultRet     = "msg.result.ret"
 	MsgResultGasUsed = "msg.result.gasUsed"
 	MsgResultError   = "msg.result.error"
+)
+
+// Receipt Context Related Keys
+const (
+	ReceiptStatus            = "receipt.status"
+	ReceiptLogs              = "receipt.logs"
+	ReceiptGasUsed           = "receipt.gasUsed"
+	ReceiptCumulativeGasUsed = "receipt.cumulativeGasUsed"
+	ReceiptBloom             = "receipt.bloom"
 )

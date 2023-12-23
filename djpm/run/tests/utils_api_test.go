@@ -11,7 +11,7 @@ import (
 
 func TestSlog(t *testing.T) {
 	raw, _ := GetTestTarget("utilapi-test")
-	runner, err := run.NewRunner(context.Background(), "", raw)
+	runner, err := run.NewRunner(context.Background(), "", 0, raw)
 	require.Equal(t, nil, err)
 	ret, err := runner.ExecFunc("TestSlog", 99, 99, nil)
 	require.Equal(t, nil, err)

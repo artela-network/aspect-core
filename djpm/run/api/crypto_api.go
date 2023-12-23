@@ -11,7 +11,7 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
 
-func (r *Register) cryptoApis() interface{} {
+func (r *Registry) cryptoAPIs() interface{} {
 	return map[string]interface{}{
 		"sha256": func(input []byte) []byte {
 			h := sha256.Sum256(input)

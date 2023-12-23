@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 )
 
-func (r *Register) utilApis() interface{} {
+func (r *Registry) utilAPIs() interface{} {
 	return map[string]interface{}{
 		"fromHexString": func(s string) []byte {
 			s = strings.TrimPrefix(s, "0x")
