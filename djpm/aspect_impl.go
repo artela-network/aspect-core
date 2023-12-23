@@ -168,7 +168,7 @@ func (aspect Aspect) verification(ctx context.Context, contract *common.Address,
 	}
 
 	// run aspects on received transaction
-	return aspect.runAspect(ctx, types.ON_TX_VERIFY_METHOD, gas, block, contract, req, aspectCodes)
+	return aspect.runAspect(ctx, types.VERIFY_TX, gas, block, contract, req, aspectCodes)
 }
 
 func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, aspects []*types.AspectCode) (result *types.AspectExecutionResult) {
