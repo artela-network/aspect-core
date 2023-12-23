@@ -1,6 +1,8 @@
 package context
 
 var PostTxCtxKeys = []interface{}{
+	IsCall,
+
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
 	BlockHeaderTransactionsRoot,

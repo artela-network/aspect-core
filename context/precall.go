@@ -1,6 +1,8 @@
 package context
 
 var PreCallCtxKeys = []interface{}{
+	IsCall,
+
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
 	BlockHeaderTransactionsRoot,

@@ -1,6 +1,8 @@
 package context
 
 var VerifyTxCtxKeys = []interface{}{
+	IsCall,
+
 	BlockHeaderNumber,
 
 	EnvExtraEIPs,
