@@ -21,21 +21,21 @@ contract AspectCore {
     function bind(
         address aspectId,
         uint256 aspectVersion,
-        address contractAddr,
+        address accountAddr,
         int8 priority
     ) public {}
 
-    function unbind(address aspectId, address contractAddr) public {}
+    function unbind(address aspectId, address accountAddr) public {}
 
     function changeVersion(
         address aspectId,
-        address contractAddr,
+        address accountAddr,
         uint64 version
     ) public {}
 
     function versionOf(address aspectId) public view returns (uint64 version) {}
 
-    function aspectsOf(address contractAddr)
+    function aspectsOf(address accountAddr)
     public
     view
     returns (AspectBoundInfoArr[] memory aspectBoundInfo)
@@ -55,7 +55,7 @@ contract AspectCore {
 
     struct KVPair {
         string key;
-        string value;
+        bytes value;
     }
     struct AspectBoundInfoArr {
         address aspectId;
