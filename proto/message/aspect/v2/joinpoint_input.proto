@@ -54,6 +54,12 @@ message PreTxExecuteInput {
     BlockInput block = 2;
 }
 
+message OperationInput {
+    WithFromTxInput tx = 1;
+    BlockInput block = 2;
+    bytes call_data = 3;
+}
+
 message PostTxExecuteInput {
     WithFromTxInput tx = 1;
     BlockInput block = 2;
