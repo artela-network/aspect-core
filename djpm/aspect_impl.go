@@ -97,6 +97,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 		},
 		Block:          &types.BlockInput{Number: uint64(block)},
 		ValidationData: validation,
+		CallData:       call,
 	}
 
 	// execute aspect verification

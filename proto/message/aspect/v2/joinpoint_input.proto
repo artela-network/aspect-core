@@ -47,6 +47,7 @@ message TxVerifyInput {
     NoFromTxInput tx = 1;
     BlockInput block = 2;
     bytes validation_data = 3;
+    bytes call_data = 4;
 }
 
 message PreTxExecuteInput {
