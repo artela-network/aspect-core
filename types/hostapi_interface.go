@@ -13,7 +13,6 @@ type RunnerContext struct {
 	Point        string
 	ContractAddr *common.Address
 	Gas          uint64
-	Commit       bool
 }
 
 var (
@@ -21,6 +20,9 @@ var (
 	GetScheduleHook    func(context.Context) (ScheduleHostApi, error)
 	GetStateDbHook     func(context.Context) (StateDbHostApi, error)
 	GetRuntimeHostHook func(context.Context) (RuntimeHostApi, error)
+
+	// JITSenderAspectByContext returns the sender Aspect address of the user operation
+	JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
 )
 
 type (

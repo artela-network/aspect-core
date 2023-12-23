@@ -834,6 +834,53 @@ func (x *BytesArrayData) GetData() [][]byte {
 	return nil
 }
 
+type UintData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data uint64 `protobuf:"varint,1,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (x *UintData) Reset() {
+	*x = UintData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aspect_v2_host_api_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UintData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UintData) ProtoMessage() {}
+
+func (x *UintData) ProtoReflect() protoreflect.Message {
+	mi := &file_aspect_v2_host_api_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UintData.ProtoReflect.Descriptor instead.
+func (*UintData) Descriptor() ([]byte, []int) {
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *UintData) GetData() uint64 {
+	if x != nil {
+		return x.Data
+	}
+	return 0
+}
+
 type CallMessageRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -845,7 +892,7 @@ type CallMessageRequest struct {
 func (x *CallMessageRequest) Reset() {
 	*x = CallMessageRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[11]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -858,7 +905,7 @@ func (x *CallMessageRequest) String() string {
 func (*CallMessageRequest) ProtoMessage() {}
 
 func (x *CallMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[11]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -871,7 +918,7 @@ func (x *CallMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallMessageRequest.ProtoReflect.Descriptor instead.
 func (*CallMessageRequest) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{11}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CallMessageRequest) GetMessage() *EthMessage {
@@ -893,7 +940,7 @@ type CallMessageResponse struct {
 func (x *CallMessageResponse) Reset() {
 	*x = CallMessageResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[12]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -906,7 +953,7 @@ func (x *CallMessageResponse) String() string {
 func (*CallMessageResponse) ProtoMessage() {}
 
 func (x *CallMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[12]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -919,7 +966,7 @@ func (x *CallMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallMessageResponse.ProtoReflect.Descriptor instead.
 func (*CallMessageResponse) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{12}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CallMessageResponse) GetResult() *RunResult {
@@ -947,7 +994,7 @@ type BytesData struct {
 func (x *BytesData) Reset() {
 	*x = BytesData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[13]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -960,7 +1007,7 @@ func (x *BytesData) String() string {
 func (*BytesData) ProtoMessage() {}
 
 func (x *BytesData) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[13]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -973,7 +1020,7 @@ func (x *BytesData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BytesData.ProtoReflect.Descriptor instead.
 func (*BytesData) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{13}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *BytesData) GetData() []byte {
@@ -996,7 +1043,7 @@ type SateChangeQuery struct {
 func (x *SateChangeQuery) Reset() {
 	*x = SateChangeQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[14]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1009,7 +1056,7 @@ func (x *SateChangeQuery) String() string {
 func (*SateChangeQuery) ProtoMessage() {}
 
 func (x *SateChangeQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[14]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1022,7 +1069,7 @@ func (x *SateChangeQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SateChangeQuery.ProtoReflect.Descriptor instead.
 func (*SateChangeQuery) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{14}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SateChangeQuery) GetAccount() string {
@@ -1057,7 +1104,7 @@ type CallStackQuery struct {
 func (x *CallStackQuery) Reset() {
 	*x = CallStackQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[15]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1070,7 +1117,7 @@ func (x *CallStackQuery) String() string {
 func (*CallStackQuery) ProtoMessage() {}
 
 func (x *CallStackQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[15]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1083,7 +1130,7 @@ func (x *CallStackQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallStackQuery.ProtoReflect.Descriptor instead.
 func (*CallStackQuery) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{15}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CallStackQuery) GetCallIndex() []uint64 {
@@ -1168,6 +1215,8 @@ var file_aspect_v2_host_api_proto_rawDesc = []byte{
 	0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61,
 	0x22, 0x24, 0x0a, 0x0e, 0x42, 0x79, 0x74, 0x65, 0x73, 0x41, 0x72, 0x72, 0x61, 0x79, 0x44, 0x61,
 	0x74, 0x61, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0c,
+	0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x1e, 0x0a, 0x08, 0x55, 0x69, 0x6e, 0x74, 0x44, 0x61,
+	0x74, 0x61, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
 	0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x45, 0x0a, 0x12, 0x43, 0x61, 0x6c, 0x6c, 0x4d, 0x65,
 	0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2f, 0x0a, 0x07,
 	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e,
@@ -1229,7 +1278,7 @@ func file_aspect_v2_host_api_proto_rawDescGZIP() []byte {
 }
 
 var file_aspect_v2_host_api_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_aspect_v2_host_api_proto_goTypes = []interface{}{
 	(QueryNameSpace)(0),          // 0: aspect.v2.QueryNameSpace
 	(SetNameSpace)(0),            // 1: aspect.v2.SetNameSpace
@@ -1245,26 +1294,27 @@ var file_aspect_v2_host_api_proto_goTypes = []interface{}{
 	(*IntData)(nil),              // 11: aspect.v2.IntData
 	(*BoolData)(nil),             // 12: aspect.v2.BoolData
 	(*BytesArrayData)(nil),       // 13: aspect.v2.BytesArrayData
-	(*CallMessageRequest)(nil),   // 14: aspect.v2.CallMessageRequest
-	(*CallMessageResponse)(nil),  // 15: aspect.v2.CallMessageResponse
-	(*BytesData)(nil),            // 16: aspect.v2.BytesData
-	(*SateChangeQuery)(nil),      // 17: aspect.v2.SateChangeQuery
-	(*CallStackQuery)(nil),       // 18: aspect.v2.CallStackQuery
-	(*anypb.Any)(nil),            // 19: google.protobuf.Any
-	(*RunResult)(nil),            // 20: aspect.v2.RunResult
-	(*EthLog)(nil),               // 21: aspect.v2.EthLog
+	(*UintData)(nil),             // 14: aspect.v2.UintData
+	(*CallMessageRequest)(nil),   // 15: aspect.v2.CallMessageRequest
+	(*CallMessageResponse)(nil),  // 16: aspect.v2.CallMessageResponse
+	(*BytesData)(nil),            // 17: aspect.v2.BytesData
+	(*SateChangeQuery)(nil),      // 18: aspect.v2.SateChangeQuery
+	(*CallStackQuery)(nil),       // 19: aspect.v2.CallStackQuery
+	(*anypb.Any)(nil),            // 20: google.protobuf.Any
+	(*RunResult)(nil),            // 21: aspect.v2.RunResult
+	(*EthLog)(nil),               // 22: aspect.v2.EthLog
 }
 var file_aspect_v2_host_api_proto_depIdxs = []int32{
 	1,  // 0: aspect.v2.ContextSetRequest.name_space:type_name -> aspect.v2.SetNameSpace
 	0,  // 1: aspect.v2.ContextQueryRequest.name_space:type_name -> aspect.v2.QueryNameSpace
-	19, // 2: aspect.v2.ContextQueryRequest.query:type_name -> google.protobuf.Any
+	20, // 2: aspect.v2.ContextQueryRequest.query:type_name -> google.protobuf.Any
 	2,  // 3: aspect.v2.ContextRemoveRequest.name_space:type_name -> aspect.v2.RemoveNameSpace
-	19, // 4: aspect.v2.ContextRemoveRequest.query:type_name -> google.protobuf.Any
-	20, // 5: aspect.v2.ContextQueryResponse.result:type_name -> aspect.v2.RunResult
-	19, // 6: aspect.v2.ContextQueryResponse.data:type_name -> google.protobuf.Any
-	21, // 7: aspect.v2.EthMessageCallResult.logs:type_name -> aspect.v2.EthLog
+	20, // 4: aspect.v2.ContextRemoveRequest.query:type_name -> google.protobuf.Any
+	21, // 5: aspect.v2.ContextQueryResponse.result:type_name -> aspect.v2.RunResult
+	20, // 6: aspect.v2.ContextQueryResponse.data:type_name -> google.protobuf.Any
+	22, // 7: aspect.v2.EthMessageCallResult.logs:type_name -> aspect.v2.EthLog
 	8,  // 8: aspect.v2.CallMessageRequest.message:type_name -> aspect.v2.EthMessage
-	20, // 9: aspect.v2.CallMessageResponse.result:type_name -> aspect.v2.RunResult
+	21, // 9: aspect.v2.CallMessageResponse.result:type_name -> aspect.v2.RunResult
 	7,  // 10: aspect.v2.CallMessageResponse.data:type_name -> aspect.v2.EthMessageCallResult
 	11, // [11:11] is the sub-list for method output_type
 	11, // [11:11] is the sub-list for method input_type
@@ -1413,7 +1463,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CallMessageRequest); i {
+			switch v := v.(*UintData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1425,7 +1475,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CallMessageResponse); i {
+			switch v := v.(*CallMessageRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1437,7 +1487,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BytesData); i {
+			switch v := v.(*CallMessageResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1449,7 +1499,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SateChangeQuery); i {
+			switch v := v.(*BytesData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1461,6 +1511,18 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SateChangeQuery); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aspect_v2_host_api_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CallStackQuery); i {
 			case 0:
 				return &v.state
@@ -1479,7 +1541,7 @@ func file_aspect_v2_host_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_aspect_v2_host_api_proto_rawDesc,
 			NumEnums:      3,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
