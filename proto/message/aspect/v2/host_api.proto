@@ -74,7 +74,7 @@ message EthAccessTuple {
 
 // trace api types
 message StateChangeQuery {
-    string account = 1;
+    bytes account = 1;
     string state_var_name = 2;
     repeated bytes indices = 3;
 }
@@ -99,7 +99,7 @@ message EthCallMessage {
 }
 
 message EthStateChange {
-    string account = 1; // hex string of account
+    bytes account = 1;
     bytes value = 2;
     uint64 call_index = 3;
 }
