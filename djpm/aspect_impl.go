@@ -95,6 +95,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 			Hash: tx.Hash().Bytes(),
 			To:   tx.To().Bytes(),
 		},
+		Block:          &types.BlockInput{Number: uint64(block)},
 		ValidationData: validation,
 	}
 
