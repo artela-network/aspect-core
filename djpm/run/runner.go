@@ -106,64 +106,6 @@ func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Add
 	return res.(bool), nil
 }
 
-func (r *Runner) IsBlockLevel() (bool, error) {
-	if r.vm == nil {
-		return false, errors.New("not init")
-	}
-
-	revertMsg := ""
-	callback := func(msg string) {
-		revertMsg = msg
-	}
-	r.registry.SetErrCallback(callback)
-	res, err := r.vm.Call(api.CheckBlockLevel)
-	if err != nil {
-		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
-		}
-		return false, err
-	}
-	return res.(bool), nil
-}
-
-func (r *Runner) IsTransactionLevel() (bool, error) {
-	if r.vm == nil {
-		return false, errors.New("not init")
-	}
-	revertMsg := ""
-	callback := func(msg string) {
-		revertMsg = msg
-	}
-	r.registry.SetErrCallback(callback)
-	res, err := r.vm.Call(api.CheckTransactionLevel)
-	if err != nil {
-		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
-		}
-		return false, err
-	}
-	return res.(bool), nil
-}
-
-func (r *Runner) IsTxVerifier() (bool, error) {
-	if r.vm == nil {
-		return false, errors.New("not init")
-	}
-	revertMsg := ""
-	callback := func(msg string) {
-		revertMsg = msg
-	}
-	r.registry.SetErrCallback(callback)
-	res, err := r.vm.Call(api.CheckIsTxVerifier)
-	if err != nil {
-		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
-		}
-		return false, err
-	}
-	return res.(bool), nil
-}
-
 func (r *Runner) Gas() uint64 {
 	return r.registry.RunnerContext().Gas
 }
