@@ -11,21 +11,21 @@ func (r *Registry) stateDBAPIs() interface{} {
 				panic("GetStateDbHook failed")
 			}
 			balance := hook.GetBalance(common.BytesToAddress(addr))
-			return balance.Bytes()
+			return wrapNilByte(balance.Bytes())
 		},
 		"getState": func(addr []byte, hash []byte) []byte {
 			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				panic("GetStateDbHook failed")
 			}
-			return hook.GetState(common.BytesToAddress(addr), common.BytesToHash(hash)).Bytes()
+			return wrapNilByte(hook.GetState(common.BytesToAddress(addr), common.BytesToHash(hash)).Bytes())
 		},
 		"getCodeHash": func(addr []byte) []byte {
 			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				panic("GetStateDbHook failed")
 			}
-			return hook.GetCodeHash(common.BytesToAddress(addr)).Bytes()
+			return wrapNilByte(hook.GetCodeHash(common.BytesToAddress(addr)).Bytes())
 		},
 		"getCodeSize": func(addr []byte) int32 {
 			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)

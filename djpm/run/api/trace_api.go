@@ -21,7 +21,7 @@ func (r *Registry) traceAPIs() interface{} {
 				panic("failed to unmarshal query: " + err.Error())
 			}
 
-			return hook.QueryStateChange(r.runnerContext, query)
+			return wrapNilByte(hook.QueryStateChange(r.runnerContext, query))
 		},
 		"queryCallTree": func(rawQuery []byte) []byte {
 			hook, err := types.GetAspectTraceHostHook(r.runnerContext.Ctx)
@@ -37,7 +37,7 @@ func (r *Registry) traceAPIs() interface{} {
 				panic("failed to unmarshal query: " + err.Error())
 			}
 
-			return hook.QueryCallTree(r.runnerContext, query)
+			return wrapNilByte(hook.QueryCallTree(r.runnerContext, query))
 		},
 	}
 }

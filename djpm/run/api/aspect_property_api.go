@@ -14,7 +14,7 @@ func (r *Registry) aspectPropertyAPIs() interface{} {
 			if hook == nil {
 				panic("aspect runtime context host api not found")
 			}
-			return hook.Get(r.runnerContext, key)
+			return wrapNilByte(hook.Get(r.runnerContext, key))
 		},
 	}
 }

@@ -14,7 +14,7 @@ func (r *Registry) transientStorageAPIs() interface{} {
 			if hook == nil {
 				panic("aspect runtime context host api not found")
 			}
-			return hook.Get(r.runnerContext, aspectId, key)
+			return wrapNilByte(hook.Get(r.runnerContext, aspectId, key))
 		},
 		"set": func(key string, val []byte) {
 			hook, err := types.GetAspectTransientStorageHostHook(r.runnerContext.Ctx)
