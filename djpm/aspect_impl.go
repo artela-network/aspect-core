@@ -47,7 +47,10 @@ func AspectInstance() *Aspect {
 }
 
 func (aspect Aspect) FilterTx(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.FILTER_TX, request)
+
+	return types.DefJoinPointResult("this join point will be open in the future.")
+
+	//return aspect.transactionAdvice(ctx, types.FILTER_TX, request)
 }
 
 func (aspect Aspect) VerifyTx(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
@@ -97,7 +100,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	// check contract verifier
-	verifiers, err := aspect.provider.GetAccountVerifiers(block, *tx.To())
+	verifiers, err := aspect.provider.GetAccountVerifiers(ctx, *tx.To())
 	if err != nil {
 		return common.Address{}, nil, err
 	}
@@ -152,7 +155,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 		sender := common.BytesToAddress(txResult.Data)
 
 		// make sure sender accepts this aspect as verifier
-		aspects, err := aspect.provider.GetAccountVerifiers(block, sender)
+		aspects, err := aspect.provider.GetAccountVerifiers(ctx, sender)
 		if err != nil {
 			return common.Address{}, nil, err
 		}
@@ -171,7 +174,7 @@ func (aspect Aspect) blockAdvice(ctx context.Context, method types.PointCut, req
 	if req == nil || method == "" {
 		return types.DefJoinPointResult("blockAdvice input is empty.")
 	}
-	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.Header.Number) - 1)
+	aspectCodes, err := aspect.provider.GetBlockBondAspects(ctx)
 	if err != nil {
 		return types.DefJoinPointResult("blockAdvice GetBlockBondAspects error." + err.Error())
 	}
@@ -209,7 +212,7 @@ func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCu
 	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, contractAddr, method)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(ctx, contractAddr, method)
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
 		result.GasInfo = req.GasInfo
@@ -255,7 +258,7 @@ func (aspect Aspect) verification(ctx context.Context, method types.PointCut, re
 		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
 	}
 
-	aspectCodes, err := aspect.provider.GetAccountVerifiers(req.GetTx().BlockNumber, contractAddr)
+	aspectCodes, err := aspect.provider.GetAccountVerifiers(ctx, contractAddr)
 
 	if err != nil {
 		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
