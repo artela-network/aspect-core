@@ -3,32 +3,17 @@ package api
 import (
 	"crypto"
 	"crypto/sha256"
-	"encoding/base64"
 	"math/big"
 
-	"github.com/cosmos/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
 
-func (r *Register) cryptoApis() interface{} {
+func (r *Registry) cryptoAPIs() interface{} {
 	return map[string]interface{}{
 		"sha256": func(input []byte) []byte {
 			h := sha256.Sum256(input)
 			return h[:]
-		},
-		"base64Encode": func(input []byte) string {
-			return base64.StdEncoding.EncodeToString(input)
-		},
-		"base64Decode": func(input string) []byte {
-			bytes, _ := base64.StdEncoding.DecodeString(input)
-			return bytes
-		},
-		"base58Encode": func(input []byte) string {
-			return base58.Encode(input)
-		},
-		"base58Decode": func(input string) []byte {
-			return base58.Decode(input)
 		},
 		"ripemd160": func(input []byte) []byte {
 			hash := crypto.RIPEMD160.New()

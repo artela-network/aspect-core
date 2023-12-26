@@ -5,17 +5,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/artela-network/aspect-core/djpm/run"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	types2 "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/holiman/uint256"
 
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/artela-network/aspect-core/chaincoreext/scheduler"
-	"github.com/artela-network/aspect-core/djpm/run"
 	"github.com/artela-network/aspect-core/types"
 )
 
@@ -33,9 +32,6 @@ func NewAspect(provider types.AspectProvider) *Aspect {
 	globalAspect = &Aspect{
 		provider: provider,
 	}
-	scheduler.NewScheduleHost()
-	types.GetScheduleHook = scheduler.GetScheduleHostApi
-
 	return globalAspect
 }
 
@@ -46,43 +42,27 @@ func AspectInstance() *Aspect {
 	return globalAspect
 }
 
-func (aspect Aspect) FilterTx(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.FILTER_TX, request)
+func (aspect Aspect) VerifyTx(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.TxVerifyInput) *types.AspectExecutionResult {
+	return aspect.verification(ctx, contract, block, gas, request)
 }
 
-func (aspect Aspect) VerifyTx(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.verification(ctx, types.VERIFY_TX, request)
+func (aspect Aspect) PreTxExecute(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PreTxExecuteInput) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.PRE_TX_EXECUTE_METHOD, contract, block, gas, request)
 }
 
-func (aspect Aspect) PreTxExecute(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.PRE_TX_EXECUTE_METHOD, request)
+func (aspect Aspect) PreContractCall(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PreContractCallInput) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.PRE_CONTRACT_CALL_METHOD, contract, block, gas, request)
 }
 
-func (aspect Aspect) PreContractCall(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.PRE_CONTRACT_CALL_METHOD, request)
+func (aspect Aspect) PostContractCall(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PostContractCallInput) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.POST_CONTRACT_CALL_METHOD, contract, block, gas, request)
 }
 
-func (aspect Aspect) PostContractCall(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.POST_CONTRACT_CALL_METHOD, request)
+func (aspect Aspect) PostTxExecute(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PostTxExecuteInput) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.POST_TX_EXECUTE_METHOD, contract, block, gas, request)
 }
 
-func (aspect Aspect) PostTxExecute(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.POST_TX_EXECUTE_METHOD, request)
-}
-
-func (aspect Aspect) PostTxCommit(ctx context.Context, request *types.EthTxAspect) *types.JoinPointResult {
-	return aspect.transactionAdvice(ctx, types.POST_TX_COMMIT, request)
-}
-
-func (aspect Aspect) OnBlockInitialize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
-	return aspect.blockAdvice(ctx, types.ON_BLOCK_INITIALIZE_METHOD, request)
-}
-
-func (aspect Aspect) OnBlockFinalize(ctx context.Context, request *types.EthBlockAspect) *types.JoinPointResult {
-	return aspect.blockAdvice(ctx, types.ON_BLOCK_FINALIZE_METHOD, request)
-}
-
-func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *types2.Transaction) (common.Address, []byte, error) {
+func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *ethtypes.Transaction) (common.Address, []byte, error) {
 	// transaction without a sig has different tx data encoding than the normal ethereum tx
 	// the data is encoded as follows: abi.encode(validationData, callData)
 	// validationData is the data that will be passed to the aspect verifier
@@ -110,213 +90,116 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	contractVerifier := verifiers[0].AspectId
+	request := &types.TxVerifyInput{
+		Tx: &types.NoFromTxInput{
+			Hash: tx.Hash().Bytes(),
+			To:   tx.To().Bytes(),
+		},
+		Block:          &types.BlockInput{Number: uint64(block)},
+		ValidationData: validation,
+		CallData:       call,
+	}
 
-	request, err := aspect.provider.CreateTxPointRequestWithData(validation)
+	// execute aspect verification
+	verifyRes := aspect.VerifyTx(ctx, tx.To(), block, tx.Gas(), request)
+	if verifyRes.Err != nil {
+		return common.Address{}, nil, verifyRes.Err
+	}
+
+	sender := common.BytesToAddress(verifyRes.Ret)
+
+	// make sure sender accepts this aspect as verifier
+	aspects, err := aspect.provider.GetAccountVerifiers(block, sender)
 	if err != nil {
 		return common.Address{}, nil, err
 	}
 
-	request.Tx = &types.EthTransaction{
-		BlockHash:   nil,
-		BlockNumber: block,
-		Hash:        tx.Hash().Bytes(),
-		Input:       tx.Data(),
-		Nonce:       tx.Nonce(),
-		To:          tx.To().Hex(),
-		Value:       tx.Value().String(),
-		Type:        int32(tx.Type()),
-		ChainId:     tx.ChainId().String(),
-	}
-
-	// execute aspect verification
-	verifyRes := aspect.VerifyTx(ctx, request)
-	hasErr, err := verifyRes.HasErr()
-	if hasErr {
-		return common.Address{}, nil, err
-	}
-
-	resultMap := verifyRes.GetExecResultMap()
-	for _, response := range resultMap {
-		if response.Data == nil {
-			return common.Address{}, nil, err
-		}
-		txResult := new(types.BytesData)
-		anyData := response.Data
-		if err := anyData.UnmarshalTo(txResult); err != nil {
-			return common.Address{}, nil, err
-		}
-		if txResult.Data == nil {
-			return common.Address{}, nil, err
-		}
-
-		sender := common.BytesToAddress(txResult.Data)
-
-		// make sure sender accepts this aspect as verifier
-		aspects, err := aspect.provider.GetAccountVerifiers(block, sender)
-		if err != nil {
-			return common.Address{}, nil, err
-		}
-
-		for _, aspect := range aspects {
-			if aspect.AspectId == contractVerifier {
-				return sender, call, nil
-			}
+	for _, aspect := range aspects {
+		if aspect.AspectId == contractVerifier {
+			return sender, call, nil
 		}
 	}
 
 	return common.Address{}, nil, errors.New("unable to verify tx with aspect")
 }
 
-func (aspect Aspect) blockAdvice(ctx context.Context, method types.PointCut, req *types.EthBlockAspect) *types.JoinPointResult {
-	if req == nil || method == "" {
-		return types.DefJoinPointResult("blockAdvice input is empty.")
+func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCut, contract *common.Address, block int64, gas uint64, request proto.Message) *types.AspectExecutionResult {
+	result := &types.AspectExecutionResult{
+		Gas:    gas,
+		Revert: types.NotRevert,
 	}
-	aspectCodes, err := aspect.provider.GetBlockBondAspects(int64(req.Header.Number) - 1)
-	if err != nil {
-		return types.DefJoinPointResult("blockAdvice GetBlockBondAspects error." + err.Error())
-	}
-	// load aspects
-	if len(aspectCodes) == 0 {
-		return types.DefJoinPointResult("not bond aspects.")
-	}
-	// run aspects on received transaction
 
-	return aspect.runAspect(ctx, method, req.GasInfo.Gas, int64(req.Header.Number), nil, req, aspectCodes)
-}
-
-func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCut, req *types.EthTxAspect) *types.JoinPointResult {
-	if req == nil || req.Tx == nil || types.IsAspectContract(req.Tx.To) {
-		result := types.DefJoinPointResult("transactionAdvice invalid input.")
-		result.GasInfo = req.GasInfo
+	if contract == nil {
+		// pass on contract creation call
 		return result
 	}
-	if req.Tx.To == "" {
-		result := types.DefJoinPointResult("it is create tx.")
-		result.GasInfo = req.GasInfo
-		return result
-	}
-	if len(req.Tx.Hash) != 0 {
-		// skip scheduleTx
-		txHash := common.BytesToHash(req.Tx.Hash)
-		if nil != scheduler.TaskInstance() && scheduler.TaskInstance().IsScheduleTx(txHash) {
-			result := types.DefJoinPointResult("it is schedule tx.")
-			result.GasInfo = req.GasInfo
-			return result
-		}
-	}
+
 	// get binding contract address
-	contractAddr := common.HexToAddress(req.Tx.To)
-	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
-		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
-	}
-	aspectCodes, err := aspect.provider.GetTxBondAspects(req.GetTx().BlockNumber, contractAddr, method)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(block, *contract, method)
 	if err != nil {
-		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
-		result.GasInfo = req.GasInfo
+		result.Err = err
+		result.Revert = types.RevertCall
 		return result
 	}
 	if len(aspectCodes) == 0 {
-		result := types.DefJoinPointResult("not bond aspects.")
-		result.GasInfo = req.GasInfo
 		return result
 	}
 
 	// run aspects on received transaction
-	runAspect := aspect.runAspect(ctx, method, req.GasInfo.Gas, req.GetTx().BlockNumber, &contractAddr, req, aspectCodes)
-	if len(req.Tx.Hash) != 0 {
-		runAspect.TxHash = common.Bytes2Hex(req.Tx.Hash)
-	}
-	return runAspect
+	return aspect.runAspect(ctx, method, gas, block, contract, request, aspectCodes)
 }
 
-func (aspect Aspect) verification(ctx context.Context, method types.PointCut, req *types.EthTxAspect) *types.JoinPointResult {
-	if req == nil || req.Tx == nil || types.IsAspectContract(req.Tx.To) {
-		result := types.DefJoinPointResult("verification invalid input.")
-		result.GasInfo = req.GasInfo
-		return result
-	}
-	if req.Tx.To == "" {
-		result := types.DefJoinPointResult("it is create tx.")
-		result.GasInfo = req.GasInfo
-		return result
-	}
-	if len(req.Tx.Hash) != 0 {
-		// skip scheduleTx
-		txHash := common.BytesToHash(req.Tx.Hash)
-		if nil != scheduler.TaskInstance() && scheduler.TaskInstance().IsScheduleTx(txHash) {
-			result := types.DefJoinPointResult("it is schedule tx.")
-			result.GasInfo = req.GasInfo
-			return result
+func (aspect Aspect) verification(ctx context.Context, contract *common.Address, block int64, gas uint64, req *types.TxVerifyInput) *types.AspectExecutionResult {
+	if contract == nil {
+		// not able to verify contract creation tx
+		return &types.AspectExecutionResult{
+			Gas:    gas,
+			Err:    errors.New("not able to verify contract creation tx"),
+			Revert: types.RevertTx,
 		}
 	}
-	// get binding contract address
-	contractAddr := common.HexToAddress(req.Tx.To)
-	if req.CurrInnerTx != nil && req.CurrInnerTx.To != "" {
-		contractAddr = common.HexToAddress(req.CurrInnerTx.To)
-	}
 
-	aspectCodes, err := aspect.provider.GetAccountVerifiers(req.GetTx().BlockNumber, contractAddr)
-
-	if err != nil {
-		result := types.DefJoinPointResult("transactionAdvice GetTxBondAspects error." + err.Error())
-		result.GasInfo = req.GasInfo
-		return result
-	}
-	if len(aspectCodes) == 0 {
-		result := types.DefJoinPointResult("not bond aspects.")
-		result.GasInfo = req.GasInfo
-		return result
+	aspectCodes, err := aspect.provider.GetAccountVerifiers(block, *contract)
+	if err != nil || len(aspectCodes) == 0 {
+		return &types.AspectExecutionResult{
+			Gas:    gas,
+			Err:    errors.New("contract has not bound with any verifier aspect"),
+			Revert: types.RevertTx,
+		}
 	}
 
 	// run aspects on received transaction
-	runAspect := aspect.runAspect(ctx, method, req.GasInfo.Gas, req.GetTx().BlockNumber, &contractAddr, req, aspectCodes)
-	if len(req.Tx.Hash) != 0 {
-		runAspect.TxHash = common.Bytes2Hex(req.Tx.Hash)
-	}
-	return runAspect
+	return aspect.runAspect(ctx, types.VERIFY_TX, gas, block, contract, req, aspectCodes)
 }
 
-func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, req []*types.AspectCode) (response *types.JoinPointResult) {
-	aspectId := ""
-	defer func() {
-		if err := recover(); err != nil {
-			// TODO log.Error(running aspect failed")
-			response.WithErr(aspectId, errors.New("fatal: panic in running aspect"))
-		}
-	}()
+func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, aspects []*types.AspectCode) (result *types.AspectExecutionResult) {
+	result = &types.AspectExecutionResult{
+		Gas:    gas,
+		Revert: types.NotRevert,
+	}
 
-	response = &types.JoinPointResult{}
-
-	gasLeft := gas
-	for _, aspect := range req {
-		aspectId = aspect.AspectId
-		runner, err := run.NewRunner(ctx, aspectId, aspect.Code)
+	for _, aspect := range aspects {
+		var err error
+		runner, err := run.NewRunner(ctx, aspect.AspectId, aspect.Version, aspect.Code)
 		if err != nil {
-			return response.WithErr(aspectId, err)
+			panic(err)
 		}
 
-		if res, callErr := runner.JoinPoint(method, gasLeft, blockNumber, contractAddr, reqData); callErr != nil {
-			response.WithErr(aspectId, callErr)
-		} else {
-			response.WithResponse(aspectId, res)
-		}
-
-		gasLeft = runner.Gas()
-
+		var ret []byte
+		ret, gas, err = runner.JoinPoint(method, gas, blockNumber, contractAddr, reqData)
 		runner.Return()
 
-		if hasErr, _ := response.HasErr(); hasErr {
-			// short-circuit Aspect call
-			totalGasUsed := gas - gasLeft
-			response.WithGas(totalGasUsed, totalGasUsed, gasLeft)
-			return response
+		result.Ret = ret
+		if err != nil {
+			result.Err = err
+			result.Revert = types.RevertCall
+			break
 		}
 	}
 
-	totalGasUsed := gas - gasLeft
-	response.WithGas(totalGasUsed, totalGasUsed, gasLeft)
+	result.Gas = gas
 
-	return response
+	return result
 }
 
 func DecodeValidationAndCallData(txData []byte) (validationData, callData []byte, err error) {

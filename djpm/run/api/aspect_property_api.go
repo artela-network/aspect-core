@@ -4,10 +4,10 @@ import (
 	"github.com/artela-network/aspect-core/types"
 )
 
-func (r *Registry) runtimeContextAPIs() interface{} {
+func (r *Registry) aspectPropertyAPIs() interface{} {
 	return map[string]interface{}{
 		"get": func(key string) []byte {
-			hook, err := types.GetAspectRuntimeContextHostHook(r.runnerContext.Ctx)
+			hook, err := types.GetAspectPropertyHostHook(r.runnerContext.Ctx)
 			if err != nil {
 				panic("failed to init aspect runtime context host api: " + err.Error())
 			}

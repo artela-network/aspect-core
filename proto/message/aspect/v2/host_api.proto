@@ -2,66 +2,119 @@ syntax = "proto3";
 
 package aspect.v2;
 
-import "aspect/v2/base_message.proto";
-import "google/protobuf/any.proto";
-
-
 option go_package = "github.com/artela-network/aspect-core/types";
 
-message ContextSetRequest {
-    SetNameSpace name_space = 1;
-    string key = 2;
-    string value = 3;
-}
-message ContextQueryRequest {
-    QueryNameSpace name_space = 1;
-    google.protobuf.Any query = 2;
-}
-message ContextRemoveRequest {
-    RemoveNameSpace name_space = 1;
-    google.protobuf.Any query = 2;
+// evm api types
+message StaticCallRequest {
+    bytes from = 1;
+    bytes to = 2;
+    bytes data = 3;
+    uint64 gas = 4;
 }
 
-message ContextQueryResponse {
-    RunResult result = 1;
-    google.protobuf.Any data = 2;
+message StaticCallResult {
+    bytes ret = 1;
+    string vm_error = 2;
+    uint64 gas_left = 3;
 }
 
-// MsgEthereumTxResponse defines the Msg/EthereumTx response type.
-message EthMessageCallResult {
-
-    // hash of the ethereum transaction in hex format. This hash differs from the
-    // Tendermint sha256 hash of the transaction bytes. See
-    // https://github.com/tendermint/tendermint/issues/6539 for reference
-    string hash = 1;
-    // logs contains the transaction hash and the proto-compatible ethereum
-    // logs.
-    repeated EthLog logs = 2;
-    // ret is the returned data from evm function (result or data supplied with revert
-    // opcode)
-    bytes ret = 3;
-    // vm_error is the error returned by vm execution
-    string vm_error = 4;
-    // gas_used specifies how much gas was consumed by the transaction
-    uint64 gas_used = 5;
+message JitInherentRequest {
+    bytes sender = 1;
+    uint64 nonce = 2;
+    bytes nonce_key = 3;
+    bytes init_code = 4;
+    bytes call_data = 5;
+    uint64 call_gas_limit = 6;
+    uint64 verification_gas_limit = 7;
+    bytes paymaster_and_data = 8;
 }
-// Valida
-message EthMessage {
-    string to = 1;
+
+message JitInherentResponse {
+    repeated bytes jit_inherent_hashes = 1;
+    bytes tx_hash = 2;
+    bool success = 3;
+    bytes ret = 4;
+    string error_msg = 5;
+}
+
+// runtime context types
+message EthLogs {
+    repeated EthLog logs = 1;
+}
+
+message EthLog {
+    // address of the contract that generated the event
+    bytes address = 1;
+    // topics is a list of topics provided by the contract.
+    repeated bytes topics = 2;
+    // data which is supplied by the contract, usually ABI-encoded
+    bytes data = 3;
+
+    uint64 index = 4;
+}
+
+message EthReceipt {
+    uint64 status = 1;
+    uint64 cumulative_gas_used = 2;
+    bytes logs_bloom = 3;
+    bytes effective_gas_price = 4;
+    repeated EthLog logs = 5;
+}
+
+message EthAccessList {
+    repeated EthAccessTuple access_list = 1;
+}
+
+message EthAccessTuple {
+    bytes address = 1;
+    repeated bytes storage_keys = 2;
+}
+
+// trace api types
+message StateChangeQuery {
+    bytes account = 1;
+    string state_var_name = 2;
+    repeated bytes indices = 3;
+}
+
+message CallTreeQuery {
+    int64 call_idx = 1;
+}
+
+message EthCallMessage {
+    bytes from = 1;
+    bytes to = 2;
     // data is the data payload bytes of the transaction.
-    bytes input = 2;
-    uint64 nonce = 3;
-    string from = 4;
-    string gas_tip_cap = 5;
-    // gas_fee_cap defines the max value for the gas fee
-    string gas_fee_cap = 6;
-    // gas defines the gas limit defined for the transaction.
-    uint64 gas = 7;
-    string gas_price = 8;
-    string value = 9;
-    bool is_fake = 10;
+    bytes data = 3;
+    uint64 gas = 4;
+    bytes value = 5;
+    bytes ret = 6;
+    uint64 gas_used = 7;
+    string error = 8;
+    uint64 index = 9;
+    int64 parent_index = 10;
+    repeated uint64 children_indices = 11;
 }
 
+message EthStateChange {
+    bytes account = 1;
+    bytes value = 2;
+    uint64 call_index = 3;
+}
+
+message EthStateChangeIndices {
+    repeated bytes indices = 1;
+}
+
+message EthStateChanges {
+    repeated EthStateChange all = 1;
+}
+
+message EthCallTree {
+    map<uint64, EthCallMessage> calls = 1;
+}
+
+// basic types
 message StringData {
     string data = 1;
 }
@@ -70,8 +123,16 @@ message StringArrayData {
     repeated string data = 1;
 }
 
+message UintData {
+    uint64 data = 1;
+}
+
 message IntData {
     int64 data = 1;
+}
+
+message IntArrayData {
+    repeated int64 data = 1;
 }
 
 message BoolData {
@@ -82,42 +143,6 @@ message BytesArrayData {
     repeated bytes data = 1;
 }
 
-message UintData{
-  uint64 data=1;
-}
-
-message CallMessageRequest {
-    EthMessage message = 1;
-}
-message CallMessageResponse {
-    RunResult result = 1;
-    EthMessageCallResult data = 2;
-}
-
 message BytesData {
     bytes data = 1;
-}
-enum QueryNameSpace {
-    QueryAspectState = 0;
-    QueryAspectProperty = 1;
-}
-
-enum SetNameSpace {
-    SetAspectContext = 0;
-    SetAspectState = 1;
-}
-
-enum RemoveNameSpace {
-    RemoveAspectContext = 0;
-    RemoveAspectState = 1;
-}
-
-message SateChangeQuery {
-    string account = 1;
-    string stateVarName = 2;
-    repeated bytes indices = 3;
-}
-
-message CallStackQuery {
-    repeated uint64 callIndex = 1;
 }

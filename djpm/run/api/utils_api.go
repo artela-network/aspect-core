@@ -1,25 +1,11 @@
 package api
 
 import (
-	"encoding/hex"
-	"strings"
-
 	"github.com/ethereum/go-ethereum/log"
 )
 
-func (r *Register) utilApis() interface{} {
+func (r *Registry) utilAPIs() interface{} {
 	return map[string]interface{}{
-		"fromHexString": func(s string) []byte {
-			s = strings.TrimPrefix(s, "0x")
-			data, err := hex.DecodeString(s)
-			if err != nil {
-				return []byte{}
-			}
-			return data
-		},
-		"toHexString": func(data []byte) string {
-			return hex.EncodeToString(data)
-		},
 		"revert": func(msg string) {
 			if r.errCallback != nil {
 				r.errCallback(msg)

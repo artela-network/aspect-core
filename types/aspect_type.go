@@ -2,15 +2,14 @@ package types
 
 import (
 	"context"
-	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 )
 
 // for jit-inherent
 var (
-	GetAspectContext func(ctx context.Context, aspectId string, key string) (string, error)
-	SetAspectContext func(ctx context.Context, aspectId string, key string, value string) error
+	GetAspectContext func(ctx context.Context, aspectId common.Address, key string) ([]byte, error)
+	SetAspectContext func(ctx context.Context, aspectId common.Address, key string, value []byte) error
 )
 
 var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
@@ -18,11 +17,10 @@ var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Ad
 type PointCut string
 
 type AspectProvider interface {
-	GetTxBondAspects(int64, common.Address, PointCut) ([]*AspectCode, error)
-	GetAccountVerifiers(int64, common.Address) ([]*AspectCode, error)
-	GetBlockBondAspects(int64) ([]*AspectCode, error)
+	GetTxBondAspects(block int64, contract common.Address, joinpoint PointCut) ([]*AspectCode, error)
+	GetAccountVerifiers(block int64, account common.Address) ([]*AspectCode, error)
+	GetBlockBondAspects(block int64) ([]*AspectCode, error)
 	GetLatestBlock() int64
-	CreateTxPointRequestWithData(data []byte) (*EthTxAspect, error)
 }
 
 const (
@@ -41,8 +39,6 @@ const (
 	IS_OWNER_METHOD            PointCut = "isOwner"
 	ON_CONTRACT_BINDING_METHOD PointCut = "onContractBinding"
 )
-
-const DefaultKey = "-"
 
 type JoinPointRunType int64
 
@@ -107,95 +103,4 @@ func CheckIsTransactionLevel(runJPs int64) bool {
 }
 func CheckIsTxVerifier(runJPs int64) bool {
 	return runJPs&(int64(JoinPointRunType_VerifyTx)) == int64(JoinPointRunType_VerifyTx)
-}
-
-func ErrRunResult(message string) *RunResult {
-	return &RunResult{
-		Success: false,
-		Message: message,
-	}
-}
-
-func DefRunResult() *RunResult {
-	return &RunResult{
-		Success: true,
-		Message: "success",
-	}
-}
-
-func ErrJoinPointResult(message string) *JoinPointResult {
-	response := &AspectResponse{
-		Result: &RunResult{
-			Success: false,
-			Message: message,
-		},
-		DataMessageType: DefaultKey,
-	}
-	m := make(map[string]*AspectResponse, 0)
-	m[DefaultKey] = response
-	return &JoinPointResult{
-		ExecResultMap: m,
-	}
-}
-
-func DefJoinPointResult(message string) *JoinPointResult {
-	response := &AspectResponse{
-		Result: &RunResult{
-			Success: true,
-			Message: message,
-		},
-		DataMessageType: DefaultKey,
-	}
-	m := make(map[string]*AspectResponse, 0)
-	m[DefaultKey] = response
-	return &JoinPointResult{
-		ExecResultMap: m,
-	}
-}
-
-func (c *JoinPointResult) HasErr() (bool, error) {
-	if c.ExecResultMap == nil {
-		return false, nil
-	}
-	for k, v := range c.ExecResultMap {
-		if !v.Result.Success {
-			return true, errors.New(k + " " + v.Result.Message)
-		}
-	}
-	return false, nil
-}
-
-func (c *JoinPointResult) WithResponse(aspectId string, output *AspectResponse) *JoinPointResult {
-	if c.ExecResultMap == nil {
-		c.ExecResultMap = make(map[string]*AspectResponse)
-	}
-	if aspectId != "" && output != nil {
-		c.ExecResultMap[aspectId] = output
-	}
-	return c
-}
-
-func (c *JoinPointResult) WithGas(gasWanted, gasUsed, gasLeft uint64) *JoinPointResult {
-	c.GasInfo = &GasInfo{
-		GasWanted: gasWanted,
-		GasUsed:   gasUsed,
-		Gas:       gasLeft,
-	}
-	return c
-}
-
-func (c *JoinPointResult) WithErr(aspectId string, err error) *JoinPointResult {
-	errMsg := "fail"
-	if err != nil {
-		errMsg = err.Error()
-	}
-	result := &RunResult{
-		Success: false,
-		Message: errMsg,
-	}
-	response := &AspectResponse{
-		Result: result,
-	}
-	c.WithResponse(aspectId, response)
-	return c
 }
