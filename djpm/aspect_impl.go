@@ -185,10 +185,10 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 			panic(err)
 		}
 
-		defer runner.Return()
-
 		var ret []byte
 		ret, gas, err = runner.JoinPoint(method, gas, blockNumber, contractAddr, reqData)
+		runner.Return()
+
 		result.Ret = ret
 		if err != nil {
 			result.Err = err
