@@ -12,14 +12,14 @@ var (
 	SetAspectContext func(ctx context.Context, aspectId common.Address, key string, value []byte) error
 )
 
-var GetAspectPaymaster func(blockNum int64, aspectId common.Address) (*common.Address, error)
+var GetAspectPaymaster func(ctx context.Context, aspectId common.Address) (*common.Address, error)
 
 type PointCut string
 
 type AspectProvider interface {
-	GetTxBondAspects(block int64, contract common.Address, joinpoint PointCut) ([]*AspectCode, error)
-	GetAccountVerifiers(block int64, account common.Address) ([]*AspectCode, error)
-	GetBlockBondAspects(block int64) ([]*AspectCode, error)
+	GetTxBondAspects(context.Context, common.Address, PointCut) ([]*AspectCode, error)
+	GetAccountVerifiers(context.Context, common.Address) ([]*AspectCode, error)
+	GetBlockBondAspects(ctx context.Context) ([]*AspectCode, error)
 	GetLatestBlock() int64
 }
 
