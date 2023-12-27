@@ -77,7 +77,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	// check contract verifier
-	verifiers, err := aspect.provider.GetAccountVerifiers(block, *tx.To())
+	verifiers, err := aspect.provider.GetAccountVerifiers(ctx, *tx.To())
 	if err != nil {
 		return common.Address{}, nil, err
 	}
@@ -109,7 +109,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	sender := common.BytesToAddress(verifyRes.Ret)
 
 	// make sure sender accepts this aspect as verifier
-	aspects, err := aspect.provider.GetAccountVerifiers(block, sender)
+	aspects, err := aspect.provider.GetAccountVerifiers(ctx, sender)
 	if err != nil {
 		return common.Address{}, nil, err
 	}
@@ -135,7 +135,7 @@ func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCu
 	}
 
 	// get binding contract address
-	aspectCodes, err := aspect.provider.GetTxBondAspects(block, *contract, method)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(ctx, *contract, method)
 	if err != nil {
 		result.Err = err
 		result.Revert = types.RevertCall
@@ -159,7 +159,7 @@ func (aspect Aspect) verification(ctx context.Context, contract *common.Address,
 		}
 	}
 
-	aspectCodes, err := aspect.provider.GetAccountVerifiers(block, *contract)
+	aspectCodes, err := aspect.provider.GetAccountVerifiers(ctx, *contract)
 	if err != nil || len(aspectCodes) == 0 {
 		return &types.AspectExecutionResult{
 			Gas:    gas,
