@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artela-network/aspect-core/djpm/run"
+
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/artela-network/aspect-core/djpm/run"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -90,12 +92,13 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	contractVerifier := verifiers[0].AspectId
+	uintBlock := uint64(block)
 	request := &types.TxVerifyInput{
 		Tx: &types.NoFromTxInput{
 			Hash: tx.Hash().Bytes(),
 			To:   tx.To().Bytes(),
 		},
-		Block:          &types.BlockInput{Number: uint64(block)},
+		Block:          &types.BlockInput{Number: &uintBlock},
 		ValidationData: validation,
 		CallData:       call,
 	}

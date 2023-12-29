@@ -143,9 +143,10 @@ func (m *Manager) submitJITCall(ctx context.Context, aspect common.Address, gas 
 	userOpHashes := m.cacheUserOp(aspect, userOp)
 	defer m.ClearUserOp(userOpHashes[0])
 
+	defSuccess := false
 	resp := &types.JitInherentResponse{
 		JitInherentHashes: [][]byte{userOpHashes[0].Bytes()},
-		Success:           false,
+		Success:           &defSuccess,
 	}
 
 	callData, err := m.entrypointABI.Pack("handleOps", []aa.UserOperation{*userOp}, userOp.Sender)
@@ -153,7 +154,8 @@ func (m *Manager) submitJITCall(ctx context.Context, aspect common.Address, gas 
 		return nil, gas, err
 	}
 	ret, gas, err := baseLayerVM.Call(ctx, vm.AccountRef(userOp.Sender), aa.EntryPointContract, callData, gas, big.NewInt(0))
-	resp.Success = err == nil
+	hasErr := err == nil
+	resp.Success = &hasErr
 	if err == nil || err.Error() == vm.ErrExecutionReverted.Error() {
 		// ignore the reverted error
 		resp.Ret = ret
@@ -254,8 +256,9 @@ func (m *Manager) getNonce(ctx context.Context, address common.Address, key *big
 
 func NewUserOperation(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePerGas uint64, protoMsg *types.JitInherentRequest) *aa.UserOperation {
 	zero := new(big.Int)
-	callGasLimit := new(big.Int).SetUint64(protoMsg.CallGasLimit)
-	verificationGasLimit := new(big.Int).SetUint64(protoMsg.VerificationGasLimit)
+
+	callGasLimit := new(big.Int).SetUint64(*protoMsg.CallGasLimit)
+	verificationGasLimit := new(big.Int).SetUint64(*protoMsg.VerificationGasLimit)
 	if verificationGasLimit.Cmp(zero) <= 0 {
 		// by default use 1/5 remaining gas for verification
 		verificationGasLimit.SetUint64(leftoverGas / 5)
@@ -270,7 +273,7 @@ func NewUserOperation(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePer
 
 	userOp := &aa.UserOperation{
 		Sender:               common.BytesToAddress(protoMsg.Sender),
-		Nonce:                nonceKey.Add(nonceKey, uint256.NewInt(0).SetUint64(protoMsg.Nonce)).ToBig(),
+		Nonce:                nonceKey.Add(nonceKey, uint256.NewInt(0).SetUint64(*protoMsg.Nonce)).ToBig(),
 		InitCode:             protoMsg.InitCode,
 		CallData:             protoMsg.CallData,
 		CallGasLimit:         callGasLimit,

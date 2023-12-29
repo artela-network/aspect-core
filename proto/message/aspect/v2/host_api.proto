@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package aspect.v2;
 
@@ -6,35 +6,35 @@ option go_package = "github.com/artela-network/aspect-core/types";
 
 // evm api types
 message StaticCallRequest {
-    bytes from = 1;
-    bytes to = 2;
-    bytes data = 3;
-    uint64 gas = 4;
+    optional bytes from = 1;
+    required bytes to = 2;
+    required bytes data = 3;
+    optional uint64 gas = 4;
 }
 
 message StaticCallResult {
-    bytes ret = 1;
-    string vm_error = 2;
-    uint64 gas_left = 3;
+    optional bytes ret = 1;
+    optional string vm_error = 2;
+    required uint64 gas_left = 3;
 }
 
 message JitInherentRequest {
-    bytes sender = 1;
-    uint64 nonce = 2;
-    bytes nonce_key = 3;
-    bytes init_code = 4;
-    bytes call_data = 5;
-    uint64 call_gas_limit = 6;
-    uint64 verification_gas_limit = 7;
-    bytes paymaster_and_data = 8;
+    required bytes sender = 1;
+    optional uint64 nonce = 2;
+    optional bytes nonce_key = 3;
+    optional bytes init_code = 4;
+    required bytes call_data = 5;
+    optional uint64 call_gas_limit = 6;
+    optional uint64 verification_gas_limit = 7;
+    optional bytes paymaster_and_data = 8;
 }
 
 message JitInherentResponse {
     repeated bytes jit_inherent_hashes = 1;
-    bytes tx_hash = 2;
-    bool success = 3;
-    bytes ret = 4;
-    string error_msg = 5;
+    optional bytes tx_hash = 2;
+    required bool success = 3;
+    optional bytes ret = 4;
+    optional string error_msg = 5;
 }
 
 // runtime context types
@@ -44,20 +44,20 @@ message EthLogs {
 
 message EthLog {
     // address of the contract that generated the event
-    bytes address = 1;
+    required bytes address = 1;
     // topics is a list of topics provided by the contract.
     repeated bytes topics = 2;
     // data which is supplied by the contract, usually ABI-encoded
-    bytes data = 3;
+    required bytes data = 3;
 
-    uint64 index = 4;
+    required uint64 index = 4;
 }
 
 message EthReceipt {
-    uint64 status = 1;
-    uint64 cumulative_gas_used = 2;
-    bytes logs_bloom = 3;
-    bytes effective_gas_price = 4;
+    required uint64 status = 1;
+    required uint64 cumulative_gas_used = 2;
+    required bytes logs_bloom = 3;
+    required bytes effective_gas_price = 4;
     repeated EthLog logs = 5;
 }
 
@@ -66,40 +66,40 @@ message EthAccessList {
 }
 
 message EthAccessTuple {
-    bytes address = 1;
+    required bytes address = 1;
     repeated bytes storage_keys = 2;
 }
 
 // trace api types
 message StateChangeQuery {
-    bytes account = 1;
-    string state_var_name = 2;
+    required bytes account = 1;
+    required string state_var_name = 2;
     repeated bytes indices = 3;
 }
 
 message CallTreeQuery {
-    int64 call_idx = 1;
+    required int64 call_idx = 1;
 }
 
 message EthCallMessage {
-    bytes from = 1;
-    bytes to = 2;
+    required bytes from = 1;
+    required bytes to = 2;
     // data is the data payload bytes of the transaction.
-    bytes data = 3;
-    uint64 gas = 4;
-    bytes value = 5;
-    bytes ret = 6;
-    uint64 gas_used = 7;
-    string error = 8;
-    uint64 index = 9;
-    int64 parent_index = 10;
+    required bytes data = 3;
+    required uint64 gas = 4;
+    required bytes value = 5;
+    optional bytes ret = 6;
+    optional uint64 gas_used = 7;
+    optional string error = 8;
+    required uint64 index = 9;
+    required int64 parent_index = 10;
     repeated uint64 children_indices = 11;
 }
 
 message EthStateChange {
-    bytes account = 1;
-    bytes value = 2;
-    uint64 call_index = 3;
+    required bytes account = 1;
+    required bytes value = 2;
+    required uint64 call_index = 3;
 }
 
 message EthStateChangeIndices {
@@ -116,7 +116,7 @@ message EthCallTree {
 
 // basic types
 message StringData {
-    string data = 1;
+    required string data = 1;
 }
 
 message StringArrayData {
@@ -124,11 +124,11 @@ message StringArrayData {
 }
 
 message UintData {
-    uint64 data = 1;
+    required uint64 data = 1;
 }
 
 message IntData {
-    int64 data = 1;
+    required int64 data = 1;
 }
 
 message IntArrayData {
@@ -136,7 +136,7 @@ message IntArrayData {
 }
 
 message BoolData {
-    bool data = 1;
+    required bool data = 1;
 }
 
 message BytesArrayData {
@@ -144,5 +144,5 @@ message BytesArrayData {
 }
 
 message BytesData {
-    bytes data = 1;
+    required bytes data = 1;
 }

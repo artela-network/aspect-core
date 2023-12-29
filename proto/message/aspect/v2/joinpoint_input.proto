@@ -1,80 +1,80 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package aspect.v2;
 
 option go_package = "github.com/artela-network/aspect-core/types";
 
 message NoFromTxInput {
-    bytes hash = 1;
-    bytes to = 2;
+    required bytes hash = 1;
+    required bytes to = 2;
 }
 
 message WithFromTxInput {
-    bytes hash = 1;
-    bytes to = 2;
-    bytes from = 3;
+    required bytes hash = 1;
+    required bytes to = 2;
+    required bytes from = 3;
 }
 
 message PreExecMessageInput {
-    bytes from = 1;
-    bytes to = 2;
-    uint64 index = 3;
-    bytes data = 4;
-    bytes value = 5;
-    uint64 gas = 6;
+    required bytes from = 1;
+    required bytes to = 2;
+    required uint64 index = 3;
+    required bytes data = 4;
+    required bytes value = 5;
+    required uint64 gas = 6;
 }
 
 message PostExecMessageInput {
-    bytes from = 1;
-    bytes to = 2;
-    uint64 index = 3;
-    bytes data = 4;
-    bytes value = 5;
-    uint64 gas = 6;
-    bytes ret = 7;
-    string error = 8;
+    required bytes from = 1;
+    required bytes to = 2;
+    required uint64 index = 3;
+    required bytes data = 4;
+    required bytes value = 5;
+    optional uint64 gas = 6;
+    optional bytes ret = 7;
+    optional string error = 8;
 }
 
 message BlockInput {
-    uint64 number = 1;
+    required uint64 number = 1;
 }
 
 message ReceiptInput {
-    uint64 status = 1;
+    required uint64 status = 1;
 }
 
 message TxVerifyInput {
-    NoFromTxInput tx = 1;
-    BlockInput block = 2;
-    bytes validation_data = 3;
-    bytes call_data = 4;
+    required NoFromTxInput tx = 1;
+    required BlockInput block = 2;
+    required bytes validation_data = 3;
+    required bytes call_data = 4;
 }
 
 message PreTxExecuteInput {
-    WithFromTxInput tx = 1;
-    BlockInput block = 2;
+    required WithFromTxInput tx = 1;
+    required BlockInput block = 2;
 }
 
 message OperationInput {
-    WithFromTxInput tx = 1;
-    BlockInput block = 2;
-    bytes call_data = 3;
+    required WithFromTxInput tx = 1;
+    required BlockInput block = 2;
+    required bytes call_data = 3;
 }
 
 message PostTxExecuteInput {
-    WithFromTxInput tx = 1;
-    BlockInput block = 2;
-    ReceiptInput receipt = 3;
+    required WithFromTxInput tx = 1;
+    required BlockInput block = 2;
+    required ReceiptInput receipt = 3;
 }
 
 message PreContractCallInput {
-    PreExecMessageInput call = 1;
-    BlockInput block = 2;
+    required PreExecMessageInput call = 1;
+    required BlockInput block = 2;
 }
 
 message PostContractCallInput {
-    PostExecMessageInput call = 1;
-    BlockInput block = 2;
+    required PostExecMessageInput call = 1;
+    required BlockInput block = 2;
 }
 
 
