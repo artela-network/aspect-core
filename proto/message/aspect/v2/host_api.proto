@@ -6,143 +6,143 @@ option go_package = "github.com/artela-network/aspect-core/types";
 
 // evm api types
 message StaticCallRequest {
-  optional  bytes from = 1;
-  required  bytes to = 2;
-  required  bytes data = 3;
-  optional uint64 gas = 4;
+    optional bytes from = 1;
+    required bytes to = 2;
+    required bytes data = 3;
+    optional uint64 gas = 4;
 }
 
 message StaticCallResult {
-  optional  bytes ret = 1;
-  optional  string vm_error = 2;
-  required  uint64 gas_left = 3;
+    optional bytes ret = 1;
+    optional string vm_error = 2;
+    required uint64 gas_left = 3;
 }
 
 message JitInherentRequest {
-  required   bytes sender = 1;
-  optional uint64 nonce = 2;
-  optional bytes nonce_key = 3;
-  optional bytes init_code = 4;
-  required bytes call_data = 5;
-  optional uint64 call_gas_limit = 6;
-  optional uint64 verification_gas_limit = 7;
-  optional  bytes paymaster_and_data = 8;
+    required bytes sender = 1;
+    optional uint64 nonce = 2;
+    optional bytes nonce_key = 3;
+    optional bytes init_code = 4;
+    required bytes call_data = 5;
+    optional uint64 call_gas_limit = 6;
+    optional uint64 verification_gas_limit = 7;
+    optional bytes paymaster_and_data = 8;
 }
 
 message JitInherentResponse {
-  repeated bytes jit_inherent_hashes = 1;
-  optional  bytes tx_hash = 2;
-  required bool success = 3;
-  optional bytes ret = 4;
-  optional string error_msg = 5;
+    repeated bytes jit_inherent_hashes = 1;
+    optional bytes tx_hash = 2;
+    required bool success = 3;
+    optional bytes ret = 4;
+    optional string error_msg = 5;
 }
 
 // runtime context types
 message EthLogs {
-  repeated EthLog logs = 1;
+    repeated EthLog logs = 1;
 }
 
 message EthLog {
-  // address of the contract that generated the event
-  required  bytes address = 1;
-  // topics is a list of topics provided by the contract.
-  repeated bytes topics = 2;
-  // data which is supplied by the contract, usually ABI-encoded
-  required  bytes data = 3;
+    // address of the contract that generated the event
+    required bytes address = 1;
+    // topics is a list of topics provided by the contract.
+    repeated bytes topics = 2;
+    // data which is supplied by the contract, usually ABI-encoded
+    required bytes data = 3;
 
-  required  uint64 index = 4;
+    required uint64 index = 4;
 }
 
 message EthReceipt {
-  required  uint64 status = 1;
-  required  uint64 cumulative_gas_used = 2;
-  required  bytes logs_bloom = 3;
-  required  bytes effective_gas_price = 4;
-  repeated  EthLog logs = 5;
+    required uint64 status = 1;
+    required uint64 cumulative_gas_used = 2;
+    required bytes logs_bloom = 3;
+    required bytes effective_gas_price = 4;
+    repeated EthLog logs = 5;
 }
 
 message EthAccessList {
-  repeated EthAccessTuple access_list = 1;
+    repeated EthAccessTuple access_list = 1;
 }
 
 message EthAccessTuple {
-  required bytes address = 1;
-  repeated bytes storage_keys = 2;
+    required bytes address = 1;
+    repeated bytes storage_keys = 2;
 }
 
 // trace api types
 message StateChangeQuery {
-  required bytes account = 1;
-  required string state_var_name = 2;
-  repeated bytes indices = 3;
+    required bytes account = 1;
+    required string state_var_name = 2;
+    repeated bytes indices = 3;
 }
 
 message CallTreeQuery {
-  required  int64 call_idx = 1;
+    required int64 call_idx = 1;
 }
 
 message EthCallMessage {
-  required  bytes from = 1;
-  required  bytes to = 2;
-  // data is the data payload bytes of the transaction.
-  required  bytes data = 3;
-  required  uint64 gas = 4;
-  required  bytes value = 5;
-  optional  bytes ret = 6;
-  optional  uint64 gas_used = 7;
-  optional string error = 8;
-  required  uint64 index = 9;
-  required int64 parent_index = 10;
-  repeated uint64 children_indices = 11;
+    required bytes from = 1;
+    required bytes to = 2;
+    // data is the data payload bytes of the transaction.
+    required bytes data = 3;
+    required uint64 gas = 4;
+    required bytes value = 5;
+    optional bytes ret = 6;
+    optional uint64 gas_used = 7;
+    optional string error = 8;
+    required uint64 index = 9;
+    required int64 parent_index = 10;
+    repeated uint64 children_indices = 11;
 }
 
 message EthStateChange {
-  required   bytes account = 1;
-  required  bytes value = 2;
-  required  uint64 call_index = 3;
+    required bytes account = 1;
+    required bytes value = 2;
+    required uint64 call_index = 3;
 }
 
 message EthStateChangeIndices {
-  repeated bytes indices = 1;
+    repeated bytes indices = 1;
 }
 
 message EthStateChanges {
-  repeated EthStateChange all = 1;
+    repeated EthStateChange all = 1;
 }
 
 message EthCallTree {
-  map<uint64, EthCallMessage> calls = 1;
+    map<uint64, EthCallMessage> calls = 1;
 }
 
 // basic types
 message StringData {
-  required string data = 1;
+    required string data = 1;
 }
 
 message StringArrayData {
-  repeated string data = 1;
+    repeated string data = 1;
 }
 
 message UintData {
-  required uint64 data = 1;
+    required uint64 data = 1;
 }
 
 message IntData {
-  required int64 data = 1;
+    required int64 data = 1;
 }
 
 message IntArrayData {
-  repeated int64 data = 1;
+    repeated int64 data = 1;
 }
 
 message BoolData {
-  required bool data = 1;
+    required bool data = 1;
 }
 
 message BytesArrayData {
-  repeated bytes data = 1;
+    repeated bytes data = 1;
 }
 
 message BytesData {
-  required bytes data = 1;
+    required bytes data = 1;
 }
