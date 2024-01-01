@@ -1,7 +1,10 @@
 package api
 
-import "github.com/artela-network/aspect-core/types"
-import "github.com/ethereum/go-ethereum/common"
+import (
+	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/artela-network/aspect-core/types"
+)
 
 func (r *Registry) stateDBAPIs() interface{} {
 	return map[string]interface{}{
@@ -40,6 +43,13 @@ func (r *Registry) stateDBAPIs() interface{} {
 				panic("GetStateDbHook failed")
 			}
 			return hook.GetNonce(common.BytesToAddress(addr))
+		},
+		"hasSuicided": func(addr []byte) bool {
+			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)
+			if err != nil || hook == nil {
+				panic("GetStateDbHook failed")
+			}
+			return hook.HasSuicided(common.BytesToAddress(addr))
 		},
 	}
 }
