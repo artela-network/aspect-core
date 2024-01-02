@@ -3,7 +3,7 @@ module github.com/artela-network/aspect-core
 go 1.20
 
 require (
-	github.com/artela-network/aspect-runtime v0.4.5-beta
+	github.com/artela-network/aspect-runtime v0.4.7-rc3
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/holiman/uint256 v1.2.2
 	github.com/json-iterator/go v1.1.12
