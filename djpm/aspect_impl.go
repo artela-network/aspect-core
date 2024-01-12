@@ -180,6 +180,13 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 		Gas:    gas,
 		Revert: types.NotRevert,
 	}
+	defer func() {
+		if err := recover(); err != nil {
+			// TODO log.Error(running aspect failed")
+			result.Err = errors.New("fatal: panic in running aspect: " + err.(string))
+			result.Revert = types.RevertCall
+		}
+	}()
 
 	for _, aspect := range aspects {
 		var err error
