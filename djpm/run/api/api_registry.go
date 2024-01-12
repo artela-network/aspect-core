@@ -80,7 +80,10 @@ func (r *Registry) registerApis(module, namespace string, apis interface{}) {
 	for method, fn := range apis.(map[string]interface{}) {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
-		_ = r.collection.AddAPI(runtime.Module(module), runtime.NameSpace(namespace), runtime.MethodName(method), fn)
+		err := r.collection.AddAPI(runtime.Module(module), runtime.NameSpace(namespace), runtime.MethodName(method), fn)
+		if err != nil {
+			panic("add host api failed" + err.Error())
+		}
 	}
 }
 

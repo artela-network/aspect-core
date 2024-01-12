@@ -22,12 +22,13 @@ type Runner struct {
 	// fns      *runtime.HostAPIRegistry
 	registry *api.Registry
 	code     []byte
+	commit   bool
 }
 
-func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte) (*Runner, error) {
+func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte, commit bool) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
 	registry := api.NewRegistry(ctx, aspectId, aspVer)
-	key, vm, err := types.Runtime(code, registry.HostApis())
+	key, vm, err := types.RunnerPool(commit).Runtime(code, registry.HostApis())
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +38,12 @@ func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte) (*
 		vm:       vm,
 		registry: registry,
 		code:     code,
+		commit:   commit,
 	}, nil
 }
 
 func (r *Runner) Return() {
-	types.ReturnRuntime(r.vmKey, r.vm)
+	types.RunnerPool(r.commit).Return(r.vmKey, r.vm)
 }
 
 func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) ([]byte, uint64, error) {
