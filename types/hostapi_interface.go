@@ -29,6 +29,7 @@ var (
 
 	// JITSenderAspectByContext returns the sender Aspect address of the user operation
 	JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
+	IsCommit                 func(ctx context.Context) bool
 )
 
 type (

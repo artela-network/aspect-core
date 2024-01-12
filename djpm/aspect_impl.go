@@ -183,7 +183,8 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 
 	for _, aspect := range aspects {
 		var err error
-		runner, err := run.NewRunner(ctx, aspect.AspectId, aspect.Version, aspect.Code)
+		isCommit := types.IsCommit(ctx)
+		runner, err := run.NewRunner(ctx, aspect.AspectId, aspect.Version, aspect.Code, isCommit)
 		if err != nil {
 			panic(err)
 		}
