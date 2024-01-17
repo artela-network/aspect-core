@@ -12,9 +12,9 @@ var (
 )
 
 // InitRuntimePool init runtime pool with given capacity.
-func InitRuntimePool(capacity int32) {
-	globalMsgPool = newGlobalPool(capacity)
-	globalQueryPool = newGlobalPool(capacity)
+func InitRuntimePool(msgPoolCapacity, queryPoolCapacity int32) {
+	globalMsgPool = newGlobalPool(msgPoolCapacity)
+	globalQueryPool = newGlobalPool(queryPoolCapacity)
 }
 
 func RunnerPool(commit bool) *globalPool {
