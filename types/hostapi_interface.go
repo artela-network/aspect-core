@@ -26,6 +26,7 @@ var (
 	GetAspectPropertyHostHook         func(context.Context) (AspectPropertyHostAPI, error)
 	GetAspectTransientStorageHostHook func(context.Context) (AspectTransientStorageHostAPI, error)
 	GetAspectTraceHostHook            func(context.Context) (AspectTraceHostAPI, error)
+	GetBlockchainHook                 func(context.Context) (BlockchainAPI, error)
 
 	// JITSenderAspectByContext returns the sender Aspect address of the user operation
 	JITSenderAspectByContext func(ctx context.Context, userOpHash common.Hash) (common.Address, error)
@@ -68,5 +69,9 @@ type (
 		GetCodeSize(address common.Address) int
 		GetNonce(address common.Address) uint64
 		HasSuicided(address common.Address) bool
+	}
+
+	BlockchainAPI interface {
+		GetTransactionByHash(hash []byte) *Transaction
 	}
 )

@@ -20,6 +20,7 @@ const (
 	moduleAspectProperty         = "aspect-property-api"
 	moduleAspectTransientStorage = "aspect-transient-storage-api"
 	moduleTrace                  = "trace-api"
+	moduleBlockChain             = "blockchain-api"
 
 	// namespace of hostapis
 	nsUtils                  = "__UtilApi__"
@@ -31,6 +32,7 @@ const (
 	nsAspectState            = "__AspectStateApi__"
 	nsAspectProperty         = "__AspectPropertyApi__"
 	nsAspectTransientStorage = "__AspectTransientStorageApi__"
+	nsBlockChain             = "__BlockchainApi__"
 
 	// entrance of api functions
 	APIEntrance           = "execute"
@@ -72,6 +74,7 @@ func (r *Registry) HostApis() *runtime.HostAPIRegistry {
 	r.registerApis(moduleAspectState, nsAspectState, r.aspectStateAPIs())
 	r.registerApis(moduleAspectTransientStorage, nsAspectTransientStorage, r.transientStorageAPIs())
 	r.registerApis(moduleTrace, nsTrace, r.traceAPIs())
+	r.registerApis(moduleBlockChain, nsBlockChain, r.blockchainAPIs())
 
 	return r.collection
 }
