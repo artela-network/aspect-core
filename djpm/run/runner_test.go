@@ -20,7 +20,7 @@ import (
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestJoinPoint(t *testing.T) {
-	types.InitRuntimePool(0)
+	types.InitRuntimePool(0, 0)
 	var wg sync.WaitGroup
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
