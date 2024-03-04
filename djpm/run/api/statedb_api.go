@@ -30,12 +30,14 @@ func (r *Registry) stateDBAPIs() interface{} {
 			}
 			return wrapNilByte(hook.GetCodeHash(common.BytesToAddress(addr)).Bytes())
 		},
-		"getCodeSize": func(addr []byte) int32 {
+		"getCodeSize": func(addr []byte) uint64 {
 			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)
 			if err != nil || hook == nil {
 				panic("GetStateDbHook failed")
 			}
-			return int32(hook.GetCodeSize(common.BytesToAddress(addr)))
+			address := common.BytesToAddress(addr)
+			size := hook.GetCodeSize(address)
+			return uint64(size)
 		},
 		"getNonce": func(addr []byte) uint64 {
 			hook, err := types.GetStateDbHook(r.runnerContext.Ctx)
