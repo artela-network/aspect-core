@@ -2,8 +2,9 @@ package api
 
 import (
 	"context"
+	rttypes "github.com/artela-network/aspect-runtime/types"
+	"github.com/artela-network/aspect-runtime/wasmtime"
 
-	runtime "github.com/artela-network/aspect-runtime"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/artela-network/aspect-core/types"
@@ -39,14 +40,10 @@ const (
 	CheckIsTxVerifier     = "isTransactionVerifier"
 )
 
-type HostFunc interface {
-	FuncRegister() *runtime.HostAPIRegistry
-}
-
 // Registry keeps the properity owned by current
 type Registry struct {
 	runnerContext *types.RunnerContext
-	collection    *runtime.HostAPIRegistry
+	collection    *rttypes.HostAPIRegistry
 	errCallback   func(message string)
 }
 
@@ -57,12 +54,12 @@ func NewRegistry(ctx context.Context, aspectID common.Address, aspVer uint64) *R
 			AspectId:      aspectID,
 			AspectVersion: aspVer,
 		},
-		collection: runtime.NewHostAPIRegistry(),
+		collection: rttypes.NewHostAPIRegistry(wasmtime.Wrap),
 	}
 }
 
 // HostApis return the collection of aspect runtime host apis
-func (r *Registry) HostApis() *runtime.HostAPIRegistry {
+func (r *Registry) HostApis() *rttypes.HostAPIRegistry {
 	r.registerApis(moduleStateDB, nsStateDB, r.stateDBAPIs())
 	r.registerApis(moduleUtils, nsUtils, r.utilAPIs())
 	r.registerApis(moduleCrypto, nsCrypto, r.cryptoAPIs())
@@ -76,11 +73,12 @@ func (r *Registry) HostApis() *runtime.HostAPIRegistry {
 	return r.collection
 }
 
-func (r *Registry) registerApis(module, namespace string, apis interface{}) {
-	for method, fn := range apis.(map[string]interface{}) {
+func (r *Registry) registerApis(module, namespace string, apis map[string]*rttypes.HostFuncWithGasRule) {
+	for method, hostFunc := range apis {
 		// Here we cannot make new variable function to call fn in it,
 		// and to pass it into AddApi in loop instead pass fn directly.
-		err := r.collection.AddAPI(runtime.Module(module), runtime.NameSpace(namespace), runtime.MethodName(method), fn)
+		hostFunc.HostContext = r.runnerContext
+		err := r.collection.AddAPI(rttypes.Module(module), rttypes.NameSpace(namespace), rttypes.MethodName(method), hostFunc)
 		if err != nil {
 			panic("add host api failed" + err.Error())
 		}
