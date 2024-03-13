@@ -21,7 +21,7 @@ func (r *Registry) utilAPIs() map[string]*types.HostFuncWithGasRule {
 				log.Info(s)
 				return nil
 			},
-			GasRule: types.NewStaticGasRule(1),
+			GasRule: types.NewDynamicGasRule(1000, 3750),
 		},
 	}
 }

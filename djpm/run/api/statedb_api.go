@@ -18,7 +18,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				balance := hook.GetBalance(common.BytesToAddress(addr))
 				return wrapNilByte(balance.Bytes())
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(2000),
 		},
 		"getState": {
 			Func: func(addr []byte, hash []byte) []byte {
@@ -28,7 +28,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return wrapNilByte(hook.GetState(common.BytesToAddress(addr), common.BytesToHash(hash)).Bytes())
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(5000),
 		},
 		"getCodeHash": {
 			Func: func(addr []byte) []byte {
@@ -38,7 +38,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return wrapNilByte(hook.GetCodeHash(common.BytesToAddress(addr)).Bytes())
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(40000),
 		},
 		"getCodeSize": {
 			Func: func(addr []byte) uint64 {
@@ -48,7 +48,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return uint64(hook.GetCodeSize(common.BytesToAddress(addr)))
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(40000),
 		},
 		"getNonce": {
 			Func: func(addr []byte) uint64 {
@@ -58,7 +58,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return hook.GetNonce(common.BytesToAddress(addr))
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(40000),
 		},
 		"hasSuicided": {
 			Func: func(addr []byte) bool {
@@ -68,7 +68,7 @@ func (r *Registry) stateDBAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return hook.HasSuicided(common.BytesToAddress(addr))
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(40000),
 		},
 	}
 }

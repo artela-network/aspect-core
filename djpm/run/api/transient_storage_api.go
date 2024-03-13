@@ -22,7 +22,7 @@ func (r *Registry) transientStorageAPIs() map[string]*types2.HostFuncWithGasRule
 				}
 				return wrapNilByte(res), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(0, 50),
 		},
 		"set": {
 			Func: func(key string, val []byte) error {
@@ -35,7 +35,7 @@ func (r *Registry) transientStorageAPIs() map[string]*types2.HostFuncWithGasRule
 				}
 				return hook.Set(r.runnerContext, key, val)
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(0, 3125),
 		},
 	}
 }

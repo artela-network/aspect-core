@@ -18,7 +18,7 @@ func (r *Registry) aspectPropertyAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return wrapNilByte(hook.Get(r.runnerContext, key)), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(0, 1250),
 		},
 	}
 }

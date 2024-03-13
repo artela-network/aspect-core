@@ -16,7 +16,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				h := sha256.Sum256(input)
 				return h[:], nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(6000, 7500),
 		},
 		"ripemd160": {
 			Func: func(input []byte) ([]byte, error) {
@@ -24,13 +24,13 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				hash.Write(input)
 				return common.LeftPadBytes(hash.Sum(nil), 32), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(60000, 75000),
 		},
 		"keccak": {
 			Func: func(input []byte) ([]byte, error) {
 				return ethcrypto.Keccak256(input), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(3000, 3750),
 		},
 		"ecRecover": {
 			Func: func(input []byte) ([]byte, error) {
@@ -63,7 +63,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				// the first byte of pubkey is bitcoin heritage
 				return common.LeftPadBytes(ethcrypto.Keccak256(pubKey[1:])[12:], 32), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(3000),
 		},
 	}
 }

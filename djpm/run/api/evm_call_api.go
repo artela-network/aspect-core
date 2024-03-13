@@ -31,7 +31,7 @@ func (r *Registry) evmCallAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return marshal, nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(3000, 3750),
 		},
 		"jitCall": {
 			Func: func(request []byte) ([]byte, error) {
@@ -55,7 +55,7 @@ func (r *Registry) evmCallAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return marshal, err
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewDynamicGasRule(3000, 7500),
 		},
 	}
 }
