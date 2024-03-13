@@ -8,16 +8,18 @@ import (
 func (r *Registry) utilAPIs() map[string]*types.HostFuncWithGasRule {
 	return map[string]*types.HostFuncWithGasRule{
 		"revert": {
-			Func: func(msg string) {
+			Func: func(msg string) error {
 				if r.errCallback != nil {
 					r.errCallback(msg)
 				}
+				return nil
 			},
 			GasRule: types.NewStaticGasRule(1),
 		},
 		"sLog": {
-			Func: func(s string) {
+			Func: func(s string) error {
 				log.Info(s)
+				return nil
 			},
 			GasRule: types.NewStaticGasRule(1),
 		},

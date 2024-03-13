@@ -45,7 +45,7 @@ func (p *globalPool) Runtime(ctx context.Context, logger types.Logger, code []by
 		return "", vm, err
 	}
 
-	return p.vmPool.Runtime(runtime.WASM, code, registry)
+	return p.vmPool.Runtime(ctx, runtime.WASM, code, registry)
 }
 
 // ReturnRuntime returns the the runtime instance to the pool, is the pool is enabled.

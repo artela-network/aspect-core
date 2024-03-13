@@ -12,28 +12,28 @@ import (
 func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 	return map[string]*types2.HostFuncWithGasRule{
 		"sha256": {
-			Func: func(input []byte) []byte {
+			Func: func(input []byte) ([]byte, error) {
 				h := sha256.Sum256(input)
-				return h[:]
+				return h[:], nil
 			},
 			GasRule: types2.NewStaticGasRule(1),
 		},
 		"ripemd160": {
-			Func: func(input []byte) []byte {
+			Func: func(input []byte) ([]byte, error) {
 				hash := crypto.RIPEMD160.New()
 				hash.Write(input)
-				return common.LeftPadBytes(hash.Sum(nil), 32)
+				return common.LeftPadBytes(hash.Sum(nil), 32), nil
 			},
 			GasRule: types2.NewStaticGasRule(1),
 		},
 		"keccak": {
-			Func: func(input []byte) []byte {
-				return ethcrypto.Keccak256(input)
+			Func: func(input []byte) ([]byte, error) {
+				return ethcrypto.Keccak256(input), nil
 			},
 			GasRule: types2.NewStaticGasRule(1),
 		},
 		"ecRecover": {
-			Func: func(input []byte) []byte {
+			Func: func(input []byte) ([]byte, error) {
 				const ecRecoverInputLength = 128
 
 				input = common.RightPadBytes(input, ecRecoverInputLength)
@@ -46,7 +46,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				// tighter sig s values input homestead only apply to tx sigs
 				if !allZero(input[32:63]) || !ethcrypto.ValidateSignatureValues(v, r, s, false) {
-					return nil
+					return nil, nil
 				}
 				// We must make sure not to modify the 'input', so placing the 'v' along with
 				// the signature needs to be done on a new allocation
@@ -57,11 +57,11 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				pubKey, err := ethcrypto.Ecrecover(input[:32], sig)
 				// make sure the public key is a valid one
 				if err != nil {
-					return nil
+					return nil, nil
 				}
 
 				// the first byte of pubkey is bitcoin heritage
-				return common.LeftPadBytes(ethcrypto.Keccak256(pubKey[1:])[12:], 32)
+				return common.LeftPadBytes(ethcrypto.Keccak256(pubKey[1:])[12:], 32), nil
 			},
 			GasRule: types2.NewStaticGasRule(1),
 		},

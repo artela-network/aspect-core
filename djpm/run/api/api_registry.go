@@ -80,7 +80,7 @@ func (r *Registry) registerApis(module, namespace string, apis map[string]*rttyp
 		hostFunc.HostContext = r.runnerContext
 		err := r.collection.AddAPI(rttypes.Module(module), rttypes.NameSpace(namespace), rttypes.MethodName(method), hostFunc)
 		if err != nil {
-			panic("add host api failed" + err.Error())
+			panic("add host api failed: " + err.Error())
 		}
 	}
 }
