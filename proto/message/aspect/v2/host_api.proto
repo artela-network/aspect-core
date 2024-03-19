@@ -83,16 +83,16 @@ message CallTreeQuery {
 
 message EthCallMessage {
     required bytes from = 1;
-    required bytes to = 2;
+    optional bytes to = 2;
     // data is the data payload bytes of the transaction.
-    required bytes data = 3;
+    optional bytes data = 3;
     required uint64 gas = 4;
     required bytes value = 5;
     optional bytes ret = 6;
     optional uint64 gas_used = 7;
     optional string error = 8;
     required uint64 index = 9;
-    required int64 parent_index = 10;
+    optional int64 parent_index = 10;
     repeated uint64 children_indices = 11;
 }
 
