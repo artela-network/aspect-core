@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	runtime "github.com/artela-network/aspect-runtime/types"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -28,11 +29,13 @@ var globalAspect *Aspect
 
 type Aspect struct {
 	provider types.AspectProvider
+	logger   runtime.Logger
 }
 
-func NewAspect(provider types.AspectProvider) *Aspect {
+func NewAspect(provider types.AspectProvider, logger runtime.Logger) *Aspect {
 	globalAspect = &Aspect{
 		provider: provider,
+		logger:   logger,
 	}
 	return globalAspect
 }
@@ -188,10 +191,10 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 		}
 	}()
 
-	for _, aspect := range aspects {
+	for _, storedAspect := range aspects {
 		var err error
 		isCommit := types.IsCommit(ctx)
-		runner, err := run.NewRunner(ctx, aspect.AspectId, aspect.Version, aspect.Code, isCommit)
+		runner, err := run.NewRunner(ctx, aspect.logger, storedAspect.AspectId, storedAspect.Version, storedAspect.Code, isCommit)
 		if err != nil {
 			panic(err)
 		}
