@@ -107,6 +107,7 @@ func (r *Registry) RunnerContext() *types.RunnerContext {
 func (r *Registry) Destroy() {
 	r.runnerContext = nil
 	r.collection.Destroy()
+	r.collection = nil
 	r.errCallback = nil
 }
 
