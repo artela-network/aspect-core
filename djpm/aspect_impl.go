@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	runtime "github.com/artela-network/aspect-runtime/types"
+	"runtime/debug"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -185,8 +186,8 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 	}
 	defer func() {
 		if err := recover(); err != nil {
-			// TODO log.Error(running aspect failed")
-			result.Err = errors.New("fatal: panic in running aspect: " + err.(string))
+			aspect.logger.Error("panic in running aspect", "err", err, "stack", debug.Stack())
+			result.Err = errors.New("fatal: panic in running aspect: " + fmt.Sprintln(err))
 			result.Revert = types.RevertCall
 		}
 	}()
