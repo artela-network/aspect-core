@@ -46,6 +46,7 @@ func NewRunner(ctx context.Context, logger runtime.Logger, aspID string, aspVer 
 }
 
 func (r *Runner) Return() {
+	r.registry.Destroy()
 	types.RunnerPool(r.commit).Return(r.vmKey, r.vm)
 }
 

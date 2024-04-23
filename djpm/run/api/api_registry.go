@@ -104,6 +104,12 @@ func (r *Registry) RunnerContext() *types.RunnerContext {
 	return r.runnerContext
 }
 
+func (r *Registry) Destroy() {
+	r.runnerContext = nil
+	r.collection.Destroy()
+	r.errCallback = nil
+}
+
 func (r *Registry) SetErrCallback(errFunc func(message string)) {
 	r.errCallback = errFunc
 }
