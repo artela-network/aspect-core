@@ -18,6 +18,14 @@ type RunnerContext struct {
 	Commit        bool
 }
 
+func (r *RunnerContext) RemainingGas() uint64 {
+	return r.Gas
+}
+
+func (r *RunnerContext) SetGas(gas uint64) {
+	r.Gas = gas
+}
+
 var (
 	GetEvmHostHook                    func(context.Context) (EVMHostAPI, error)
 	GetStateDbHook                    func(context.Context) (StateDBHostAPI, error)
@@ -34,12 +42,12 @@ var (
 
 type (
 	RuntimeContextHostAPI interface {
-		Get(ctx *RunnerContext, key string) []byte
+		Get(ctx *RunnerContext, key string) ([]byte, error)
 	}
 
 	AspectStateHostAPI interface {
 		Get(ctx *RunnerContext, key string) []byte
-		Set(ctx *RunnerContext, key string, value []byte)
+		Set(ctx *RunnerContext, key string, value []byte) error
 	}
 
 	AspectPropertyHostAPI interface {
@@ -47,18 +55,18 @@ type (
 	}
 
 	AspectTransientStorageHostAPI interface {
-		Get(ctx *RunnerContext, aspectId []byte, key string) []byte
-		Set(ctx *RunnerContext, key string, value []byte)
+		Get(ctx *RunnerContext, aspectId []byte, key string) ([]byte, error)
+		Set(ctx *RunnerContext, key string, value []byte) error
 	}
 
 	AspectTraceHostAPI interface {
-		QueryStateChange(ctx *RunnerContext, query *StateChangeQuery) []byte
-		QueryCallTree(ctx *RunnerContext, query *CallTreeQuery) []byte
+		QueryStateChange(ctx *RunnerContext, query *StateChangeQuery) ([]byte, error)
+		QueryCallTree(ctx *RunnerContext, query *CallTreeQuery) ([]byte, error)
 	}
 
 	EVMHostAPI interface {
-		StaticCall(ctx *RunnerContext, request *StaticCallRequest) *StaticCallResult
-		JITCall(ctx *RunnerContext, request *JitInherentRequest) *JitInherentResponse
+		StaticCall(ctx *RunnerContext, request *StaticCallRequest) (*StaticCallResult, error)
+		JITCall(ctx *RunnerContext, request *JitInherentRequest) (*JitInherentResponse, error)
 	}
 
 	StateDBHostAPI interface {

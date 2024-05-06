@@ -45,27 +45,17 @@ func (m *Manager) UpdateProtocol(protocol integration.AspectProtocol) {
 	m.protocol = protocol
 }
 
-// ·Submit submits a JIT inherent call. There are two types of JIT inherent calls:
-//  1. JIT transaction: the JIT transaction will be submitted directly into the block proposal to guarantee the execution.
-//     Please note that the JIT transaction submission could be failed if there is no space left in the block.
-//  2. JIT call: the JIT call will be injected into the current evm callstack to guarantee the execution.
+// Submit submits a JIT inherent call. There are two types of JIT inherent calls:
+//  1. JIT call: the JIT call will be injected into the current evm callstack to guarantee the execution.
 //     Only one JIT call can be submitted at a time.
 func (m *Manager) Submit(ctx context.Context, aspect common.Address,
-	gas uint64, stage integration.JoinPointStage, inherents ...*types.JitInherentRequest,
+	gas uint64, inherent *types.JitInherentRequest,
 ) (*types.JitInherentResponse, uint64, error) {
-	if len(inherents) == 0 {
+	if inherent == nil {
 		return nil, gas, errors.New("no jit inherent to submit")
 	}
 
-	switch stage {
-	case integration.TransactionExecution:
-		if len(inherents) != 1 {
-			return nil, gas, errors.New("only one user operation is allowed in current join point")
-		}
-		return m.submitJITCall(ctx, aspect, gas, inherents[0])
-	default:
-		return nil, gas, errors.New("cannot submit jit inherent in current join point")
-	}
+	return m.submitJITCall(ctx, aspect, gas, inherent)
 }
 
 func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherentRequest) (

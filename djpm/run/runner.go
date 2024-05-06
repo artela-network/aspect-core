@@ -3,13 +3,13 @@ package run
 import (
 	"context"
 	"errors"
+	runtime "github.com/artela-network/aspect-runtime/types"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/artela-network/aspect-core/djpm/run/api"
 
-	runtime "github.com/artela-network/aspect-runtime"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/artela-network/aspect-core/types"
@@ -23,17 +23,20 @@ type Runner struct {
 	registry *api.Registry
 	code     []byte
 	commit   bool
+
+	logger runtime.Logger
 }
 
-func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte, commit bool) (*Runner, error) {
+func NewRunner(ctx context.Context, logger runtime.Logger, aspID string, aspVer uint64, code []byte, commit bool) (*Runner, error) {
 	aspectId := common.HexToAddress(aspID)
 	registry := api.NewRegistry(ctx, aspectId, aspVer)
-	key, vm, err := types.RunnerPool(commit).Runtime(code, registry.HostApis())
+	key, vm, err := types.RunnerPool(commit).Runtime(ctx, logger, code, registry.HostApis())
 	if err != nil {
 		return nil, err
 	}
 	return &Runner{
 		ctx:      ctx,
+		logger:   logger,
 		vmKey:    key,
 		vm:       vm,
 		registry: registry,
@@ -43,6 +46,7 @@ func NewRunner(ctx context.Context, aspID string, aspVer uint64, code []byte, co
 }
 
 func (r *Runner) Return() {
+	r.registry.Destroy()
 	types.RunnerPool(r.commit).Return(r.vmKey, r.vm)
 }
 
@@ -64,17 +68,16 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	r.registry.SetErrCallback(errorFunc)
 	r.registry.SetRunnerContext(string(name), blockNumber, gas, contractAddr)
 
-	res, err := r.vm.Call(api.APIEntrance, string(name), reqData)
-	gas = r.registry.RunnerContext().Gas
+	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), string(name), reqData)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return []byte(revertMsg), gas, errors.New(revertMsg)
 		}
-		return nil, gas, err
+		return nil, uint64(leftover), err
 	}
 
 	if res == nil {
-		return nil, gas, nil
+		return nil, uint64(leftover), nil
 	}
 
 	resData, ok := res.([]byte)
@@ -82,7 +85,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 		return nil, gas, errors.New("read output failed, return value is not byte array")
 	}
 
-	return resData, gas, nil
+	return resData, uint64(leftover), nil
 }
 
 func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, error) {
@@ -96,7 +99,8 @@ func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Add
 	r.registry.SetErrCallback(callback)
 	r.registry.SetRunnerContext("isOwner", blockNumber, gas, contractAddr)
 
-	res, err := r.vm.Call(api.APIEntrance, "isOwner", sender)
+	// TODO: no gas refund for aspect for now, add later
+	res, _, err := r.vm.Call(api.APIEntrance, int64(gas), "isOwner", sender)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
@@ -122,7 +126,9 @@ func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contra
 	}
 	r.registry.SetErrCallback(callback)
 	r.registry.SetRunnerContext(funcName, blockNumber, gas, contractAddr)
-	res, err := r.vm.Call(funcName, args...)
+
+	// TODO: no gas refund for aspect for now, add later
+	res, _, err := r.vm.Call(funcName, int64(gas), args...)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
 			return false, errors.New(revertMsg)
