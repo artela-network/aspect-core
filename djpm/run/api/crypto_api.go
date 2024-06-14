@@ -3,12 +3,21 @@ package api
 import (
 	"crypto"
 	"crypto/sha256"
+	"errors"
 	"math/big"
 
+	"github.com/artela-network/aspect-core/types"
 	types2 "github.com/artela-network/aspect-runtime/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"google.golang.org/protobuf/proto"
+)
+
+var (
+	bn256AddAddress       = common.BytesToAddress([]byte{6})
+	bn256ScalarMulAddress = common.BytesToAddress([]byte{7})
+	bn256PairingAddress   = common.BytesToAddress([]byte{8})
 )
 
 func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
@@ -93,63 +102,97 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return common.LeftPadBytes(v, len(m))
 			},
-			GasRule: types2.NewDynamicGasRule(60000, 75000),
+			GasRule: types2.NewDynamicGasRule(30000, 150000),
 		},
 
 		"bn256Add": {
-			Func: func(ax, ay, bx, by []byte) []byte {
-				if len(ax) > 32 || len(ay) > 32 || len(bx) > 32 || len(by) > 32 {
-					return []byte{}
-				}
-				input := make([]byte, 128)
-				copy(input[:], ax)
-				copy(input[32:], ay)
-				copy(input[64:], bx)
-				copy(input[96:], by)
-
-				bn256AddAddress := common.BytesToAddress([]byte{6})
-				contract := vm.PrecompiledContractsBerlin[bn256AddAddress]
-				data, err := contract.Run(input)
+			Func: func(input []byte) ([]byte, error) {
+				points := &types.Bn256AddInput{}
+				err := proto.Unmarshal(input, points)
 				if err != nil {
-					return nil
+					return nil, err
 				}
-				return data
+
+				calldata := make([]byte, 128)
+				copy(calldata[:], points.A.X)
+				copy(calldata[32:], points.A.Y)
+				copy(calldata[64:], points.B.X)
+				copy(calldata[96:], points.B.Y)
+
+				contract := vm.PrecompiledContractsBerlin[bn256AddAddress]
+				res, err := contract.Run(calldata)
+				if err != nil {
+					return nil, err
+				}
+
+				if len(res) != 64 {
+					return nil, errors.New("run precompile failed")
+				}
+				point := &types.CurvePoint{X: res[:32], Y: res[32:]}
+				return proto.Marshal(point)
 			},
-			GasRule: types2.NewDynamicGasRule(60000, 75000),
+			GasRule: types2.NewStaticGasRule(1500),
 		},
 
 		"bn256ScalarMul": {
-			Func: func(x, y, scalar []byte) []byte {
+			Func: func(x, y, scalar []byte) ([]byte, error) {
 				if len(x) > 32 || len(y) > 32 || len(scalar) > 32 {
-					return []byte{}
+					return nil, errors.New("params not valid")
 				}
-				input := make([]byte, 96)
-				copy(input[:], x)
-				copy(input[32:], y)
-				copy(input[64:], scalar)
+				calldata := make([]byte, 96)
+				copy(calldata[:], x)
+				copy(calldata[32:], y)
+				copy(calldata[64:], scalar)
 
-				bn256ScalarMulAddress := common.BytesToAddress([]byte{7})
 				contract := vm.PrecompiledContractsBerlin[bn256ScalarMulAddress]
-				data, err := contract.Run(input)
+				res, err := contract.Run(calldata)
 				if err != nil {
-					return nil
+					return nil, err
 				}
-				return data
+
+				if len(res) != 64 {
+					return nil, errors.New("run precompile failed")
+				}
+				point := &types.CurvePoint{X: res[:32], Y: res[32:]}
+				return proto.Marshal(point)
 			},
-			GasRule: types2.NewDynamicGasRule(60000, 75000),
+			GasRule: types2.NewStaticGasRule(6000),
 		},
 
 		"bn256Pairing": {
-			Func: func(input []byte) []byte {
-				bn256AddAddress := common.BytesToAddress([]byte{6})
-				contract := vm.PrecompiledContractsBerlin[bn256AddAddress]
-				data, err := contract.Run(input)
+			Func: func(input []byte) ([]byte, error) {
+				pairing := &types.Bn256PairingInput{}
+				err := proto.Unmarshal(input, pairing)
 				if err != nil {
-					return nil
+					return nil, err
 				}
-				return data
+
+				if !(len(pairing.Cs) == len(pairing.Ts1) && len(pairing.Cs) == len(pairing.Ts2)) {
+					return nil, errors.New("params not valid")
+				}
+
+				grouplen := 192 // 32 * 2 * 3
+
+				calldata := make([]byte, len(pairing.Cs)*grouplen)
+				for i := 0; i < len(pairing.Cs); i++ {
+					start := grouplen * i
+					copy(calldata[start:], pairing.Cs[i].X)
+					copy(calldata[start+32:], pairing.Cs[i].Y)
+					copy(calldata[start+64:], pairing.Ts1[i].X)
+					copy(calldata[start+96:], pairing.Ts1[i].Y)
+					copy(calldata[start+128:], pairing.Ts2[i].X)
+					copy(calldata[start+160:], pairing.Ts2[i].Y)
+				}
+
+				contract := vm.PrecompiledContractsBerlin[bn256PairingAddress]
+				res, err := contract.Run(calldata)
+				if err != nil {
+					return nil, err
+				}
+
+				return res, nil
 			},
-			GasRule: types2.NewDynamicGasRule(60000, 75000),
+			GasRule: types2.NewDynamicGasRule(45000, 34000),
 		},
 	}
 }
