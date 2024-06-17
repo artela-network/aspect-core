@@ -18,12 +18,12 @@ func IsArtelaFrom(from *common.Address) bool {
 	return false
 }
 
-func ArtelaAllowanceMsg(to *common.Address, nonce uint64, aspectId common.Address, gas uint64) (*core.Message, error) {
+func ArtelaOwnerMsg(to *common.Address, nonce uint64, sender common.Address, gas uint64, gasPrice, gasFeeCap, gasTipCap *big.Int) (*core.Message, error) {
 	from := common.HexToAddress(ARTELA_FROM_ADDR)
-	return PackAllowanceMsg(from, to, nonce, big.NewInt(0), gas, big.NewInt(1000), big.NewInt(1000), big.NewInt(1000), nil, aspectId)
+	return PackIsOwnerMsg(from, to, nonce, big.NewInt(0), gas, gasPrice, gasFeeCap, gasTipCap, nil, sender)
 }
 
-func ArtelaOwnerMsg(to *common.Address, nonce uint64, sender common.Address, gas uint64) (*core.Message, error) {
+func OpenZeppelinOwnableMsg(to *common.Address, nonce uint64, sender common.Address, gas uint64, gasPrice, gasFeeCap, gasTipCap *big.Int) (*core.Message, error) {
 	from := common.HexToAddress(ARTELA_FROM_ADDR)
-	return PackIsOwnerMsg(from, to, nonce, big.NewInt(0), gas, big.NewInt(1000), big.NewInt(30000), big.NewInt(2000), nil, sender)
+	return PackIsOwnerMsg(from, to, nonce, big.NewInt(0), gas, gasPrice, gasFeeCap, gasTipCap, nil, sender)
 }

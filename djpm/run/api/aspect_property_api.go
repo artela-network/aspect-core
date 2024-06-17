@@ -16,9 +16,11 @@ func (r *Registry) aspectPropertyAPIs() map[string]*types2.HostFuncWithGasRule {
 				if hook == nil {
 					panic("aspect runtime context host api not found")
 				}
-				return wrapNilByte(hook.Get(r.runnerContext, key)), nil
+
+				ret, err := hook.Get(r.runnerContext, key)
+				return wrapNilByte(ret), err
 			},
-			GasRule: types2.NewDynamicGasRule(0, 1250),
+			GasRule: types2.NewStaticGasRule(500),
 		},
 	}
 }

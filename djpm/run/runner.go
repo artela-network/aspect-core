@@ -52,7 +52,7 @@ func (r *Runner) Return() {
 
 func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) ([]byte, uint64, error) {
 	if r.vm == nil {
-		return nil, gas, errors.New("runner not init")
+		panic("vm not init")
 	}
 	// turn inputBytes into bytes
 	reqData, err := proto.Marshal(txRequest)
@@ -88,10 +88,11 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	return resData, uint64(leftover), nil
 }
 
-func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, error) {
+func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, uint64, error) {
 	if r.vm == nil {
-		return false, errors.New("vm not init")
+		panic("vm not init")
 	}
+
 	revertMsg := ""
 	callback := func(msg string) {
 		revertMsg = msg
@@ -100,25 +101,26 @@ func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Add
 	r.registry.SetRunnerContext("isOwner", blockNumber, gas, contractAddr)
 
 	// TODO: no gas refund for aspect for now, add later
-	res, _, err := r.vm.Call(api.APIEntrance, int64(gas), "isOwner", sender)
+	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), "isOwner", sender)
+	leftoverU64 := uint64(leftover)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
+			return false, leftoverU64, errors.New(revertMsg)
 		}
 
-		return false, err
+		return false, leftoverU64, err
 	}
 
-	return res.(bool), nil
+	return res.(bool), leftoverU64, nil
 }
 
 func (r *Runner) Gas() uint64 {
 	return r.registry.RunnerContext().Gas
 }
 
-func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, error) {
+func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, uint64, error) {
 	if r.vm == nil {
-		return false, errors.New("run not init")
+		panic("vm not init")
 	}
 	revertMsg := ""
 	callback := func(msg string) {
@@ -128,12 +130,13 @@ func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contra
 	r.registry.SetRunnerContext(funcName, blockNumber, gas, contractAddr)
 
 	// TODO: no gas refund for aspect for now, add later
-	res, _, err := r.vm.Call(funcName, int64(gas), args...)
+	res, leftover, err := r.vm.Call(funcName, int64(gas), args...)
+	leftoverU64 := uint64(leftover)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
+			return false, leftoverU64, errors.New(revertMsg)
 		}
-		return nil, err
+		return nil, leftoverU64, err
 	}
-	return res, nil
+	return res, leftoverU64, nil
 }
