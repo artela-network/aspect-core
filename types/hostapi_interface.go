@@ -51,7 +51,7 @@ type (
 	}
 
 	AspectPropertyHostAPI interface {
-		Get(ctx *RunnerContext, key string) []byte
+		Get(ctx *RunnerContext, key string) ([]byte, error)
 	}
 
 	AspectTransientStorageHostAPI interface {

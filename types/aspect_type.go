@@ -12,62 +12,48 @@ var (
 	SetAspectContext func(ctx context.Context, aspectId common.Address, key string, value []byte) error
 )
 
-var GetAspectPaymaster func(ctx context.Context, aspectId common.Address) (*common.Address, error)
-
 type PointCut string
 
 type AspectProvider interface {
 	GetTxBondAspects(context.Context, common.Address, PointCut) ([]*AspectCode, error)
 	GetAccountVerifiers(context.Context, common.Address) ([]*AspectCode, error)
-	GetBlockBondAspects(ctx context.Context) ([]*AspectCode, error)
 	GetLatestBlock() int64
 }
 
 const (
-	FILTER_TX                  PointCut = "filterTx"
-	ON_BLOCK_INITIALIZE_METHOD PointCut = "onBlockInitialize"
-	VERIFY_TX                  PointCut = "verifyTx"
-	ON_ACCOUNT_VERIFY_METHOD   PointCut = "onAccountVerify"
-	ON_GAS_PAYMENT_METHOD      PointCut = "onGasPayment"
-	PRE_TX_EXECUTE_METHOD      PointCut = "preTxExecute"
-	PRE_CONTRACT_CALL_METHOD   PointCut = "preContractCall"
-	POST_CONTRACT_CALL_METHOD  PointCut = "postContractCall"
-	POST_TX_EXECUTE_METHOD     PointCut = "postTxExecute"
-	POST_TX_COMMIT             PointCut = "postTxCommit"
-	ON_BLOCK_FINALIZE_METHOD   PointCut = "onBlockFinalize"
-	OPERATION_METHOD           PointCut = "operation"
-	IS_OWNER_METHOD            PointCut = "isOwner"
-	ON_CONTRACT_BINDING_METHOD PointCut = "onContractBinding"
+	FILTER_TX                 PointCut = "filterTx"
+	VERIFY_TX                 PointCut = "verifyTx"
+	ON_GAS_PAYMENT_METHOD     PointCut = "onGasPayment"
+	PRE_TX_EXECUTE_METHOD     PointCut = "preTxExecute"
+	PRE_CONTRACT_CALL_METHOD  PointCut = "preContractCall"
+	POST_CONTRACT_CALL_METHOD PointCut = "postContractCall"
+	POST_TX_EXECUTE_METHOD    PointCut = "postTxExecute"
+	POST_TX_COMMIT            PointCut = "postTxCommit"
+
+	OPERATION_METHOD PointCut = "operation"
+	IS_OWNER_METHOD  PointCut = "isOwner"
 )
 
 type JoinPointRunType int64
 
 const (
-	JoinPointRunType_VerifyTx          JoinPointRunType = 1
-	JoinPointRunType_PreTxExecute      JoinPointRunType = 2
-	JoinPointRunType_PreContractCall   JoinPointRunType = 4
-	JoinPointRunType_PostContractCall  JoinPointRunType = 8
-	JoinPointRunType_PostTxExecute     JoinPointRunType = 16
-	JoinPointRunType_PostTxCommit      JoinPointRunType = 32
-	JoinPointRunType_OnBlockInitialize JoinPointRunType = 64
-	JoinPointRunType_OnBlockFinalize   JoinPointRunType = 128
+	JoinPointRunType_VerifyTx         JoinPointRunType = 1
+	JoinPointRunType_PreTxExecute     JoinPointRunType = 2
+	JoinPointRunType_PreContractCall  JoinPointRunType = 4
+	JoinPointRunType_PostContractCall JoinPointRunType = 8
+	JoinPointRunType_PostTxExecute    JoinPointRunType = 16
 
-	BlockLevelJP = int64(JoinPointRunType_OnBlockInitialize) + int64(JoinPointRunType_OnBlockFinalize)
-
-	TransactionLevelJP = int64(JoinPointRunType_PreTxExecute) + int64(JoinPointRunType_PreContractCall) + int64(JoinPointRunType_PostContractCall) + int64(JoinPointRunType_PostTxExecute) + int64(JoinPointRunType_PostTxCommit)
+	TransactionLevelJP = int64(JoinPointRunType_PreTxExecute) + int64(JoinPointRunType_PreContractCall) + int64(JoinPointRunType_PostContractCall) + int64(JoinPointRunType_PostTxExecute)
 )
 
 // Enum value maps for JoinPointRunType.
 var (
 	JoinPointRunType_value = map[string]int64{
-		string(VERIFY_TX):                  int64(JoinPointRunType_VerifyTx),
-		string(PRE_TX_EXECUTE_METHOD):      int64(JoinPointRunType_PreTxExecute),
-		string(PRE_CONTRACT_CALL_METHOD):   int64(JoinPointRunType_PreContractCall),
-		string(POST_CONTRACT_CALL_METHOD):  int64(JoinPointRunType_PostContractCall),
-		string(POST_TX_EXECUTE_METHOD):     int64(JoinPointRunType_PostTxExecute),
-		string(POST_TX_COMMIT):             int64(JoinPointRunType_PostTxCommit),
-		string(ON_BLOCK_INITIALIZE_METHOD): int64(JoinPointRunType_OnBlockInitialize),
-		string(ON_BLOCK_FINALIZE_METHOD):   int64(JoinPointRunType_OnBlockFinalize),
+		string(VERIFY_TX):                 int64(JoinPointRunType_VerifyTx),
+		string(PRE_TX_EXECUTE_METHOD):     int64(JoinPointRunType_PreTxExecute),
+		string(PRE_CONTRACT_CALL_METHOD):  int64(JoinPointRunType_PreContractCall),
+		string(POST_CONTRACT_CALL_METHOD): int64(JoinPointRunType_PostContractCall),
+		string(POST_TX_EXECUTE_METHOD):    int64(JoinPointRunType_PostTxExecute),
 	}
 )
 
@@ -95,9 +81,6 @@ func CanExecPoint(runJPs int64, cut PointCut) bool {
 	return false
 }
 
-func CheckIsBlockLevel(runJPs int64) bool {
-	return runJPs&BlockLevelJP > 0
-}
 func CheckIsTransactionLevel(runJPs int64) bool {
 	return runJPs&TransactionLevelJP > 0
 }
