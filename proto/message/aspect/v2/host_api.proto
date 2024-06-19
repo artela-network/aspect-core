@@ -159,6 +159,13 @@ message G2 {
   required bytes y2 = 4;
 }
 
+message EcRecoverInput {
+  required bytes hash = 1;
+  required bytes v = 2;
+  required bytes r = 3;
+  required bytes s = 4;
+}
+
 message Bn256AddInput {
   required G1 a = 1;
   required G1 b = 2;

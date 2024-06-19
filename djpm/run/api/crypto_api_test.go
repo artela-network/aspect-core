@@ -44,6 +44,47 @@ func getData(data []byte, start uint64, size uint64) []byte {
 	return common.RightPadBytes(data[start:end], int(size))
 }
 
+func TestEcRecover(t *testing.T) {
+	r := NewRegistry(context.Background(), common.Address{}, 1)
+	apis := r.cryptoAPIs()
+
+	api, ok := apis["ecRecover"]
+	require.Equal(t, true, ok)
+
+	fn, ok := api.Func.(func(input []byte) ([]byte, error))
+	require.Equal(t, true, ok)
+
+	testCases, err := loadJson("ecRecover")
+	require.Equal(t, nil, err)
+	for _, testCase := range testCases {
+		input := common.Hex2Bytes(testCase.Input)
+
+		hash := getData(input, 0, 32)
+		v := getData(input, 32, 32)
+		r := getData(input, 64, 32)
+		s := getData(input, 96, 32)
+
+		fmt.Println("hash: ", common.Bytes2Hex(hash))
+		fmt.Println("v: ", common.Bytes2Hex(v))
+		fmt.Println("r: ", common.Bytes2Hex(r))
+		fmt.Println("s: ", common.Bytes2Hex(s))
+		fmt.Println("expect: ", testCase.Expected)
+
+		data, err := proto.Marshal(&types.EcRecoverInput{
+			Hash: hash,
+			V: v,
+			R: r,
+			S: s,
+		})
+		require.Equal(t, nil, err)
+
+		res, err := fn(data)
+		require.Equal(t, nil, err)
+
+		require.Equal(t, testCase.Expected, common.Bytes2Hex(res))
+	}
+}
+
 func TestModExp(t *testing.T) {
 	r := NewRegistry(context.Background(), common.Address{}, 1)
 	apis := r.cryptoAPIs()

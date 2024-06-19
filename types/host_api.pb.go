@@ -1586,6 +1586,77 @@ func (x *G2) GetY2() []byte {
 	return nil
 }
 
+type EcRecoverInput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Hash []byte `protobuf:"bytes,1,req,name=hash" json:"hash,omitempty"`
+	V    []byte `protobuf:"bytes,2,req,name=v" json:"v,omitempty"`
+	R    []byte `protobuf:"bytes,3,req,name=r" json:"r,omitempty"`
+	S    []byte `protobuf:"bytes,4,req,name=s" json:"s,omitempty"`
+}
+
+func (x *EcRecoverInput) Reset() {
+	*x = EcRecoverInput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aspect_v2_host_api_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EcRecoverInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EcRecoverInput) ProtoMessage() {}
+
+func (x *EcRecoverInput) ProtoReflect() protoreflect.Message {
+	mi := &file_aspect_v2_host_api_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EcRecoverInput.ProtoReflect.Descriptor instead.
+func (*EcRecoverInput) Descriptor() ([]byte, []int) {
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *EcRecoverInput) GetHash() []byte {
+	if x != nil {
+		return x.Hash
+	}
+	return nil
+}
+
+func (x *EcRecoverInput) GetV() []byte {
+	if x != nil {
+		return x.V
+	}
+	return nil
+}
+
+func (x *EcRecoverInput) GetR() []byte {
+	if x != nil {
+		return x.R
+	}
+	return nil
+}
+
+func (x *EcRecoverInput) GetS() []byte {
+	if x != nil {
+		return x.S
+	}
+	return nil
+}
+
 type Bn256AddInput struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1598,7 +1669,7 @@ type Bn256AddInput struct {
 func (x *Bn256AddInput) Reset() {
 	*x = Bn256AddInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[26]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1611,7 +1682,7 @@ func (x *Bn256AddInput) String() string {
 func (*Bn256AddInput) ProtoMessage() {}
 
 func (x *Bn256AddInput) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[26]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1624,7 +1695,7 @@ func (x *Bn256AddInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Bn256AddInput.ProtoReflect.Descriptor instead.
 func (*Bn256AddInput) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{26}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *Bn256AddInput) GetA() *G1 {
@@ -1653,7 +1724,7 @@ type Bn256ScalarMulInput struct {
 func (x *Bn256ScalarMulInput) Reset() {
 	*x = Bn256ScalarMulInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[27]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1666,7 +1737,7 @@ func (x *Bn256ScalarMulInput) String() string {
 func (*Bn256ScalarMulInput) ProtoMessage() {}
 
 func (x *Bn256ScalarMulInput) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[27]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1679,7 +1750,7 @@ func (x *Bn256ScalarMulInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Bn256ScalarMulInput.ProtoReflect.Descriptor instead.
 func (*Bn256ScalarMulInput) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{27}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *Bn256ScalarMulInput) GetA() *G1 {
@@ -1708,7 +1779,7 @@ type Bn256PairingInput struct {
 func (x *Bn256PairingInput) Reset() {
 	*x = Bn256PairingInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_aspect_v2_host_api_proto_msgTypes[28]
+		mi := &file_aspect_v2_host_api_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1721,7 +1792,7 @@ func (x *Bn256PairingInput) String() string {
 func (*Bn256PairingInput) ProtoMessage() {}
 
 func (x *Bn256PairingInput) ProtoReflect() protoreflect.Message {
-	mi := &file_aspect_v2_host_api_proto_msgTypes[28]
+	mi := &file_aspect_v2_host_api_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1734,7 +1805,7 @@ func (x *Bn256PairingInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Bn256PairingInput.ProtoReflect.Descriptor instead.
 func (*Bn256PairingInput) Descriptor() ([]byte, []int) {
-	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{28}
+	return file_aspect_v2_host_api_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *Bn256PairingInput) GetCs() []*G1 {
@@ -1903,7 +1974,12 @@ var file_aspect_v2_host_api_proto_rawDesc = []byte{
 	0x78, 0x31, 0x12, 0x0e, 0x0a, 0x02, 0x78, 0x32, 0x18, 0x02, 0x20, 0x02, 0x28, 0x0c, 0x52, 0x02,
 	0x78, 0x32, 0x12, 0x0e, 0x0a, 0x02, 0x79, 0x31, 0x18, 0x03, 0x20, 0x02, 0x28, 0x0c, 0x52, 0x02,
 	0x79, 0x31, 0x12, 0x0e, 0x0a, 0x02, 0x79, 0x32, 0x18, 0x04, 0x20, 0x02, 0x28, 0x0c, 0x52, 0x02,
-	0x79, 0x32, 0x22, 0x49, 0x0a, 0x0d, 0x42, 0x6e, 0x32, 0x35, 0x36, 0x41, 0x64, 0x64, 0x49, 0x6e,
+	0x79, 0x32, 0x22, 0x4e, 0x0a, 0x0e, 0x45, 0x63, 0x52, 0x65, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x49,
+	0x6e, 0x70, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20, 0x02,
+	0x28, 0x0c, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x0c, 0x0a, 0x01, 0x76, 0x18, 0x02, 0x20,
+	0x02, 0x28, 0x0c, 0x52, 0x01, 0x76, 0x12, 0x0c, 0x0a, 0x01, 0x72, 0x18, 0x03, 0x20, 0x02, 0x28,
+	0x0c, 0x52, 0x01, 0x72, 0x12, 0x0c, 0x0a, 0x01, 0x73, 0x18, 0x04, 0x20, 0x02, 0x28, 0x0c, 0x52,
+	0x01, 0x73, 0x22, 0x49, 0x0a, 0x0d, 0x42, 0x6e, 0x32, 0x35, 0x36, 0x41, 0x64, 0x64, 0x49, 0x6e,
 	0x70, 0x75, 0x74, 0x12, 0x1b, 0x0a, 0x01, 0x61, 0x18, 0x01, 0x20, 0x02, 0x28, 0x0b, 0x32, 0x0d,
 	0x2e, 0x61, 0x73, 0x70, 0x65, 0x63, 0x74, 0x2e, 0x76, 0x32, 0x2e, 0x47, 0x31, 0x52, 0x01, 0x61,
 	0x12, 0x1b, 0x0a, 0x01, 0x62, 0x18, 0x02, 0x20, 0x02, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x61, 0x73,
@@ -1941,7 +2017,7 @@ func file_aspect_v2_host_api_proto_rawDescGZIP() []byte {
 	return file_aspect_v2_host_api_proto_rawDescData
 }
 
-var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_aspect_v2_host_api_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_aspect_v2_host_api_proto_goTypes = []any{
 	(*StaticCallRequest)(nil),     // 0: aspect.v2.StaticCallRequest
 	(*StaticCallResult)(nil),      // 1: aspect.v2.StaticCallResult
@@ -1969,17 +2045,18 @@ var file_aspect_v2_host_api_proto_goTypes = []any{
 	(*BytesData)(nil),             // 23: aspect.v2.BytesData
 	(*G1)(nil),                    // 24: aspect.v2.G1
 	(*G2)(nil),                    // 25: aspect.v2.G2
-	(*Bn256AddInput)(nil),         // 26: aspect.v2.Bn256AddInput
-	(*Bn256ScalarMulInput)(nil),   // 27: aspect.v2.Bn256ScalarMulInput
-	(*Bn256PairingInput)(nil),     // 28: aspect.v2.Bn256PairingInput
-	nil,                           // 29: aspect.v2.EthCallTree.CallsEntry
+	(*EcRecoverInput)(nil),        // 26: aspect.v2.EcRecoverInput
+	(*Bn256AddInput)(nil),         // 27: aspect.v2.Bn256AddInput
+	(*Bn256ScalarMulInput)(nil),   // 28: aspect.v2.Bn256ScalarMulInput
+	(*Bn256PairingInput)(nil),     // 29: aspect.v2.Bn256PairingInput
+	nil,                           // 30: aspect.v2.EthCallTree.CallsEntry
 }
 var file_aspect_v2_host_api_proto_depIdxs = []int32{
 	5,  // 0: aspect.v2.EthLogs.logs:type_name -> aspect.v2.EthLog
 	5,  // 1: aspect.v2.EthReceipt.logs:type_name -> aspect.v2.EthLog
 	8,  // 2: aspect.v2.EthAccessList.access_list:type_name -> aspect.v2.EthAccessTuple
 	12, // 3: aspect.v2.EthStateChanges.all:type_name -> aspect.v2.EthStateChange
-	29, // 4: aspect.v2.EthCallTree.calls:type_name -> aspect.v2.EthCallTree.CallsEntry
+	30, // 4: aspect.v2.EthCallTree.calls:type_name -> aspect.v2.EthCallTree.CallsEntry
 	24, // 5: aspect.v2.Bn256AddInput.a:type_name -> aspect.v2.G1
 	24, // 6: aspect.v2.Bn256AddInput.b:type_name -> aspect.v2.G1
 	24, // 7: aspect.v2.Bn256ScalarMulInput.a:type_name -> aspect.v2.G1
@@ -2312,7 +2389,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[26].Exporter = func(v any, i int) any {
-			switch v := v.(*Bn256AddInput); i {
+			switch v := v.(*EcRecoverInput); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2324,7 +2401,7 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[27].Exporter = func(v any, i int) any {
-			switch v := v.(*Bn256ScalarMulInput); i {
+			switch v := v.(*Bn256AddInput); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2336,6 +2413,18 @@ func file_aspect_v2_host_api_proto_init() {
 			}
 		}
 		file_aspect_v2_host_api_proto_msgTypes[28].Exporter = func(v any, i int) any {
+			switch v := v.(*Bn256ScalarMulInput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aspect_v2_host_api_proto_msgTypes[29].Exporter = func(v any, i int) any {
 			switch v := v.(*Bn256PairingInput); i {
 			case 0:
 				return &v.state
@@ -2354,7 +2443,7 @@ func file_aspect_v2_host_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_aspect_v2_host_api_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
