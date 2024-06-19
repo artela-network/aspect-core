@@ -3,9 +3,7 @@ package api
 import (
 	"crypto"
 	"crypto/sha256"
-	"encoding/hex"
 	"errors"
-	"fmt"
 	"math/big"
 
 	"github.com/artela-network/aspect-core/types"
@@ -92,13 +90,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					mod  = new(big.Int).SetBytes(m)
 					v    []byte
 				)
-				fmt.Println("-----------base: ", hex.EncodeToString(b))
-				fmt.Println("-----------exp: ", hex.EncodeToString(e))
-				fmt.Println("-----------mod: ", hex.EncodeToString(m))
 
-				fmt.Println("-----------base: ", base.String())
-				fmt.Println("-----------exp: ", exp.String())
-				fmt.Println("-----------mod: ", mod.String())
 				switch {
 				case mod.BitLen() == 0:
 					// Modulo 0 is undefined, return zero
@@ -109,11 +101,9 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				default:
 					v = base.Exp(base, exp, mod).Bytes()
 				}
-				fmt.Println("-----------bigModExp: ", hex.EncodeToString(common.LeftPadBytes(v, len(m))))
 				return common.LeftPadBytes(v, len(m)), nil
 			},
-			// GasRule: types2.NewDynamicGasRule(15000, 300000),
-			GasRule: types2.NewStaticGasRule(0),
+			GasRule: types2.NewDynamicGasRule(15000, 300000),
 		},
 
 		"bn256Add": {
@@ -218,12 +208,4 @@ func allZero(b []byte) bool {
 		}
 	}
 	return true
-}
-
-func bigEndianToLittleEndian(bigEndianBytes []byte) []byte {
-	b := bigEndianBytes
-	for i := 0; i < len(b)/2; i++ {
-		b[len(b)-i-1], b[i] = b[i], b[len(b)-i-1]
-	}
-	return b
 }

@@ -74,13 +74,8 @@ func TestModExp(t *testing.T) {
 		e := getData(input, baseLen, expLen)
 		m := getData(input, baseLen+expLen, modLen)
 
-		fmt.Println("b:", hex.EncodeToString(b))
-		fmt.Println("e:", hex.EncodeToString(e))
-		fmt.Println("m:", hex.EncodeToString(m))
-
 		res, err := fn(b, e, m)
 		require.Equal(t, nil, err)
-		fmt.Println("res:", hex.EncodeToString(res))
 		require.Equal(t, testCase.Expected, hex.EncodeToString(res))
 	}
 }
@@ -104,14 +99,6 @@ func TestBN256Add(t *testing.T) {
 		ay := getData(input, 32, 32)
 		bx := getData(input, 64, 32)
 		by := getData(input, 96, 32)
-
-		fmt.Println("ax:", hex.EncodeToString(ax))
-		fmt.Println("ay:", hex.EncodeToString(ay))
-		fmt.Println("bx:", hex.EncodeToString(bx))
-		fmt.Println("by:", hex.EncodeToString(by))
-
-		fmt.Println("expect x:", testCase.Expected[:64])
-		fmt.Println("expect y:", testCase.Expected[64:])
 
 		data, err := proto.Marshal(&types.Bn256AddInput{
 			A: &types.G1{X: ax, Y: ay},
