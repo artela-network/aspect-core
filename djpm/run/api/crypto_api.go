@@ -3,7 +3,9 @@ package api
 import (
 	"crypto"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/artela-network/aspect-core/types"
@@ -78,10 +80,10 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 		},
 		"bigModExp": {
 			// proto encoded input ([]byte) -> proto decode (3 []byte)
-			Func: func(b, e, m []byte) []byte {
+			Func: func(b, e, m []byte) ([]byte, error) {
 				// Handle a special case when both the base and mod length is zero
 				if len(b) == 0 && len(m) == 0 {
-					return []byte{}
+					return []byte{}, errors.New("params not valid")
 				}
 				// Retrieve the operands and execute the exponentiation
 				var (
@@ -90,19 +92,28 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					mod  = new(big.Int).SetBytes(m)
 					v    []byte
 				)
+				fmt.Println("-----------base: ", hex.EncodeToString(b))
+				fmt.Println("-----------exp: ", hex.EncodeToString(e))
+				fmt.Println("-----------mod: ", hex.EncodeToString(m))
+
+				fmt.Println("-----------base: ", base.String())
+				fmt.Println("-----------exp: ", exp.String())
+				fmt.Println("-----------mod: ", mod.String())
 				switch {
 				case mod.BitLen() == 0:
 					// Modulo 0 is undefined, return zero
-					return common.LeftPadBytes([]byte{}, len(m))
+					return common.LeftPadBytes([]byte{}, len(m)), nil
 				case base.BitLen() == 1: // a bit length of 1 means it's 1 (or -1).
 					// If base == 1, then we can just return base % mod (if mod >= 1, which it is)
 					v = base.Mod(base, mod).Bytes()
 				default:
 					v = base.Exp(base, exp, mod).Bytes()
 				}
-				return common.LeftPadBytes(v, len(m))
+				fmt.Println("-----------bigModExp: ", hex.EncodeToString(common.LeftPadBytes(v, len(m))))
+				return common.LeftPadBytes(v, len(m)), nil
 			},
-			GasRule: types2.NewDynamicGasRule(30000, 150000),
+			// GasRule: types2.NewDynamicGasRule(15000, 300000),
+			GasRule: types2.NewStaticGasRule(0),
 		},
 
 		"bn256Add": {
@@ -128,21 +139,24 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				if len(res) != 64 {
 					return nil, errors.New("run precompile failed")
 				}
-				point := &types.CurvePoint{X: res[:32], Y: res[32:]}
+				point := &types.G1{X: res[:32], Y: res[32:]}
 				return proto.Marshal(point)
 			},
 			GasRule: types2.NewStaticGasRule(1500),
 		},
 
 		"bn256ScalarMul": {
-			Func: func(x, y, scalar []byte) ([]byte, error) {
-				if len(x) > 32 || len(y) > 32 || len(scalar) > 32 {
-					return nil, errors.New("params not valid")
+			Func: func(input []byte) ([]byte, error) {
+				scalrInput := &types.Bn256ScalarMulInput{}
+				err := proto.Unmarshal(input, scalrInput)
+				if err != nil {
+					return nil, err
 				}
+
 				calldata := make([]byte, 96)
-				copy(calldata[:], x)
-				copy(calldata[32:], y)
-				copy(calldata[64:], scalar)
+				copy(calldata[:], scalrInput.A.X)
+				copy(calldata[32:], scalrInput.A.Y)
+				copy(calldata[64:], scalrInput.Scalar)
 
 				contract := vm.PrecompiledContractsBerlin[bn256ScalarMulAddress]
 				res, err := contract.Run(calldata)
@@ -153,8 +167,8 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				if len(res) != 64 {
 					return nil, errors.New("run precompile failed")
 				}
-				point := &types.CurvePoint{X: res[:32], Y: res[32:]}
-				return proto.Marshal(point)
+				scalared := &types.G1{X: res[:32], Y: res[32:]}
+				return proto.Marshal(scalared)
 			},
 			GasRule: types2.NewStaticGasRule(6000),
 		},
@@ -167,7 +181,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					return nil, err
 				}
 
-				if !(len(pairing.Cs) == len(pairing.Ts1) && len(pairing.Cs) == len(pairing.Ts2)) {
+				if !(len(pairing.Cs) == len(pairing.Ts)) {
 					return nil, errors.New("params not valid")
 				}
 
@@ -178,10 +192,10 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					start := grouplen * i
 					copy(calldata[start:], pairing.Cs[i].X)
 					copy(calldata[start+32:], pairing.Cs[i].Y)
-					copy(calldata[start+64:], pairing.Ts1[i].X)
-					copy(calldata[start+96:], pairing.Ts1[i].Y)
-					copy(calldata[start+128:], pairing.Ts2[i].X)
-					copy(calldata[start+160:], pairing.Ts2[i].Y)
+					copy(calldata[start+64:], pairing.Ts[i].X1)
+					copy(calldata[start+96:], pairing.Ts[i].X2)
+					copy(calldata[start+128:], pairing.Ts[i].Y1)
+					copy(calldata[start+160:], pairing.Ts[i].Y2)
 				}
 
 				contract := vm.PrecompiledContractsBerlin[bn256PairingAddress]
@@ -204,4 +218,12 @@ func allZero(b []byte) bool {
 		}
 	}
 	return true
+}
+
+func bigEndianToLittleEndian(bigEndianBytes []byte) []byte {
+	b := bigEndianBytes
+	for i := 0; i < len(b)/2; i++ {
+		b[len(b)-i-1], b[i] = b[i], b[len(b)-i-1]
+	}
+	return b
 }

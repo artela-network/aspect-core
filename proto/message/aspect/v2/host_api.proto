@@ -147,23 +147,29 @@ message BytesData {
   required bytes data = 1;
 }
 
-message CurvePoint {
+message G1 {
   required bytes x = 1;
   required bytes y = 2;
 }
 
-message Bn256AddInput {
-  required CurvePoint a = 1;
-  required CurvePoint b = 2;
+message G2 {
+  required bytes x1 = 1;
+  required bytes x2 = 2;
+  required bytes y1 = 3;
+  required bytes y2 = 4;
 }
 
-message Bn256ScalarMul {
-  required CurvePoint a = 1;
+message Bn256AddInput {
+  required G1 a = 1;
+  required G1 b = 2;
+}
+
+message Bn256ScalarMulInput {
+  required G1 a = 1;
   required bytes scalar = 2;
 }
 
 message Bn256PairingInput {
-  repeated CurvePoint cs = 1;
-  repeated CurvePoint ts1 = 2;
-  repeated CurvePoint ts2 = 3;
+  repeated G1 cs = 1;
+  repeated G2 ts = 2;
 }

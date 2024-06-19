@@ -51,7 +51,7 @@ func TestModExp(t *testing.T) {
 	api, ok := apis["bigModExp"]
 	require.Equal(t, true, ok)
 
-	fn, ok := api.Func.(func(b, e, m []byte) []byte)
+	fn, ok := api.Func.(func(b, e, m []byte) ([]byte, error))
 	require.Equal(t, true, ok)
 
 	testCases, err := loadJson("modexp")
@@ -74,7 +74,13 @@ func TestModExp(t *testing.T) {
 		e := getData(input, baseLen, expLen)
 		m := getData(input, baseLen+expLen, modLen)
 
-		res := fn(b, e, m)
+		fmt.Println("b:", hex.EncodeToString(b))
+		fmt.Println("e:", hex.EncodeToString(e))
+		fmt.Println("m:", hex.EncodeToString(m))
+
+		res, err := fn(b, e, m)
+		require.Equal(t, nil, err)
+		fmt.Println("res:", hex.EncodeToString(res))
 		require.Equal(t, testCase.Expected, hex.EncodeToString(res))
 	}
 }
@@ -99,16 +105,24 @@ func TestBN256Add(t *testing.T) {
 		bx := getData(input, 64, 32)
 		by := getData(input, 96, 32)
 
+		fmt.Println("ax:", hex.EncodeToString(ax))
+		fmt.Println("ay:", hex.EncodeToString(ay))
+		fmt.Println("bx:", hex.EncodeToString(bx))
+		fmt.Println("by:", hex.EncodeToString(by))
+
+		fmt.Println("expect x:", testCase.Expected[:64])
+		fmt.Println("expect y:", testCase.Expected[64:])
+
 		data, err := proto.Marshal(&types.Bn256AddInput{
-			A: &types.CurvePoint{X: ax, Y: ay},
-			B: &types.CurvePoint{X: bx, Y: by},
+			A: &types.G1{X: ax, Y: ay},
+			B: &types.G1{X: bx, Y: by},
 		})
 		require.Equal(t, nil, err)
 
 		res, err := fn(data)
 		require.Equal(t, nil, err)
 
-		p := &types.CurvePoint{}
+		p := &types.G1{}
 		err = proto.Unmarshal(res, p)
 		require.Equal(t, nil, err)
 
@@ -124,7 +138,7 @@ func TestBN256Saclar(t *testing.T) {
 	api, ok := apis["bn256ScalarMul"]
 	require.Equal(t, true, ok)
 
-	fn, ok := api.Func.(func(x, y, scalar []byte) ([]byte, error))
+	fn, ok := api.Func.(func(input []byte) ([]byte, error))
 	require.Equal(t, true, ok)
 
 	testCases, err := loadJson("bn256ScalarMul")
@@ -136,10 +150,14 @@ func TestBN256Saclar(t *testing.T) {
 		y := getData(input, 32, 32)
 		scalar := getData(input, 64, 32)
 
-		res, err := fn(x, y, scalar)
+		scalarInput := &types.Bn256ScalarMulInput{A: &types.G1{X: x, Y: y}, Scalar: scalar}
+		scalarData, err := proto.Marshal(scalarInput)
 		require.Equal(t, nil, err)
 
-		p := &types.CurvePoint{}
+		res, err := fn(scalarData)
+		require.Equal(t, nil, err)
+
+		p := &types.G1{}
 		err = proto.Unmarshal(res, p)
 		require.Equal(t, nil, err)
 
@@ -164,16 +182,15 @@ func TestBN256Pairing(t *testing.T) {
 		input := common.Hex2Bytes(testCase.Input)
 		pairing := &types.Bn256PairingInput{}
 		for i := 0; i < len(input); i += 192 {
-			c, t1, t2 := &types.CurvePoint{}, &types.CurvePoint{}, &types.CurvePoint{}
+			c, t := &types.G1{}, &types.G2{}
 			c.X = input[i : i+32]
 			c.Y = input[i+32 : i+(32*2)]
-			t1.X = input[i+(32*2) : i+(32*3)]
-			t1.Y = input[i+(32*3) : i+(32*4)]
-			t2.X = input[i+(32*4) : i+(32*5)]
-			t2.Y = input[i+(32*5) : i+(32*6)]
+			t.X1 = input[i+(32*2) : i+(32*3)]
+			t.X2 = input[i+(32*3) : i+(32*4)]
+			t.Y1 = input[i+(32*4) : i+(32*5)]
+			t.Y2 = input[i+(32*5) : i+(32*6)]
 			pairing.Cs = append(pairing.Cs, c)
-			pairing.Ts1 = append(pairing.Ts1, t1)
-			pairing.Ts2 = append(pairing.Ts2, t2)
+			pairing.Ts = append(pairing.Ts, t)
 		}
 
 		in, err := proto.Marshal(pairing)
