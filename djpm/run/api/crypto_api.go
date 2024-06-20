@@ -3,6 +3,7 @@ package api
 import (
 	"crypto"
 	"crypto/sha256"
+	"encoding/binary"
 	"errors"
 	"math/big"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/blake2b"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -125,7 +127,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				copy(calldata[64:], points.B.X)
 				copy(calldata[96:], points.B.Y)
 
-				contract := vm.PrecompiledContractsBerlin[bn256AddAddress]
+				contract := vm.PrecompiledContractsIstanbul[bn256AddAddress]
 				res, err := contract.Run(calldata)
 				if err != nil {
 					return nil, err
@@ -153,7 +155,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				copy(calldata[32:], scalrInput.A.Y)
 				copy(calldata[64:], scalrInput.Scalar)
 
-				contract := vm.PrecompiledContractsBerlin[bn256ScalarMulAddress]
+				contract := vm.PrecompiledContractsIstanbul[bn256ScalarMulAddress]
 				res, err := contract.Run(calldata)
 				if err != nil {
 					return nil, err
@@ -193,7 +195,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					copy(calldata[start+160:], pairing.Ts[i].Y2)
 				}
 
-				contract := vm.PrecompiledContractsBerlin[bn256PairingAddress]
+				contract := vm.PrecompiledContractsIstanbul[bn256PairingAddress]
 				res, err := contract.Run(calldata)
 				if err != nil {
 					return nil, err
@@ -201,7 +203,51 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return res, nil
 			},
-			GasRule: types2.NewDynamicGasRule(45000, 34000),
+			GasRule: types2.NewDynamicGasRule(45000, 380000),
+		},
+
+		"blake2F": {
+			Func: func(input []byte) ([]byte, error) {
+				// Execute the compression function, extract and return the result
+				blakeInput := &types.Blake2FInput{}
+				err := proto.Unmarshal(input, blakeInput)
+				if err != nil {
+					return nil, err
+				}
+
+				if !(len(blakeInput.H) == 64 && len(blakeInput.M) == 128 && len(blakeInput.T) == 16 && blakeInput.Final != nil && blakeInput.Rounds != nil) {
+					return nil, errors.New("params not valid")
+				}
+
+				var (
+					h [8]uint64
+					m [16]uint64
+					t [2]uint64
+
+					rounds = binary.BigEndian.Uint32(blakeInput.Rounds[0:4])
+				)
+
+				for i := 0; i < 8; i++ {
+					offset := i*8
+					h[i] = binary.LittleEndian.Uint64(blakeInput.H[offset : offset+8])
+				}
+				for i := 0; i < 16; i++ {
+					offset := i*8
+					m[i] = binary.LittleEndian.Uint64(blakeInput.M[offset : offset+8])
+				}
+				t[0] = binary.LittleEndian.Uint64(blakeInput.T[:8])
+				t[1] = binary.LittleEndian.Uint64(blakeInput.T[8:16])
+
+				blake2b.F(&h, m, t, *blakeInput.Final, rounds)
+
+				output := make([]byte, 64)
+				for i := 0; i < 8; i++ {
+					offset := i * 8
+					binary.LittleEndian.PutUint64(output[offset:offset+8], h[i])
+				}
+				return output, nil
+			},
+			GasRule: types2.NewDynamicGasRule(30000, 150000),
 		},
 	}
 }

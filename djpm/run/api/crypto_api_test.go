@@ -229,3 +229,58 @@ func TestBN256Pairing(t *testing.T) {
 		require.Equal(t, testCase.Expected, common.Bytes2Hex(res))
 	}
 }
+
+func TestBlake2F(test *testing.T) {
+	const (
+		blake2FInputLength        = 213
+		blake2FFinalBlockBytes    = byte(1)
+		blake2FNonFinalBlockBytes = byte(0)
+	)
+
+	r := NewRegistry(context.Background(), common.Address{}, 1)
+	apis := r.cryptoAPIs()
+
+	api, ok := apis["blake2F"]
+	require.Equal(test, true, ok)
+
+	fn, ok := api.Func.(func(input []byte) ([]byte, error))
+	require.Equal(test, true, ok)
+
+	testCases, err := loadJson("blake2F")
+	require.Equal(test, nil, err)
+	for _, testCase := range testCases {
+		input := common.Hex2Bytes(testCase.Input)
+
+		require.Equal(test, blake2FInputLength, len(input))
+		require.Equal(test, false, input[212] != blake2FNonFinalBlockBytes && input[212] != blake2FFinalBlockBytes)
+
+		// Parse the input into the Blake2b call parameters
+		var (
+			rounds = input[0:4]
+			final  = input[212] == blake2FFinalBlockBytes
+		)
+		var (
+			h = input[4:68]
+			m = input[68:196]
+			t = input[196:212]
+		)
+		fmt.Println("h: ", common.Bytes2Hex(input[4:68]))
+		fmt.Println("m: ", common.Bytes2Hex(input[68:196]))
+		fmt.Println("t: ", common.Bytes2Hex(input[196:212]))
+
+		blake2FInput := &types.Blake2FInput{
+			H:      h,
+			M:      m,
+			T:      t,
+			Final:  &final,
+			Rounds: rounds,
+		}
+		inputData, err := proto.Marshal(blake2FInput)
+		require.Equal(test, nil, err)
+
+		res, err := fn(inputData)
+		require.Equal(test, nil, err)
+
+		require.Equal(test, testCase.Expected, common.Bytes2Hex(res))
+	}
+}

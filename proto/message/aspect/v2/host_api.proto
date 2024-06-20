@@ -180,3 +180,11 @@ message Bn256PairingInput {
   repeated G1 cs = 1;
   repeated G2 ts = 2;
 }
+
+message Blake2FInput {
+  required bytes h = 1;
+  required bytes m = 2;
+  required bytes t = 3;
+  required bool final = 4;
+  required bytes rounds = 5;
+}
