@@ -215,7 +215,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 					return nil, err
 				}
 
-				if !(len(blakeInput.H) == 64 && len(blakeInput.M) == 128 && len(blakeInput.T) == 16 && blakeInput.Final != nil && blakeInput.Rounds != nil) {
+				if !(len(blakeInput.H) == 64 && len(blakeInput.M) == 128 && len(blakeInput.T) == 16 && blakeInput.Final != nil && len(blakeInput.Rounds) == 4) {
 					return nil, errors.New("params not valid")
 				}
 

@@ -264,9 +264,12 @@ func TestBlake2F(test *testing.T) {
 			m = input[68:196]
 			t = input[196:212]
 		)
-		fmt.Println("h: ", common.Bytes2Hex(input[4:68]))
-		fmt.Println("m: ", common.Bytes2Hex(input[68:196]))
-		fmt.Println("t: ", common.Bytes2Hex(input[196:212]))
+		fmt.Println("h: ", common.Bytes2Hex(h))
+		fmt.Println("m: ", common.Bytes2Hex(m))
+		fmt.Println("t: ", common.Bytes2Hex(t))
+		fmt.Println("t: ", common.Bytes2Hex(rounds))
+		fmt.Println("final: ", final)
+		fmt.Println("expect: ", testCase.Expected)
 
 		blake2FInput := &types.Blake2FInput{
 			H:      h,
