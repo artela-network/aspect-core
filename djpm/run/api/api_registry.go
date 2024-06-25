@@ -48,13 +48,14 @@ type Registry struct {
 }
 
 func NewRegistry(ctx context.Context, aspectID common.Address, aspVer uint64) *Registry {
+	runnerCtx := &types.RunnerContext{
+		Ctx:           ctx,
+		AspectId:      aspectID,
+		AspectVersion: aspVer,
+	}
 	return &Registry{
-		runnerContext: &types.RunnerContext{
-			Ctx:           ctx,
-			AspectId:      aspectID,
-			AspectVersion: aspVer,
-		},
-		collection: rttypes.NewHostAPIRegistry(wasmtime.Wrap),
+		runnerContext: runnerCtx,
+		collection:    rttypes.NewHostAPIRegistry(runnerCtx, wasmtime.Wrap),
 	}
 }
 

@@ -14,14 +14,20 @@ func (r *Registry) utilAPIs() map[string]*types.HostFuncWithGasRule {
 				}
 				return nil
 			},
-			GasRule: types.NewStaticGasRule(1),
+			GasRule: types.NewDynamicGasRule(1000, 37500),
 		},
 		"sLog": {
 			Func: func(s string) error {
 				log.Info(s)
 				return nil
 			},
-			GasRule: types.NewDynamicGasRule(1000, 3750),
+			GasRule: types.NewDynamicGasRule(10000, 37500),
+		},
+		"gas": {
+			Func: func() (int64, error) {
+				return r.runnerContext.VMContext.RemainingWASMGas()
+			},
+			GasRule: types.NewStaticGasRule(2000),
 		},
 	}
 }

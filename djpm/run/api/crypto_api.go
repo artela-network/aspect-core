@@ -29,7 +29,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				h := sha256.Sum256(input)
 				return h[:], nil
 			},
-			GasRule: types2.NewDynamicGasRule(6000, 7500),
+			GasRule: types2.NewDynamicGasRule(60000, 75000),
 		},
 		"ripemd160": {
 			Func: func(input []byte) ([]byte, error) {
@@ -37,13 +37,13 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				hash.Write(input)
 				return common.LeftPadBytes(hash.Sum(nil), 32), nil
 			},
-			GasRule: types2.NewDynamicGasRule(60000, 75000),
+			GasRule: types2.NewDynamicGasRule(600000, 750000),
 		},
 		"keccak": {
 			Func: func(input []byte) ([]byte, error) {
 				return ethcrypto.Keccak256(input), nil
 			},
-			GasRule: types2.NewDynamicGasRule(3000, 3750),
+			GasRule: types2.NewDynamicGasRule(30000, 37500),
 		},
 		"ecRecover": {
 			Func: func(input []byte) ([]byte, error) {
@@ -81,7 +81,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				// the first byte of pubkey is bitcoin heritage
 				return common.LeftPadBytes(ethcrypto.Keccak256(pubKey[1:])[12:], 32), nil
 			},
-			GasRule: types2.NewStaticGasRule(3000),
+			GasRule: types2.NewStaticGasRule(30000),
 		},
 		"bigModExp": {
 			// proto encoded input ([]byte) -> proto decode (3 []byte)
@@ -110,7 +110,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return common.LeftPadBytes(v, len(m)), nil
 			},
-			GasRule: types2.NewDynamicGasRule(15000, 300000),
+			GasRule: types2.NewDynamicGasRule(150000, 3000000),
 		},
 
 		"bn256Add": {
@@ -139,7 +139,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				point := &types.G1{X: res[:32], Y: res[32:]}
 				return proto.Marshal(point)
 			},
-			GasRule: types2.NewStaticGasRule(1500),
+			GasRule: types2.NewStaticGasRule(15000),
 		},
 
 		"bn256ScalarMul": {
@@ -167,7 +167,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				scalared := &types.G1{X: res[:32], Y: res[32:]}
 				return proto.Marshal(scalared)
 			},
-			GasRule: types2.NewStaticGasRule(6000),
+			GasRule: types2.NewStaticGasRule(60000),
 		},
 
 		"bn256Pairing": {
@@ -203,7 +203,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return res, nil
 			},
-			GasRule: types2.NewDynamicGasRule(45000, 380000),
+			GasRule: types2.NewDynamicGasRule(450000, 3800000),
 		},
 
 		"blake2F": {
@@ -228,11 +228,11 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				)
 
 				for i := 0; i < 8; i++ {
-					offset := i*8
+					offset := i * 8
 					h[i] = binary.LittleEndian.Uint64(blakeInput.H[offset : offset+8])
 				}
 				for i := 0; i < 16; i++ {
-					offset := i*8
+					offset := i * 8
 					m[i] = binary.LittleEndian.Uint64(blakeInput.M[offset : offset+8])
 				}
 				t[0] = binary.LittleEndian.Uint64(blakeInput.T[:8])

@@ -22,7 +22,7 @@ func (r *Registry) transientStorageAPIs() map[string]*types2.HostFuncWithGasRule
 				}
 				return wrapNilByte(res), nil
 			},
-			GasRule: types2.NewDynamicGasRule(0, 50),
+			GasRule: types2.NewDynamicGasRule(0, 3125),
 		},
 		"set": {
 			Func: func(key string, val []byte) error {

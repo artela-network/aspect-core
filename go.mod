@@ -66,6 +66,7 @@ require (
 )
 
 replace (
+	github.com/artela-network/aspect-runtime => ../runtime
 	github.com/bytecodealliance/wasmtime-go/v20 => github.com/artela-network/wasmtime-go/v20 v20.0.2
 	github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
 )
