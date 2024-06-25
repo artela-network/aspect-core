@@ -20,7 +20,7 @@ func (r *Registry) aspectPropertyAPIs() map[string]*types2.HostFuncWithGasRule {
 				ret, err := hook.Get(r.runnerContext, key)
 				return wrapNilByte(ret), err
 			},
-			GasRule: types2.NewStaticGasRule(500),
+			GasRule: types2.NewStaticGasRule(12500),
 		},
 	}
 }
