@@ -111,7 +111,7 @@ message EthStateChanges {
 }
 
 message EthCallTree {
-    map<uint64, EthCallMessage> calls = 1;
+    repeated EthCallMessage calls = 1;
 }
 
 // basic types
