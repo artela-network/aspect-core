@@ -24,6 +24,7 @@ import (
 
 var (
 	CustomVerificationPrefix = hexutil.MustDecode("0xCAFECAFE")
+	MaxTxVerificationGas     = uint64(150000) // maximum gas allowed for customized transaction verification
 )
 
 var globalAspect *Aspect
@@ -108,7 +109,9 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	// execute aspect verification
-	verifyRes := aspect.VerifyTx(ctx, tx.To(), block, tx.Gas(), request)
+	// we cannot use tx.Gas() here, because verifier execution cannot be count into the execution gas,
+	// we'll use a fixed gas here
+	verifyRes := aspect.VerifyTx(ctx, tx.To(), block, MaxTxVerificationGas, request)
 	if verifyRes.Err != nil {
 		return common.Address{}, nil, verifyRes.Err
 	}
