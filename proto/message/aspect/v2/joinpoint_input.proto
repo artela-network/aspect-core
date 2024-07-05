@@ -61,6 +61,12 @@ message OperationInput {
     required bytes call_data = 3;
 }
 
+message InitInput {
+    required WithFromTxInput tx = 1;
+    required BlockInput block = 2;
+    required bytes call_data = 3;
+}
+
 message PostTxExecuteInput {
     required WithFromTxInput tx = 1;
     required BlockInput block = 2;
