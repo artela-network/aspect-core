@@ -30,6 +30,7 @@ const (
 	POST_TX_EXECUTE_METHOD    PointCut = "postTxExecute"
 	POST_TX_COMMIT            PointCut = "postTxCommit"
 
+	INIT_METHOD      PointCut = "init"
 	OPERATION_METHOD PointCut = "operation"
 	IS_OWNER_METHOD  PointCut = "isOwner"
 )
