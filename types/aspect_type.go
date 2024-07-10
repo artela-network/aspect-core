@@ -41,6 +41,10 @@ func (j JoinPointRunType) String() string {
 	return joinPointName[j]
 }
 
+func (j JoinPointRunType) IsPreCall() bool {
+	return j == JoinPointRunType_PreTxExecute || j == JoinPointRunType_PreContractCall
+}
+
 const (
 	JoinPointRunType_Unknown          JoinPointRunType = 0
 	JoinPointRunType_VerifyTx         JoinPointRunType = 1
