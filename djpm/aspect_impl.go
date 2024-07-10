@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	runtime "github.com/artela-network/aspect-runtime/types"
+	"math/big"
 	"runtime/debug"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -49,24 +50,24 @@ func AspectInstance() *Aspect {
 	return globalAspect
 }
 
-func (aspect Aspect) VerifyTx(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.TxVerifyInput) *types.AspectExecutionResult {
+func (aspect Aspect) VerifyTx(ctx context.Context, contract common.Address, block int64, gas uint64, request *types.TxVerifyInput) *types.AspectExecutionResult {
 	return aspect.verification(ctx, contract, block, gas, request)
 }
 
-func (aspect Aspect) PreTxExecute(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PreTxExecuteInput) *types.AspectExecutionResult {
-	return aspect.transactionAdvice(ctx, types.PRE_TX_EXECUTE_METHOD, contract, block, gas, request)
+func (aspect Aspect) PreTxExecute(ctx context.Context, from, contract common.Address, input []byte, block int64, gas uint64, value *big.Int, request *types.PreTxExecuteInput, tracer types.AspectLogger) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.PRE_TX_EXECUTE_METHOD, from, contract, input, block, gas, value, request, tracer)
 }
 
-func (aspect Aspect) PreContractCall(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PreContractCallInput) *types.AspectExecutionResult {
-	return aspect.transactionAdvice(ctx, types.PRE_CONTRACT_CALL_METHOD, contract, block, gas, request)
+func (aspect Aspect) PreContractCall(ctx context.Context, from, contract common.Address, input []byte, block int64, gas uint64, value *big.Int, request *types.PreContractCallInput, tracer types.AspectLogger) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.PRE_CONTRACT_CALL_METHOD, from, contract, input, block, gas, value, request, tracer)
 }
 
-func (aspect Aspect) PostContractCall(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PostContractCallInput) *types.AspectExecutionResult {
-	return aspect.transactionAdvice(ctx, types.POST_CONTRACT_CALL_METHOD, contract, block, gas, request)
+func (aspect Aspect) PostContractCall(ctx context.Context, from, contract common.Address, input []byte, block int64, gas uint64, value *big.Int, request *types.PostContractCallInput, tracer types.AspectLogger) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.POST_CONTRACT_CALL_METHOD, from, contract, input, block, gas, value, request, tracer)
 }
 
-func (aspect Aspect) PostTxExecute(ctx context.Context, contract *common.Address, block int64, gas uint64, request *types.PostTxExecuteInput) *types.AspectExecutionResult {
-	return aspect.transactionAdvice(ctx, types.POST_TX_EXECUTE_METHOD, contract, block, gas, request)
+func (aspect Aspect) PostTxExecute(ctx context.Context, from, contract common.Address, input []byte, block int64, gas uint64, value *big.Int, request *types.PostTxExecuteInput, tracer types.AspectLogger) *types.AspectExecutionResult {
+	return aspect.transactionAdvice(ctx, types.POST_TX_EXECUTE_METHOD, from, contract, input, block, gas, value, request, tracer)
 }
 
 func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *ethtypes.Transaction) (common.Address, []byte, error) {
@@ -83,6 +84,13 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 		block = aspect.provider.GetLatestBlock()
 	}
 
+	if tx.To() == nil {
+		aspect.logger.Error("cannot do customized verify on contract creation", "tx", tx.Hash().Hex())
+		return common.Address{}, nil, errors.New("contract creation is not allowed for customized verification")
+	}
+
+	logger := aspect.logger.With("contract", tx.To().Hex(), "block", block, "tx", tx.Hash().Hex())
+
 	// check contract verifier
 	verifiers, err := aspect.provider.GetAccountVerifiers(ctx, *tx.To())
 	if err != nil {
@@ -90,6 +98,7 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	}
 
 	if len(verifiers) != 1 {
+		logger.Error("contract has more than 1 verifiers", "verifiers", len(verifiers))
 		return common.Address{}, nil, errors.New(fmt.Sprintf(
 			"invalid number of contract verifiers: %d",
 			len(verifiers),
@@ -111,41 +120,42 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 	// execute aspect verification
 	// we cannot use tx.Gas() here, because verifier execution cannot be count into the execution gas,
 	// we'll use a fixed gas here
-	verifyRes := aspect.VerifyTx(ctx, tx.To(), block, MaxTxVerificationGas, request)
+	verifyRes := aspect.VerifyTx(ctx, *tx.To(), block, MaxTxVerificationGas, request)
 	if verifyRes.Err != nil {
+		logger.Error("failed to verify tx with aspect", "err", verifyRes.Err)
 		return common.Address{}, nil, verifyRes.Err
 	}
 
 	sender := common.BytesToAddress(verifyRes.Ret)
 
+	logger = logger.With("sender", "sender", sender.Hex())
+
 	// make sure sender accepts this aspect as verifier
 	aspects, err := aspect.provider.GetAccountVerifiers(ctx, sender)
 	if err != nil {
+		logger.Error("failed to get sender's verifiers", "err", err)
 		return common.Address{}, nil, err
 	}
 
 	for _, aspect := range aspects {
 		if aspect.AspectId == contractVerifier {
+			logger.Debug("aspect verification passed")
 			return sender, call, nil
 		}
 	}
 
+	logger.Error("sender does not accept this aspect as verifier")
 	return common.Address{}, nil, errors.New("unable to verify tx with aspect")
 }
 
-func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCut, contract *common.Address, block int64, gas uint64, request proto.Message) *types.AspectExecutionResult {
+func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCut, from, contract common.Address, input []byte, block int64, gas uint64, value *big.Int, request proto.Message, tracer types.AspectLogger) *types.AspectExecutionResult {
 	result := &types.AspectExecutionResult{
 		Gas:    gas,
 		Revert: types.NotRevert,
 	}
 
-	if contract == nil {
-		// pass on contract creation call
-		return result
-	}
-
 	// get binding contract address
-	aspectCodes, err := aspect.provider.GetTxBondAspects(ctx, *contract, method)
+	aspectCodes, err := aspect.provider.GetTxBondAspects(ctx, contract, method)
 	if err != nil {
 		result.Err = err
 		result.Revert = types.RevertCall
@@ -156,20 +166,11 @@ func (aspect Aspect) transactionAdvice(ctx context.Context, method types.PointCu
 	}
 
 	// run aspects on received transaction
-	return aspect.runAspect(ctx, method, gas, block, contract, request, aspectCodes)
+	return aspect.runAspect(ctx, method, gas, block, from, contract, input, value, request, aspectCodes, tracer)
 }
 
-func (aspect Aspect) verification(ctx context.Context, contract *common.Address, block int64, gas uint64, req *types.TxVerifyInput) *types.AspectExecutionResult {
-	if contract == nil {
-		// not able to verify contract creation tx
-		return &types.AspectExecutionResult{
-			Gas:    gas,
-			Err:    errors.New("not able to verify contract creation tx"),
-			Revert: types.RevertTx,
-		}
-	}
-
-	aspectCodes, err := aspect.provider.GetAccountVerifiers(ctx, *contract)
+func (aspect Aspect) verification(ctx context.Context, contract common.Address, block int64, gas uint64, req *types.TxVerifyInput) *types.AspectExecutionResult {
+	aspectCodes, err := aspect.provider.GetAccountVerifiers(ctx, contract)
 	if err != nil || len(aspectCodes) == 0 {
 		return &types.AspectExecutionResult{
 			Gas:    gas,
@@ -178,11 +179,16 @@ func (aspect Aspect) verification(ctx context.Context, contract *common.Address,
 		}
 	}
 
-	// run aspects on received transaction
-	return aspect.runAspect(ctx, types.VERIFY_TX, gas, block, contract, req, aspectCodes)
+	// run aspects on received transaction.
+	// since tx verification is out of the execution context, we cannot really trace it with EVM tracer,
+	// so for now we just set input, value and tracer to nil.
+	// For tx.from, since before running the verifier, we don't know the sender yet, so we just set it to empty.
+	return aspect.runAspect(ctx, types.VERIFY_TX, gas, block, common.Address{}, contract, nil, nil, req, aspectCodes, nil)
 }
 
-func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, reqData proto.Message, aspects []*types.AspectCode) (result *types.AspectExecutionResult) {
+func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas uint64, blockNumber int64, from,
+	contractAddr common.Address, input []byte, value *big.Int, reqData proto.Message,
+	aspects []*types.AspectCode, tracer types.AspectLogger) (result *types.AspectExecutionResult) {
 	result = &types.AspectExecutionResult{
 		Gas:    gas,
 		Revert: types.NotRevert,
@@ -190,16 +196,21 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 	defer func() {
 		if err := recover(); err != nil {
 			aspect.logger.Error("panic in running aspect", "err", err, "stack", debug.Stack())
-			result.Err = errors.New("fatal: panic in running aspect: " + fmt.Sprintln(err))
+			result.Err = errors.New("aspect execution crashed")
 			result.Revert = types.RevertCall
 		}
 	}()
 
 	for _, storedAspect := range aspects {
+		jp := types.JoinPointRunType(types.JoinPointRunType_value[string(method)])
+		if tracer != nil {
+			tracer.CaptureAspectEnter(jp, from, contractAddr, common.HexToAddress(storedAspect.AspectId), input, gas, value, reqData)
+		}
 		var err error
 		isCommit := types.IsCommit(ctx)
 		runner, err := run.NewRunner(ctx, aspect.logger, storedAspect.AspectId, storedAspect.Version, storedAspect.Code, isCommit)
 		if err != nil {
+			// no need to exit tracer here, since if the logic is correct, this should never happen
 			panic(err)
 		}
 
@@ -208,14 +219,20 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 		runner.Return()
 
 		result.Ret = ret
+		result.Gas = gas
+		result.Err = err
+		if tracer != nil {
+			// tracer does not care the revert scope, so we can exit tracer here before settting the revert scope
+			tracer.CaptureAspectExit(jp, result)
+		}
+
+		// revert scope is not fully supported yet, so we just break the loop if any aspect fails,
+		// no need to record this in the tracer for now
 		if err != nil {
-			result.Err = err
 			result.Revert = types.RevertCall
 			break
 		}
 	}
-
-	result.Gas = gas
 
 	return result
 }
