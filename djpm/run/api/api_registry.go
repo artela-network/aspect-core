@@ -86,7 +86,7 @@ func (r *Registry) registerApis(module, namespace string, apis map[string]*rttyp
 	}
 }
 
-func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, contractAddr *common.Address) {
+func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, contractAddr common.Address) {
 	if name != "" {
 		r.runnerContext.Point = name
 	}
@@ -96,9 +96,8 @@ func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, con
 	if gas > 0 {
 		r.runnerContext.Gas = gas
 	}
-	if contractAddr != nil {
-		r.runnerContext.ContractAddr = *contractAddr
-	}
+
+	r.runnerContext.ContractAddr = contractAddr
 }
 
 func (r *Registry) RunnerContext() *types.RunnerContext {

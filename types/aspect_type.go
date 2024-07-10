@@ -37,7 +37,12 @@ const (
 
 type JoinPointRunType int64
 
+func (j JoinPointRunType) String() string {
+	return joinPointName[j]
+}
+
 const (
+	JoinPointRunType_Unknown          JoinPointRunType = 0
 	JoinPointRunType_VerifyTx         JoinPointRunType = 1
 	JoinPointRunType_PreTxExecute     JoinPointRunType = 2
 	JoinPointRunType_PreContractCall  JoinPointRunType = 4
@@ -55,6 +60,16 @@ var (
 		string(PRE_CONTRACT_CALL_METHOD):  int64(JoinPointRunType_PreContractCall),
 		string(POST_CONTRACT_CALL_METHOD): int64(JoinPointRunType_PostContractCall),
 		string(POST_TX_EXECUTE_METHOD):    int64(JoinPointRunType_PostTxExecute),
+	}
+)
+
+var (
+	joinPointName = map[JoinPointRunType]string{
+		JoinPointRunType_VerifyTx:         string(VERIFY_TX),
+		JoinPointRunType_PreTxExecute:     string(PRE_TX_EXECUTE_METHOD),
+		JoinPointRunType_PreContractCall:  string(PRE_CONTRACT_CALL_METHOD),
+		JoinPointRunType_PostContractCall: string(POST_CONTRACT_CALL_METHOD),
+		JoinPointRunType_PostTxExecute:    string(POST_TX_EXECUTE_METHOD),
 	}
 )
 

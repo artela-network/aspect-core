@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	runtime "github.com/artela-network/aspect-runtime/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/holiman/uint256"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -15,10 +17,15 @@ import (
 	"github.com/artela-network/aspect-core/types"
 )
 
+// ErrExecutionReverted same as EVM execution reverted error, used to indicate the execution is reverted.
+var ErrExecutionReverted = errors.New("execution reverted")
+
 type Runner struct {
-	ctx   context.Context
-	vmKey string
-	vm    runtime.AspectRuntime
+	ctx      context.Context
+	vmKey    string
+	vm       runtime.AspectRuntime
+	aspectId common.Address
+
 	// fns      *runtime.HostAPIRegistry
 	registry *api.Registry
 	code     []byte
@@ -40,6 +47,7 @@ func NewRunner(ctx context.Context, logger runtime.Logger, aspID string, aspVer 
 		vmKey:    key,
 		vm:       vm,
 		registry: registry,
+		aspectId: aspectId,
 		code:     code,
 		commit:   commit,
 	}, nil
@@ -50,7 +58,7 @@ func (r *Runner) Return() {
 	types.RunnerPool(r.commit).Return(r.vmKey, r.vm)
 }
 
-func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) ([]byte, uint64, error) {
+func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr common.Address, txRequest proto.Message) ([]byte, uint64, error) {
 	if r.vm == nil {
 		panic("vm not init")
 	}
@@ -70,8 +78,10 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 
 	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), string(name), reqData)
 	if err != nil {
+		r.logger.Error("join point execution failed", "block", blockNumber, "contract", contractAddr.Hex(), "joinpoint", name, "gas", gas, "err", err)
 		if !strings.EqualFold(revertMsg, "") {
-			return []byte(revertMsg), gas, errors.New(revertMsg)
+			// need to pack the revert message as abi, then it can be decoded by the caller
+			return PackRevert(revertMsg), gas, ErrExecutionReverted
 		}
 		return nil, uint64(leftover), err
 	}
@@ -88,7 +98,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	return resData, uint64(leftover), nil
 }
 
-func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, uint64, error) {
+func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr common.Address, sender []byte) (bool, uint64, error) {
 	if r.vm == nil {
 		panic("vm not init")
 	}
@@ -118,7 +128,7 @@ func (r *Runner) Gas() uint64 {
 	return r.registry.RunnerContext().Gas
 }
 
-func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, uint64, error) {
+func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr common.Address, args ...interface{}) (interface{}, uint64, error) {
 	if r.vm == nil {
 		panic("vm not init")
 	}
@@ -139,4 +149,32 @@ func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contra
 		return nil, leftoverU64, err
 	}
 	return res, leftoverU64, nil
+}
+
+// revertSelector is a special function selector for revert reason unpacking.
+var revertSelector = crypto.Keccak256([]byte("Error(string)"))[:4]
+
+// PackRevert packs the revert message from Aspect to make sure this message can be decoded by the caller contract.
+func PackRevert(reason string) []byte {
+	if len(reason) == 0 {
+		return nil
+	}
+
+	// Step 2: Use revertSelector as the function identifier
+	selector := revertSelector
+
+	// Step 3: Convert the input string to ABI-encoded data
+	// Encode the length of the string
+	length := uint256.NewInt(uint64(len(reason)))
+	lengthPadded := length.Bytes32()
+
+	// Encode the string itself, padded to a multiple of 32 bytes
+	reasonPadded := common.RightPadBytes([]byte(reason), (len(reason)+31)/32*32) // Round up to nearest 32 and pad
+
+	// Step 4: Concatenate the selector and the encoded string data
+	data := append(selector, lengthPadded[:]...)
+	data = append(data, reasonPadded...)
+
+	// Step 5: Return the concatenated data as the result
+	return data
 }
