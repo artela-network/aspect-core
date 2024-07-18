@@ -64,4 +64,10 @@ var OperationKeys = []interface{}{
 
 	AspectId,
 	AspectVersion,
+
+	MsgFrom,
+	MsgTo,
+	MsgValue,
+	MsgGas,
+	MsgInput,
 }

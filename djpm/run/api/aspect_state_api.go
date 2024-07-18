@@ -32,7 +32,7 @@ func (r *Registry) aspectStateAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return hook.Set(r.runnerContext, key, val)
 			},
-			GasRule: types2.NewDynamicGasRule(0, 625000),
+			GasRule: types2.NewDynamicGasRule(0, 156250),
 		},
 	}
 }
