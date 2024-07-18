@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	runtime "github.com/artela-network/aspect-runtime/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/holiman/uint256"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -78,7 +78,7 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 
 	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), string(name), reqData)
 	if err != nil {
-		r.logger.Error("join point execution failed", "block", blockNumber, "contract", contractAddr.Hex(), "joinpoint", name, "gas", gas, "err", err)
+		r.logger.Error("join point execution failed", "block", blockNumber, "contract", contractAddr.Hex(), "joinpoint", name, "gas", gas, "err", err, "revertMsg", revertMsg)
 		if !strings.EqualFold(revertMsg, "") {
 			// need to pack the revert message as abi, then it can be decoded by the caller
 			return PackRevert(revertMsg), gas, ErrExecutionReverted
@@ -160,21 +160,17 @@ func PackRevert(reason string) []byte {
 		return nil
 	}
 
-	// Step 2: Use revertSelector as the function identifier
 	selector := revertSelector
 
-	// Step 3: Convert the input string to ABI-encoded data
-	// Encode the length of the string
-	length := uint256.NewInt(uint64(len(reason)))
-	lengthPadded := length.Bytes32()
+	typ, err := abi.NewType("string", "", nil)
+	if err != nil {
+		return nil
+	}
 
-	// Encode the string itself, padded to a multiple of 32 bytes
-	reasonPadded := common.RightPadBytes([]byte(reason), (len(reason)+31)/32*32) // Round up to nearest 32 and pad
+	packed, err := (abi.Arguments{{Type: typ}}).Pack(reason)
+	if err != nil {
+		return nil
+	}
 
-	// Step 4: Concatenate the selector and the encoded string data
-	data := append(selector, lengthPadded[:]...)
-	data = append(data, reasonPadded...)
-
-	// Step 5: Return the concatenated data as the result
-	return data
+	return append(selector, packed[:]...)
 }
