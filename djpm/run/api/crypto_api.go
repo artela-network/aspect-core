@@ -122,7 +122,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 
 				calldata := make([]byte, 128)
-				copy(calldata[:], points.A.X)
+				copy(calldata, points.A.X)
 				copy(calldata[32:], points.A.Y)
 				copy(calldata[64:], points.B.X)
 				copy(calldata[96:], points.B.Y)
@@ -151,7 +151,7 @@ func (r *Registry) cryptoAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 
 				calldata := make([]byte, 96)
-				copy(calldata[:], scalrInput.A.X)
+				copy(calldata, scalrInput.A.X)
 				copy(calldata[32:], scalrInput.A.Y)
 				copy(calldata[64:], scalrInput.Scalar)
 
