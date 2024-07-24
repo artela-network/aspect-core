@@ -172,5 +172,5 @@ func PackRevert(reason string) []byte {
 		return nil
 	}
 
-	return append(selector, packed[:]...)
+	return append(selector, packed...)
 }

@@ -99,10 +99,10 @@ func (aspect Aspect) GetSenderAndCallData(ctx context.Context, block int64, tx *
 
 	if len(verifiers) != 1 {
 		logger.Error("contract has more than 1 verifiers", "verifiers", len(verifiers))
-		return common.Address{}, nil, errors.New(fmt.Sprintf(
+		return common.Address{}, nil, fmt.Errorf(
 			"invalid number of contract verifiers: %d",
 			len(verifiers),
-		))
+		)
 	}
 
 	contractVerifier := verifiers[0].AspectId
@@ -222,7 +222,7 @@ func (aspect Aspect) runAspect(ctx context.Context, method types.PointCut, gas u
 		result.Gas = gas
 		result.Err = err
 		if tracer != nil {
-			// tracer does not care the revert scope, so we can exit tracer here before settting the revert scope
+			// tracer does not care the revert scope, so we can exit tracer here before setting the revert scope
 			tracer.CaptureAspectExit(jp, result)
 		}
 
@@ -245,14 +245,14 @@ func DecodeValidationAndCallData(txData []byte) (validationData, callData []byte
 
 	// check header
 	header := txData[:4]
-	if bytes.Compare(header, CustomVerificationPrefix) != 0 {
+	if !bytes.Equal(header, CustomVerificationPrefix) {
 		return nil, nil, errors.New("invalid validation data header")
 	}
 
 	// check checksum
 	checksum := txData[4:8]
 	dataHash := crypto.Keccak256(txData[8:])
-	if bytes.Compare(checksum, dataHash[:4]) != 0 {
+	if !bytes.Equal(checksum, dataHash[:4]) {
 		return nil, nil, errors.New("invalid validation data checksum")
 	}
 

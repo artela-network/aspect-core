@@ -21,7 +21,7 @@ var OpenZeppelinOwnableMetaData = &bind.MetaData{
 	},
 }
 
-func PackOwnableOwnerMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, sender common.Address) (*core.Message, error) {
+func PackOwnableOwnerMsg(from common.Address, to *common.Address, nonce uint64, amount *big.Int, gasLimit uint64, gasPrice, gasFeeCap, gasTipCap *big.Int, accessList types.AccessList, _ common.Address) (*core.Message, error) {
 	parsed, err := OpenZeppelinOwnableMetaData.GetAbi()
 	if err != nil {
 		return &core.Message{}, err

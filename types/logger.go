@@ -14,8 +14,8 @@ type AspectLogger interface {
 
 type NoOpsAspectLogger struct{}
 
-func (n NoOpsAspectLogger) CaptureAspectEnter(joinpoint JoinPointRunType, from, to, aspectId common.Address, input []byte, gas uint64, value *big.Int, execCtx proto.Message) {
+func (n NoOpsAspectLogger) CaptureAspectEnter(_ JoinPointRunType, _, _, _ common.Address, _ []byte, _ uint64, _ *big.Int, _ proto.Message) {
 }
 
-func (n NoOpsAspectLogger) CaptureAspectExit(joinpoint JoinPointRunType, result *AspectExecutionResult) {
+func (n NoOpsAspectLogger) CaptureAspectExit(_ JoinPointRunType, _ *AspectExecutionResult) {
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	types2 "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
@@ -56,36 +55,6 @@ func (m *Manager) Submit(ctx context.Context, aspect common.Address,
 	}
 
 	return m.submitJITCall(ctx, aspect, gas, inherent)
-}
-
-func (m *Manager) EstimateGas(aspect common.Address, inherent *types.JitInherentRequest) (
-	verificationGasLimit, callGasLimit *uint256.Int, err error,
-) {
-	// get vm with snapshot state
-	cvm, err := m.protocol.VMFromSnapshotState()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	gas := uint256.NewInt(cvm.Msg().Gas())
-
-	return gas, gas, nil
-}
-
-func (m *Manager) Nonce(ctx context.Context, account common.Address, key *big.Int) (nonce *big.Int, err error) {
-	if key.BitLen() > 192 {
-		return nil, errors.New("key is too large")
-	}
-
-	return m.getNonce(ctx, account, key)
-}
-
-// ClearLookup clears the user operation sender lookup. When current block finished, the lookup table should be cleared.
-func (m *Manager) ClearLookup() {
-	m.lookupMutex.Lock()
-	defer m.lookupMutex.Unlock()
-
-	m.userOpSenderLookup = make(map[common.Hash]common.Address)
 }
 
 // ClearUserOp clears the user operation sender lookup. When current call finished, the lookup table should be cleared.
@@ -183,67 +152,6 @@ func (m *Manager) cacheUserOp(aspect common.Address, userOps ...*aa.UserOperatio
 	return res
 }
 
-func (m *Manager) simulateValidate(ctx context.Context, aspect common.Address, userOp *aa.UserOperation) error {
-	// get vm with canonical state
-	cvm, err := m.protocol.VMFromCanonicalState()
-	if err != nil {
-		return err
-	}
-
-	// call simulateValidation method of entry point contract to validate the operation
-	calldata, err := m.entrypointABI.Pack("simulateValidation", userOp)
-	if err != nil {
-		return err
-	}
-
-	ret, _, err := cvm.Call(ctx, vm.AccountRef(aspect), aa.EntryPointContract,
-		calldata, userOp.CallGasLimit.Uint64(), big.NewInt(0))
-	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
-		return err
-	}
-
-	res, err := aa.DecodeValidationResult(ret)
-	if err != nil {
-		// return fail reason
-		return aa.DecodeFailedOpError(ret)
-	}
-
-	if res.ReturnInfo != nil && res.ReturnInfo.SigFailed {
-		// this should not happen, since the JIT inherent does not have a signature
-		return errors.New("signature verification failed")
-	}
-
-	return nil
-}
-
-func (m *Manager) getNonce(ctx context.Context, address common.Address, key *big.Int) (*big.Int, error) {
-	// FIXME: get vm with canonical state, this is just a temporary solution
-	cvm, err := m.protocol.VMFromSnapshotState()
-	if err != nil {
-		return nil, err
-	}
-
-	// call simulateValidation method of entry point contract to validate the operation
-	calldata, err := m.entrypointABI.Pack("getNonce", address, key)
-	if err != nil {
-		return nil, err
-	}
-
-	// FIXME: use a fixed gas limit for now
-	ret, _, err := cvm.Call(ctx, vm.AccountRef(address), aa.EntryPointContract,
-		calldata, 100000, big.NewInt(0))
-	if err != nil && !errors.Is(err, vm.ErrExecutionReverted) {
-		return nil, err
-	}
-
-	decoded, err := aa.DecodeResponse("getNonce", ret)
-	if err != nil {
-		return nil, err
-	}
-
-	return decoded[0].(*big.Int), nil
-}
-
 func NewUserOperation(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePerGas uint64, protoMsg *types.JitInherentRequest) *aa.UserOperation {
 	zero := new(big.Int)
 
@@ -283,59 +191,4 @@ func NewUserOperations(leftoverGas uint64, maxFeePerGas uint64, maxPriorityFeePe
 		userOps[i] = NewUserOperation(leftoverGas, maxFeePerGas, maxPriorityFeePerGas, msg)
 	}
 	return userOps
-}
-
-type aaBundleTx struct {
-	from      common.Address
-	data      []byte
-	gas       uint64
-	gasPrice  *big.Int
-	gasTipCap *big.Int
-	gasFeeCap *big.Int
-	nonce     uint64
-	extra     map[string]interface{}
-}
-
-func (t *aaBundleTx) TxType() byte {
-	return types2.DynamicFeeTxType
-}
-
-func (t *aaBundleTx) From() common.Address {
-	return t.from
-}
-
-func (t *aaBundleTx) To() common.Address {
-	return aa.EntryPointContract
-}
-
-func (t *aaBundleTx) Data() []byte {
-	return t.data
-}
-
-func (t *aaBundleTx) Gas() uint64 {
-	return t.gas
-}
-
-func (t *aaBundleTx) GasPrice() *big.Int {
-	return t.gasPrice
-}
-
-func (t *aaBundleTx) GasTipCap() *big.Int {
-	return t.gasTipCap
-}
-
-func (t *aaBundleTx) GasFeeCap() *big.Int {
-	return t.gasFeeCap
-}
-
-func (t *aaBundleTx) Value() *big.Int {
-	return big.NewInt(1)
-}
-
-func (t *aaBundleTx) Nonce() uint64 {
-	return t.nonce
-}
-
-func (t *aaBundleTx) Extra() map[string]interface{} {
-	return t.extra
 }

@@ -3,7 +3,6 @@ package run
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"os"
 	"path"
 	"sync"
@@ -15,13 +14,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/artela-network/aspect-core/types"
 	aspectType "github.com/artela-network/aspect-core/types"
 )
 
 // Run "scripts/build-wasm.sh" in project root, before run this test.
 func TestJoinPoint(t *testing.T) {
-	types.InitRuntimePool(context.Background(), log.New(), 0, 0)
+	logger := &aspectType.NoOpsLogger{}
+	aspectType.InitRuntimePool(context.Background(), logger, 0, 0)
 	var wg sync.WaitGroup
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
@@ -39,11 +38,11 @@ func TestJoinPoint(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			runner, err := NewRunner(context.Background(), log.New(), "0x5f61973A8cDdCc531a663f15A2a65A2781fa6D1c", 1, raw, false)
+			runner, err := NewRunner(context.Background(), logger, "0x5f61973A8cDdCc531a663f15A2a65A2781fa6D1c", 1, raw, false)
 			require.Equal(t, nil, err)
 			address := common.HexToAddress("0x066e91dfc5bcc92eb992dca2307fd373f4d6adbe")
 
-			_, gas, err := runner.JoinPoint(name, 24978580, 125691, &address, input)
+			_, gas, err := runner.JoinPoint(name, 24978580, 125691, address, input)
 			runner.Return()
 			require.Equal(t, nil, err)
 			require.Equal(t, uint64(24978580), gas)
@@ -65,11 +64,11 @@ func TestJoinPoint(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	runner, err := NewRunner(context.Background(), log.New(), "0x5f61973A8cDdCc531a663f15A2a65A2781fa6D1c", 1, raw, true)
+	runner, err := NewRunner(context.Background(), logger, "0x5f61973A8cDdCc531a663f15A2a65A2781fa6D1c", 1, raw, true)
 	require.Equal(t, nil, err)
 	address := common.HexToAddress("0x066e91dfc5bcc92eb992dca2307fd373f4d6adbe")
 
-	_, gas, err := runner.JoinPoint(name, 24978580, 125691, &address, input)
+	_, gas, err := runner.JoinPoint(name, 24978580, 125691, address, input)
 	runner.Return()
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(24978580), gas)
