@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	runtime "github.com/artela-network/aspect-runtime/types"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/crypto"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -15,10 +17,15 @@ import (
 	"github.com/artela-network/aspect-core/types"
 )
 
+// ErrExecutionReverted same as EVM execution reverted error, used to indicate the execution is reverted.
+var ErrExecutionReverted = errors.New("execution reverted")
+
 type Runner struct {
-	ctx   context.Context
-	vmKey string
-	vm    runtime.AspectRuntime
+	ctx      context.Context
+	vmKey    string
+	vm       runtime.AspectRuntime
+	aspectId common.Address
+
 	// fns      *runtime.HostAPIRegistry
 	registry *api.Registry
 	code     []byte
@@ -40,6 +47,7 @@ func NewRunner(ctx context.Context, logger runtime.Logger, aspID string, aspVer 
 		vmKey:    key,
 		vm:       vm,
 		registry: registry,
+		aspectId: aspectId,
 		code:     code,
 		commit:   commit,
 	}, nil
@@ -50,9 +58,9 @@ func (r *Runner) Return() {
 	types.RunnerPool(r.commit).Return(r.vmKey, r.vm)
 }
 
-func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr *common.Address, txRequest proto.Message) ([]byte, uint64, error) {
+func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, contractAddr common.Address, txRequest proto.Message) ([]byte, uint64, error) {
 	if r.vm == nil {
-		return nil, gas, errors.New("runner not init")
+		panic("vm not init")
 	}
 	// turn inputBytes into bytes
 	reqData, err := proto.Marshal(txRequest)
@@ -70,8 +78,10 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 
 	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), string(name), reqData)
 	if err != nil {
+		r.logger.Error("join point execution failed", "block", blockNumber, "contract", contractAddr.Hex(), "joinpoint", name, "gas", gas, "err", err, "revertMsg", revertMsg)
 		if !strings.EqualFold(revertMsg, "") {
-			return []byte(revertMsg), gas, errors.New(revertMsg)
+			// need to pack the revert message as abi, then it can be decoded by the caller
+			return PackRevert(revertMsg), gas, ErrExecutionReverted
 		}
 		return nil, uint64(leftover), err
 	}
@@ -88,10 +98,11 @@ func (r *Runner) JoinPoint(name types.PointCut, gas uint64, blockNumber int64, c
 	return resData, uint64(leftover), nil
 }
 
-func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Address, sender []byte) (bool, error) {
+func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr common.Address, sender []byte) (bool, uint64, error) {
 	if r.vm == nil {
-		return false, errors.New("vm not init")
+		panic("vm not init")
 	}
+
 	revertMsg := ""
 	callback := func(msg string) {
 		revertMsg = msg
@@ -100,25 +111,26 @@ func (r *Runner) IsOwner(blockNumber int64, gas uint64, contractAddr *common.Add
 	r.registry.SetRunnerContext("isOwner", blockNumber, gas, contractAddr)
 
 	// TODO: no gas refund for aspect for now, add later
-	res, _, err := r.vm.Call(api.APIEntrance, int64(gas), "isOwner", sender)
+	res, leftover, err := r.vm.Call(api.APIEntrance, int64(gas), "isOwner", sender)
+	leftoverU64 := uint64(leftover)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
+			return false, leftoverU64, errors.New(revertMsg)
 		}
 
-		return false, err
+		return false, leftoverU64, err
 	}
 
-	return res.(bool), nil
+	return res.(bool), leftoverU64, nil
 }
 
 func (r *Runner) Gas() uint64 {
 	return r.registry.RunnerContext().Gas
 }
 
-func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr *common.Address, args ...interface{}) (interface{}, error) {
+func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contractAddr common.Address, args ...interface{}) (interface{}, uint64, error) {
 	if r.vm == nil {
-		return false, errors.New("run not init")
+		panic("vm not init")
 	}
 	revertMsg := ""
 	callback := func(msg string) {
@@ -128,12 +140,37 @@ func (r *Runner) ExecFunc(funcName string, blockNumber int64, gas uint64, contra
 	r.registry.SetRunnerContext(funcName, blockNumber, gas, contractAddr)
 
 	// TODO: no gas refund for aspect for now, add later
-	res, _, err := r.vm.Call(funcName, int64(gas), args...)
+	res, leftover, err := r.vm.Call(funcName, int64(gas), args...)
+	leftoverU64 := uint64(leftover)
 	if err != nil {
 		if !strings.EqualFold(revertMsg, "") {
-			return false, errors.New(revertMsg)
+			return false, leftoverU64, errors.New(revertMsg)
 		}
-		return nil, err
+		return nil, leftoverU64, err
 	}
-	return res, nil
+	return res, leftoverU64, nil
+}
+
+// revertSelector is a special function selector for revert reason unpacking.
+var revertSelector = crypto.Keccak256([]byte("Error(string)"))[:4]
+
+// PackRevert packs the revert message from Aspect to make sure this message can be decoded by the caller contract.
+func PackRevert(reason string) []byte {
+	if len(reason) == 0 {
+		return nil
+	}
+
+	selector := revertSelector
+
+	typ, err := abi.NewType("string", "", nil)
+	if err != nil {
+		return nil
+	}
+
+	packed, err := (abi.Arguments{{Type: typ}}).Pack(reason)
+	if err != nil {
+		return nil
+	}
+
+	return append(selector, packed...)
 }

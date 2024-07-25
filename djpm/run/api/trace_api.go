@@ -31,7 +31,7 @@ func (r *Registry) traceAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return wrapNilByte(res), nil
 			},
-			GasRule: types2.NewStaticGasRule(1000000),
+			GasRule: types2.NewStaticGasRule(10000000),
 		},
 		"queryCallTree": {
 			Func: func(rawQuery []byte) ([]byte, error) {
@@ -55,7 +55,7 @@ func (r *Registry) traceAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return wrapNilByte(nil), nil
 			},
-			GasRule: types2.NewStaticGasRule(1000000),
+			GasRule: types2.NewStaticGasRule(10000000),
 		},
 	}
 }

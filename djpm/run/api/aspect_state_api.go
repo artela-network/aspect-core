@@ -19,7 +19,7 @@ func (r *Registry) aspectStateAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return wrapNilByte(hook.Get(r.runnerContext, key)), nil
 			},
-			GasRule: types2.NewDynamicGasRule(0, 2500),
+			GasRule: types2.NewDynamicGasRule(0, 25000),
 		},
 		"set": {
 			Func: func(key string, val []byte) error {
@@ -32,7 +32,7 @@ func (r *Registry) aspectStateAPIs() map[string]*types2.HostFuncWithGasRule {
 				}
 				return hook.Set(r.runnerContext, key, val)
 			},
-			GasRule: types2.NewDynamicGasRule(0, 62500),
+			GasRule: types2.NewDynamicGasRule(0, 156250),
 		},
 	}
 }

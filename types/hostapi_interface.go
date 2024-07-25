@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"github.com/artela-network/aspect-runtime/types"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,6 +17,7 @@ type RunnerContext struct {
 	ContractAddr  common.Address
 	Gas           uint64
 	Commit        bool
+	VMContext     types.VMContext
 }
 
 func (r *RunnerContext) RemainingGas() uint64 {
@@ -24,6 +26,10 @@ func (r *RunnerContext) RemainingGas() uint64 {
 
 func (r *RunnerContext) SetGas(gas uint64) {
 	r.Gas = gas
+}
+
+func (r *RunnerContext) SetVMContext(vmContext types.VMContext) {
+	r.VMContext = vmContext
 }
 
 var (
@@ -51,7 +57,7 @@ type (
 	}
 
 	AspectPropertyHostAPI interface {
-		Get(ctx *RunnerContext, key string) []byte
+		Get(ctx *RunnerContext, key string) ([]byte, error)
 	}
 
 	AspectTransientStorageHostAPI interface {

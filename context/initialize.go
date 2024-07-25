@@ -1,6 +1,6 @@
 package context
 
-var OperationKeys = []interface{}{
+var InitKeys = []interface{}{
 	IsCall,
 
 	BlockHeaderParentHash,
@@ -64,10 +64,4 @@ var OperationKeys = []interface{}{
 
 	AspectId,
 	AspectVersion,
-
-	MsgFrom,
-	MsgTo,
-	MsgValue,
-	MsgGas,
-	MsgInput,
 }

@@ -24,7 +24,7 @@ func (r *Registry) runtimeContextAPIs() map[string]*types2.HostFuncWithGasRule {
 
 				return wrapNilByte(res), nil
 			},
-			GasRule: types2.NewStaticGasRule(1),
+			GasRule: types2.NewStaticGasRule(10000),
 		},
 	}
 }

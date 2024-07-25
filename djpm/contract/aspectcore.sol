@@ -5,6 +5,7 @@ contract AspectCore {
 
     function deploy(
         bytes calldata code,
+        bytes calldata initdata,
         KVPair[] calldata properties,
         address account,
         bytes calldata proof,

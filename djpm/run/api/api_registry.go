@@ -48,13 +48,14 @@ type Registry struct {
 }
 
 func NewRegistry(ctx context.Context, aspectID common.Address, aspVer uint64) *Registry {
+	runnerCtx := &types.RunnerContext{
+		Ctx:           ctx,
+		AspectId:      aspectID,
+		AspectVersion: aspVer,
+	}
 	return &Registry{
-		runnerContext: &types.RunnerContext{
-			Ctx:           ctx,
-			AspectId:      aspectID,
-			AspectVersion: aspVer,
-		},
-		collection: rttypes.NewHostAPIRegistry(wasmtime.Wrap),
+		runnerContext: runnerCtx,
+		collection:    rttypes.NewHostAPIRegistry(runnerCtx, wasmtime.Wrap),
 	}
 }
 
@@ -85,7 +86,7 @@ func (r *Registry) registerApis(module, namespace string, apis map[string]*rttyp
 	}
 }
 
-func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, contractAddr *common.Address) {
+func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, contractAddr common.Address) {
 	if name != "" {
 		r.runnerContext.Point = name
 	}
@@ -95,9 +96,8 @@ func (r *Registry) SetRunnerContext(name string, blockNum int64, gas uint64, con
 	if gas > 0 {
 		r.runnerContext.Gas = gas
 	}
-	if contractAddr != nil {
-		r.runnerContext.ContractAddr = *contractAddr
-	}
+
+	r.runnerContext.ContractAddr = contractAddr
 }
 
 func (r *Registry) RunnerContext() *types.RunnerContext {

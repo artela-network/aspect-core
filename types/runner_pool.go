@@ -9,8 +9,8 @@ import (
 const DefaultAspectPoolSize = 10
 
 var (
-	globalQueryPool *globalPool
-	globalMsgPool   *globalPool
+	globalQueryPool *GlobalPool
+	globalMsgPool   *GlobalPool
 )
 
 // InitRuntimePool init runtime pool with given capacity.
@@ -19,27 +19,27 @@ func InitRuntimePool(ctx context.Context, logger types.Logger, msgPoolCapacity, 
 	globalQueryPool = newGlobalPool(ctx, logger, queryPoolCapacity)
 }
 
-func RunnerPool(commit bool) *globalPool {
+func RunnerPool(commit bool) *GlobalPool {
 	if commit {
 		return globalMsgPool
 	}
 	return globalQueryPool
 }
 
-type globalPool struct {
+type GlobalPool struct {
 	enable bool
 	vmPool *runtime.RuntimePool
 }
 
-func newGlobalPool(ctx context.Context, logger types.Logger, capacity int32) *globalPool {
-	return &globalPool{
+func newGlobalPool(ctx context.Context, logger types.Logger, capacity int32) *GlobalPool {
+	return &GlobalPool{
 		enable: capacity > 0,
 		vmPool: runtime.NewRuntimePool(ctx, logger, int(capacity)),
 	}
 }
 
 // Runtime returns a aspect-runtime instance from the pool or creating a new one.
-func (p *globalPool) Runtime(ctx context.Context, logger types.Logger, code []byte, registry *types.HostAPIRegistry) (string, types.AspectRuntime, error) {
+func (p *GlobalPool) Runtime(ctx context.Context, logger types.Logger, code []byte, registry *types.HostAPIRegistry) (string, types.AspectRuntime, error) {
 	if !p.enable {
 		vm, err := runtime.NewAspectRuntime(ctx, logger, runtime.WASM, code, registry)
 		return "", vm, err
@@ -49,9 +49,9 @@ func (p *globalPool) Runtime(ctx context.Context, logger types.Logger, code []by
 }
 
 // ReturnRuntime returns the the runtime instance to the pool, is the pool is enabled.
-func (p *globalPool) Return(key string, vm types.AspectRuntime) {
+func (p *GlobalPool) Return(key string, vm types.AspectRuntime) {
 	if !p.enable {
-		// release the host functions and memorys in Destory
+		// release the host functions and memory in Destroy
 		vm.Destroy()
 		return
 	}
