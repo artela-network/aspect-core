@@ -15,8 +15,10 @@ github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY
 github.com/allegro/bigcache v1.2.1-0.20190218064605-e24eb225f156 h1:eMwmnE/GDgah4HI848JfFxHt+iPb26b4zyfspmqY0/8=
 github.com/allegro/bigcache v1.2.1-0.20190218064605-e24eb225f156/go.mod h1:Cb/ax3seSYIx7SuZdm2G2xzfwmv3TPSk2ucNfQESPXM=
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
-github.com/artela-network/wasmtime-go/v20 v20.0.2 h1:miyLlk3+w+5b2LdI0sMpzHiUOFv4O+MzaZjQIg0vqW8=
-github.com/artela-network/wasmtime-go/v20 v20.0.2/go.mod h1:Va362hmt7aqwyb2Vu73yHbmx6NkSvGmvHOzJa2xMECQ=
+github.com/artela-network/aspect-runtime v0.4.8-rc8 h1:48dbWs+4wUAL52U6JUN+hPQ7u7lDTkajoI0EcZYtwL4=
+github.com/artela-network/aspect-runtime v0.4.8-rc8/go.mod h1:GiDB2+LUbl2b2Z8+v/83LFbUKs5DqQ3ACxLUWY8zMdU=
+github.com/artela-network/wasmtime-go/v20 v20.0.3 h1:A4/KrrCQiXhDibc3bUlvD7vzohV4saWiAA3MIFz11Yo=
+github.com/artela-network/wasmtime-go/v20 v20.0.3/go.mod h1:Va362hmt7aqwyb2Vu73yHbmx6NkSvGmvHOzJa2xMECQ=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=

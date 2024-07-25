@@ -3,7 +3,7 @@ module github.com/artela-network/aspect-core
 go 1.20
 
 require (
-	github.com/artela-network/aspect-runtime v0.4.7-rc7
+	github.com/artela-network/aspect-runtime v0.4.8-rc8
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/holiman/uint256 v1.2.2
 	github.com/json-iterator/go v1.1.12
@@ -66,7 +66,6 @@ require (
 )
 
 replace (
-	github.com/artela-network/aspect-runtime => ../aspect-runtime
-	github.com/bytecodealliance/wasmtime-go/v20 => ../wasmtime-go
+	github.com/bytecodealliance/wasmtime-go/v20 => github.com/artela-network/wasmtime-go/v20 v20.0.3
 	github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.12.0
 )
