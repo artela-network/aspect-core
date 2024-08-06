@@ -5,7 +5,6 @@ var InitKeys = []interface{}{
 
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
-	BlockHeaderTransactionsRoot,
 	BlockHeaderNumber,
 	BlockHeaderTimestamp,
 

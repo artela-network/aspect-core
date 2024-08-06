@@ -5,7 +5,6 @@ var PostCallCtxKeys = []interface{}{
 
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
-	BlockHeaderTransactionsRoot,
 	BlockHeaderNumber,
 	BlockHeaderTimestamp,
 
