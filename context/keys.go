@@ -7,11 +7,10 @@ const (
 
 // Block Context Related Keys
 const (
-	BlockHeaderParentHash       = "block.header.parentHash"
-	BlockHeaderMiner            = "block.header.miner"
-	BlockHeaderTransactionsRoot = "block.header.transactionsRoot"
-	BlockHeaderNumber           = "block.header.number"
-	BlockHeaderTimestamp        = "block.header.timestamp"
+	BlockHeaderParentHash = "block.header.parentHash"
+	BlockHeaderMiner      = "block.header.miner"
+	BlockHeaderNumber     = "block.header.number"
+	BlockHeaderTimestamp  = "block.header.timestamp"
 )
 
 // Env Context Related Keys

@@ -5,7 +5,6 @@ var PreTxCtxKeys = []interface{}{
 
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
-	BlockHeaderTransactionsRoot,
 	BlockHeaderNumber,
 	BlockHeaderTimestamp,
 
