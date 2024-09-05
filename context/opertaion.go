@@ -5,7 +5,6 @@ var OperationKeys = []interface{}{
 
 	BlockHeaderParentHash,
 	BlockHeaderMiner,
-	BlockHeaderTransactionsRoot,
 	BlockHeaderNumber,
 	BlockHeaderTimestamp,
 

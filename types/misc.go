@@ -3,7 +3,7 @@ package types
 type AspectCode struct {
 	AspectId string
 	Version  uint64
-	Priority uint32
+	Priority int8
 	Code     []byte
 }
 
