@@ -25,5 +25,5 @@ func ArtelaOwnerMsg(to *common.Address, nonce uint64, sender common.Address, gas
 
 func OpenZeppelinOwnableMsg(to *common.Address, nonce uint64, sender common.Address, gas uint64, gasPrice, gasFeeCap, gasTipCap *big.Int) (*core.Message, error) {
 	from := common.HexToAddress(ARTELA_FROM_ADDR)
-	return PackIsOwnerMsg(from, to, nonce, big.NewInt(0), gas, gasPrice, gasFeeCap, gasTipCap, nil, sender)
+	return PackOwnableOwnerMsg(from, to, nonce, big.NewInt(0), gas, gasPrice, gasFeeCap, gasTipCap, nil, sender)
 }
